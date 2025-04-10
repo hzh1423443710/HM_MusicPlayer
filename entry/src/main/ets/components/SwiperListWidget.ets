@@ -13,7 +13,7 @@ export struct SwiperListWidget {
     aboutToAppear() {
         this.viewModel.loadMusic().then(() => {
             console.log(`${this.viewModel.title} 加载成功`)
-            this.viewModel.debugInfo();
+            // this.viewModel.debugInfo();
         }).catch((e) => {
             console.error(`${this.viewModel.title} 加载失败`)
         });
@@ -42,17 +42,26 @@ export struct SwiperListWidget {
         Column() {
             Row({ space: 5 }) {
                 Text(this.viewModel.title)
-                    .fontSize(18)
+                    .fontSize(20)
                     .fontWeight(500)
+                Image($r('app.media.ic_public_play_norm'))
+                    .width($r("app.float.control_icon_width"))
+                    .height($r("app.float.control_icon_height"))
+                    .onClick(() => {
+                        promptAction.showToast({
+                            message: '播放 '
+                        })
+                    })
+
                 Blank()
                 Row() {
                     Text(this.viewModel.brief)
-                        .fontSize(15)
+                        .fontSize(16)
                         .opacity(0.5)
                     Image($r('app.media.refresh'))
                         .alt($r('sys.media.ohos_app_icon'))
-                        .height(18)
-                        .width(18)
+                        .height(24)
+                        .width(24)
                         .fillColor($r('app.color.button_color'))
                 }
                 .onClick(() => {
@@ -62,6 +71,7 @@ export struct SwiperListWidget {
                             promptAction.showToast({
                                 message: '已经在加载了',
                             });
+                            return;
                         }
                         if (ok) {
                             promptAction.showToast({
@@ -83,7 +93,8 @@ export struct SwiperListWidget {
                     });
                 })
 
-            }
+            } // Row
+            .height(40)
             .width('100%')
             .alignItems(VerticalAlign.Center)
 

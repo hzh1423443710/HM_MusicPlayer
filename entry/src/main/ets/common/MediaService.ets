@@ -1,20 +1,27 @@
 import media from '@ohos.multimedia.media'
 import common from '@ohos.app.ability.common';
 import { MusicFrom, MusicInfo } from '../model/MusicData';
-import { MusicList } from '../viewmodel/NetEasePlayListViewModel'
 import { MediaTools } from '../common/MediaTools'
 import { BackgroundUtil } from '../common/BackgroundUtil'
 
 
 const TAG = 'MediaService';
 
+/**
+ * 播放模式
+ */
 enum MusicPlayMode {
+    // 单曲循环
     SINGLE_CYCLE = 0,
-    // 顺序
+    // 顺序播放
     ORDER = 1,
+    // 随机播放
     RANDOM = 2
 }
 
+/**
+ * AVPlayer状态
+ */
 enum AudioPlayerState {
     IDLE,
     INITIALIZED,
@@ -41,7 +48,8 @@ export class MediaService {
     private isFirst: boolean = true;
     private isPrepared: boolean = false;
     private musicIndex: number = 0;
-    private songList: MusicInfo[] = MusicList;
+    // 当前播放列表
+    private songList: MusicInfo[] = [];
     private isCurrent: boolean = true;
 
     constructor() {

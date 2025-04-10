@@ -47,10 +47,10 @@ export struct RandPlayWidget {
                     Blank()
 
                     Image(this.isPlay ? $r('app.media.ic_public_pause_norm') : $r('app.media.ic_public_play_norm'))
-                        .width(30)
-                        .height(30)
-                        .backgroundColor(Color.Transparent)
+                        .width($r("app.float.control_icon_width"))
+                        .height($r("app.float.control_icon_height"))
                         .onClick(() => {
+                            promptAction.showToast({ message: '播放' })
 
                         })
                 }

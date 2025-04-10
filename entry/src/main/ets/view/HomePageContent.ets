@@ -38,19 +38,25 @@ export struct HomePageContent {
 
     build() {
         Column() {
-            // 标题
+            // 1.标题
             HeaderWidget({ title: '首页' })
-            // 搜索
+            // 2.搜索
             SearchWidget()
-            // 播放列表
+            // 3.播放列表
             Scroll() {
-                Column({ space: 10 }) {
+                Column() {
                     // 随机播放一曲
                     RandPlayWidget({ vb_rand_play: $vb_rand_play })
                     // 大家都爱听（听歌识曲榜 每周四更新）
                     SwiperListWidget({ viewModel: $vb_every_like })
                     // 宝藏歌曲 (网络热歌榜 每周五更新)
                     SwiperListWidget({ viewModel: $vb_treasure_music })
+
+                    // 防止下面看不见
+                    Row()
+                        .backgroundColor(Color.Transparent)
+                        .width('100%')
+                        .height(150)
                 }
                 .alignItems(HorizontalAlign.Start)
                 .justifyContent(FlexAlign.Start)

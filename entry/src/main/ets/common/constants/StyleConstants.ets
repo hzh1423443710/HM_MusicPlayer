@@ -13,5 +13,5 @@ export class StyleConstants {
   /**
    * Translate value of the player area on the bottom.
    */
-  static readonly TRANSLATE_PLAYER_Y: string = '-48vp';
+  static readonly TRANSLATE_PLAYER_Y: string = '-50vp';
 }

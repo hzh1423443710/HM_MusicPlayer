@@ -1,15 +1,17 @@
 import { MusicInfo } from '../model/MusicData'
 
 export class SongDataSource implements IDataSource {
-    private musics: MusicInfo[] = [];
+    musics: MusicInfo[] = [];
     /**
      * 数据变化监听器
      */
     private listener: DataChangeListener[] = [];
 
-    constructor(items: MusicInfo[]) {
-        for (let i = 0; i < items.length; i++) {
-            this.musics.push(items[i]);
+    constructor(items?: MusicInfo[]) {
+        if (items) {
+            for (let i = 0; i < items.length; i++) {
+                this.musics.push(items[i]);
+            }
         }
     }
 
@@ -29,6 +31,11 @@ export class SongDataSource implements IDataSource {
     pushData(item: MusicInfo): void {
         this.musics.push(item);
         this.notifyDataAdd(this.musics.length - 1);
+    }
+
+    clearData(): void {
+        this.musics = [];
+        this.notifyDataReload();
     }
 
     /**

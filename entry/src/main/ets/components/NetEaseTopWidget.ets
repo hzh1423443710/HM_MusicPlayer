@@ -1,26 +1,36 @@
-import { NetEaseTopPlayListId } from '../common/constants/Netease';
 import { HttpUtils } from '../common/network/HttpUtils';
 import { MusicInfo } from '../model/MusicData';
-import { MusicListData } from '../viewmodel/MusicDataViewModel'
 import { MusicItem } from './MusicItem';
+import { SongDataSource } from '../viewmodel/SongDataSource'
+import { BaseNetEasePlayListViewModel } from '../viewmodel/BaseNetEasePlayListViewModel'
 import ConnectionUtil from '../common/network/ConnectionUtils'
 import promptAction from '@ohos.promptAction';
-import { NetEaseTopListViewModel } from '../viewmodel/NetEaseTopListViewModel'
-import { SongDataSource } from '../viewmodel/SongDataSource'
+import { NetEasePlayListId } from '../common/constants/Netease';
 
 @Preview
 @Component
 export struct NetEaseTopWidget {
     // @StorageLink('Play')
-    @Link vb_top_list: NetEaseTopListViewModel;
+    @Link vb_top_list: BaseNetEasePlayListViewModel;
     @State isRefreshing: boolean = false
+    songDataSource: SongDataSource = new SongDataSource();
 
-    // musicList: MusicInfo[] = MusicList;
     aboutToAppear() {
         console.log(`NetEaseTopWidget aboutToAppear`);
-        // this.vb_top_list.loadMusic().then(() => {
-        //     console.log(`${this.vb_top_list.topName} 加载成功`)
-        // });
+        // for (let i = 0; i <= 20; i++) {
+        //     this.songDataSource.pushData(new MusicInfo(String(i)))
+        // }
+
+        this.vb_top_list.loadMusic().then(() => {
+            console.log(`${this.vb_top_list.title} 加载成功`);
+            // this.vb_top_list.debugInfo();
+            for (let i = 0; i < this.vb_top_list.batchSize; i++) {
+                this.songDataSource.pushData(this.vb_top_list.musicList[i]);
+                console.log(`${this.vb_top_list.musicList[i]}`)
+            }
+        }).catch(() => {
+            console.error(`${this.vb_top_list.title} 加载失败`);
+        });
     }
 
     aboutToDisappear(): void {
@@ -42,8 +52,7 @@ export struct NetEaseTopWidget {
                     })
                 Blank()
                 Row() {
-                    // Text(`${this.musicList.length} 首`)
-                    Text(`${this.vb_top_list.musicList.length} 首`)
+                    Text(this.vb_top_list.brief)
                     Image($r('app.media.refresh'))
                         .width(24)
                         .height(24)
@@ -61,7 +70,7 @@ export struct NetEaseTopWidget {
                                 message: '正在刷新'
                             });
                             let http = new HttpUtils();
-                            http.getNetEaseTop(NetEaseTopPlayListId.SURGE).then((data) => {
+                            http.getNetEaseTop(NetEasePlayListId.ORIGINAL).then((data) => {
                                 promptAction.showToast({
                                     message: '刷新成功'
                                 });
@@ -85,7 +94,7 @@ export struct NetEaseTopWidget {
             // 播放列表
             Refresh({ refreshing: $$this.isRefreshing }) {
                 List() {
-                    LazyForEach(new SongDataSource(this.vb_top_list.musicList), (item: MusicInfo, index: number) => {
+                    LazyForEach(this.songDataSource, (item: MusicInfo, index: number) => {
                         ListItem() {
                             Row() {
                                 Text(`${index + 1}`)
@@ -96,13 +105,16 @@ export struct NetEaseTopWidget {
                             }
                             .justifyContent(FlexAlign.Start)
                         }
+                        .onAppear(() => {
+                            console.log(`onAppear ${item.id}`);
+                        })
 
                     })
                 }
                 .scrollBar(BarState.Off)
                 .edgeEffect(EdgeEffect.Spring)
                 .width('100%')
-                .cachedCount(5)
+                .cachedCount(10)
                 .onReachEnd(() => {
                     console.log(`到底了`);
                 })

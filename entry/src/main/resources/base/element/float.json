@@ -498,11 +498,11 @@
         },
         {
             "name": "control_icon_width",
-            "value": "24vp"
+            "value": "32vp"
         },
         {
             "name": "control_icon_height",
-            "value": "24vp"
+            "value": "32vp"
         },
         {
             "name": "control_icon_margin",
@@ -510,7 +510,7 @@
         },
         {
             "name": "player_area_height",
-            "value": "48vp"
+            "value": "50vp"
         },
         {
             "name": "player_padding",

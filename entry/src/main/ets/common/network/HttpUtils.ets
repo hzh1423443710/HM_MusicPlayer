@@ -1,7 +1,7 @@
 import http from '@ohos.net.http';
 import hilog from '@ohos.hilog';
 import { MusicFrom, MusicInfo } from '../../model/MusicData';
-import { NetEaseQuality, NetEaseTopPlayListId } from '../constants/Netease';
+import { NetEaseQuality, NetEasePlayListId } from '../constants/Netease';
 import ConnectionUtil from './ConnectionUtils'
 
 const TAG: string = 'HttpUtils';
@@ -64,7 +64,7 @@ export class HttpUtils {
      * @param id
      * @returns
      */
-    async getNetEaseListId(id: string): Promise<string[]> {
+    async getNetEaseListId(id: NetEasePlayListId): Promise<string[]> {
         if (!await this.netAvailable()) {
             hilog.error(0x0000, TAG, 'getNetEaseListId: 网络不可用')
             return null;
@@ -137,7 +137,7 @@ export class HttpUtils {
     /**
      * 获取网易云热榜
      */
-    async getNetEaseTop(type: NetEaseTopPlayListId): Promise<MusicInfo[]> {
+    async getNetEaseTop(type: NetEasePlayListId): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) {
             hilog.error(0x0000, TAG, 'getNetEaseTop: 网络不可用')
             return null;

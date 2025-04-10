@@ -133,11 +133,11 @@ export struct PlayerWidget {
                         console.log('下一首');
                     })
                 Image($r('app.media.ic_music_list'))
+                    .fillColor($r('app.color.control_icon_color'))
                     .width($r('app.float.control_icon_width'))
                     .height($r('app.float.control_icon_height'))
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_ONE)
             } // Row
-            .width(120)
             .justifyContent(FlexAlign.End)
 
         } // Row

@@ -1,21 +1,27 @@
+import { NetEasePlayListId } from '../common/constants/Netease';
 import { HttpUtils } from '../common/network/HttpUtils';
 import { MusicFrom, MusicInfo, PlayListType } from '../model/MusicData'
 import { MusicListData } from './MusicDataViewModel'
+import { SongDataSource } from './SongDataSource';
 
 @Observed
 export abstract class BaseNetEasePlayListViewModel {
     protected http: HttpUtils = new HttpUtils();
+    // 播放列表
     musicList: MusicInfo[] = MusicListData;
+    // 标题
     title: string = '';
+    // 简介
     brief: string = '';
-    // 网易云歌单id
-    playListId: string;
+    // http-查询参数-歌单id
+    playListId: NetEasePlayListId;
     // 播放列表类型
     playListType: PlayListType;
     // 是否正在加载
     isLoading: boolean = false;
     // 更新触发器
     updateTrigger: number = 0;
+    batchSize: number;
 
     protected notifyUpdate() {
         this.updateTrigger++;
@@ -50,20 +56,24 @@ export abstract class BaseNetEasePlayListViewModel {
             break;
         }
 
-        // let tmp_list: MusicInfo[] = [];
-        for (let i = 0; i < ids.length; i++) {
-            let music: MusicInfo = await this.http.getNetEaseMusic(ids[i]);
-            if (music === null)
-                throw new Error(`获取网易云音乐失败, id: ${ids[i]}`);
+        // 批量处理
+        for (let i = 0; i < ids.length; i += this.batchSize) {
+            let batch = [];
+            const end = Math.min(i + this.batchSize, ids.length);
 
-            music.index = i;
-            music.playList = this.playListType;
-            // tmp_list.push(info);
-            this.musicList.push(music);
+            for (let j = i; j < end; j++) {
+                let music = await this.http.getNetEaseMusic(ids[j]);
+                if (music) {
+                    music.index = this.musicList.length + batch.length;
+                    music.playList = this.playListType;
+                    batch.push(music);
+                }
+            }
+
+            // 一次更新多首歌曲
+            this.musicList = [...this.musicList, ...batch];
             this.notifyUpdate();
         }
-
-        // this.musicList = tmp_list;
 
         this.isLoading = false;
     }

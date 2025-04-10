@@ -26,18 +26,17 @@ export class NetEaseQuality {
  * 网易云 歌单/榜单 ID
  */
 export class NetEasePlayListId {
-    // 听歌识曲榜
+    // top10 听歌识曲榜
     static readonly LISTEN_HOT = "6688069460";
-    // 网络热歌榜
+    // top10 网络热歌榜
     static readonly NET_HOT = "6723173524";
-}
 
-/**
- * 网易云 top榜单 ID
- */
-export enum NetEaseTopPlayListId {
-    ORIGINAL, // 原创榜
-    NEW, // 新歌榜
-    SURGE, // 飙升榜
-    HOT, // 热歌榜
+    // top100 原创榜
+    static readonly ORIGINAL = 0;
+    // top100 新歌榜
+    static readonly NEW = 1;
+    // top100 飙升榜
+    static readonly SURGE = 2;
+    // top100 热歌榜
+    static readonly HOT = 3;
 }

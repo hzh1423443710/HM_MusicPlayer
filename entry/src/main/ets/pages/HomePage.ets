@@ -4,6 +4,7 @@ import { PlayerWidget } from '../components/PlayerWidget'
 import { StyleConstants } from '../common/constants/StyleConstants'
 import { NetEaseTopContent } from '../view/NetEaseTopContent'
 import { MyContent } from '../view/MyContent'
+import display from '@ohos.display';
 
 @Entry
 @Component
@@ -40,7 +41,7 @@ struct Index {
             // 1.首页
             TabContent() {
                 Stack() {
-                    HomePageContent()
+                    // HomePageContent()
                     // 播放控制
                     PlayerWidget()
                 }
