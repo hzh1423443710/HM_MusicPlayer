@@ -1,0 +1,64 @@
+{
+    "string": [
+        {
+            "name": "module_desc",
+            "value": "module description"
+        },
+        {
+            "name": "EntryAbility_desc",
+            "value": "description"
+        },
+        {
+            "name": "EntryAbility_label",
+            "value": "MusicPlayer"
+        },
+        {
+            "name": "NetAvailable",
+            "value": "网络可用"
+        },
+        {
+            "name": "NetUnAvailable",
+            "value": "网络不可用"
+        },
+        {
+            "name": "NetLost",
+            "value": "网络断开连接"
+        },
+        {
+            "name": "HomePage",
+            "value": "首页"
+        },
+        {
+            "name": "MusicRank",
+            "value": "榜单"
+        },
+        {
+            "name": "My",
+            "value": "我的"
+        },
+        {
+            "name": "api_rand_music",
+            "value": "https://api.52vmy.cn/api/music/wy/rand"
+        },
+        {
+            "name": "api_NetEase_playlist_id",
+            "value": "https://music.163.com/api/playlist/detail"
+        },
+        {
+            "name": "api_netease_playlist_top",
+            "value": "https://api.52vmy.cn/api/music/wy/top"
+        },
+        {
+            "name": "api_netease_music",
+            "value": "https://api.vkeys.cn/v2/music/netease"
+        },
+        {
+            "name": "api_netease_music_lrc",
+            "value": "https://api.vkeys.cn/v2/music/netease/lyric"
+        },
+        {
+            "name": "api_netease_top",
+            "value": "https://api.52vmy.cn/api/music/wy/top"
+        }
+    ]
+}

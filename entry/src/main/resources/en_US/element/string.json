@@ -1,0 +1,29 @@
+{
+    "string": [
+        {
+            "name": "module_desc",
+            "value": "module description"
+        },
+        {
+            "name": "EntryAbility_desc",
+            "value": "description"
+        },
+        {
+            "name": "EntryAbility_label",
+            "value": "HM-Music"
+        },
+
+        {
+            "name": "NetAvailable",
+            "value": "Network Available"
+        },
+        {
+            "name": "NetUnAvailable",
+            "value": "Network Unavailable"
+        },
+        {
+            "name": "NetLost",
+            "value": "Network Lost"
+        }
+    ]
+}
