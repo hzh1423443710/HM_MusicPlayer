@@ -18,15 +18,15 @@ export struct HomePageContent {
     @State @Watch('onTreasureMusicChanged') vb_treasure_music: TreasureMusicViewModel = treasureMusicViewModel;
 
     onRandPlayChanged() {
-        console.log(`onRandPlayChanged:`)
+        // console.log(`onRandPlayChanged:`)
     }
 
     onEveryLikeListChanged() {
-        console.log(`onEveryLikeListChanged:`)
+        // console.log(`onEveryLikeListChanged:`)
     }
 
     onTreasureMusicChanged() {
-        console.log(`onTreasureMusicChanged:`)
+        // console.log(`onTreasureMusicChanged:`)
     }
 
     aboutToAppear() {

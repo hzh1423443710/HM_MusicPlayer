@@ -41,7 +41,7 @@ struct Index {
             // 1.首页
             TabContent() {
                 Stack() {
-                    // HomePageContent()
+                    HomePageContent()
                     // 播放控制
                     PlayerWidget()
                 }

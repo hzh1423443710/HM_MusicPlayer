@@ -32,15 +32,15 @@ export class MusicInfo {
     // 时长
     duration?: string = '';
     // 歌词链接
-    lrc?: string = '';
+    lrc: string = '';
     // 是否收费
     pay: boolean = false;
     // 来自
     where: MusicFrom;
     // 播放列表中的索引
-    index?: number = -1
+    index: number = -1
     // 播放列表id
-    playList?: PlayListType = PlayListType.NETEASE_RAND
+    playList: PlayListType = PlayListType.NETEASE_RAND
 
     constructor(id?: string) {
         if (id)

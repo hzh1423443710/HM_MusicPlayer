@@ -32,11 +32,11 @@ export class NetEasePlayListId {
     static readonly NET_HOT = "6723173524";
 
     // top100 原创榜
-    static readonly ORIGINAL = 0;
+    static readonly ORIGINAL = 1;
     // top100 新歌榜
-    static readonly NEW = 1;
+    static readonly NEW = 2;
     // top100 飙升榜
-    static readonly SURGE = 2;
+    static readonly SURGE = 3;
     // top100 热歌榜
-    static readonly HOT = 3;
+    static readonly HOT = 4;
 }

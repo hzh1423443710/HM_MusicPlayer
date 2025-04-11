@@ -8,8 +8,7 @@ import {
     NetEaseTopNewViewModel,
     NetEaseTopOriginalViewModel,
     NetEaseTopHotViewModel
-} from '../viewmodel/NetEasePlayListViewModel'
-import { BaseNetEasePlayListViewModel } from '../viewmodel/BaseNetEasePlayListViewModel'
+} from '../viewmodel/NetEaseLongListViewModel'
 
 
 @Preview
@@ -42,7 +41,7 @@ export struct NetEaseTopContent {
             Tabs() {
                 // 1.原创榜
                 TabContent() {
-                    NetEaseTopWidget({ vb_top_list:$vb_original })
+                    NetEaseTopWidget({ vb_top_list: $vb_original })
                 }
                 .tabBar(this.vb_original.title)
                 .tabIndex(0)
@@ -50,22 +49,25 @@ export struct NetEaseTopContent {
 
                 // 2.热歌榜
                 TabContent() {
+                    NetEaseTopWidget({ vb_top_list: $vb_hot })
                 }
-                .tabBar(this.vb_original.title)
+                .tabBar(this.vb_hot.title)
                 .tabIndex(1)
                 .align(Alignment.Top)
 
                 // 3.飙升榜
                 TabContent() {
+                    NetEaseTopWidget({ vb_top_list: $vb_surge })
                 }
-                .tabBar(this.vb_original.title)
+                .tabBar(this.vb_surge.title)
                 .tabIndex(2)
                 .align(Alignment.Top)
 
                 // 4.新歌榜
                 TabContent() {
+                    NetEaseTopWidget({ vb_top_list: $vb_new })
                 }
-                .tabBar(this.vb_original.title)
+                .tabBar(this.vb_new.title)
                 .tabIndex(3)
                 .align(Alignment.Top)
 

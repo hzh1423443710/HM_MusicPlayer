@@ -2,7 +2,6 @@ import { NetEasePlayListId } from '../common/constants/Netease';
 import { HttpUtils } from '../common/network/HttpUtils';
 import { MusicFrom, MusicInfo, PlayListType } from '../model/MusicData'
 import { MusicListData } from './MusicDataViewModel'
-import { SongDataSource } from './SongDataSource';
 
 @Observed
 export abstract class BaseNetEasePlayListViewModel {

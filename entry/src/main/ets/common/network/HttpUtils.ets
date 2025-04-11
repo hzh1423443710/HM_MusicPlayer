@@ -145,24 +145,34 @@ export class HttpUtils {
 
         let musics: MusicInfo[] = [];
         let api_url = await getContext(this).resourceManager.getStringValue($r("app.string.api_netease_top"));
-        api_url += `?t=${type}`;
+        api_url += `?t=${type}&token=5e28855fd8e2d71e2f68b1300c31627e`;
 
         await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-            let resultObj = JSON.parse(data.result as string);
+            let resultObj;
+            try {
+                resultObj = JSON.parse(data.result.toString());
+            } catch (e) {
+                console.log(`JOSN.parese:${e}`);
+                musics = null;
+                return;
+            }
 
             if (data.responseCode === 200 && resultObj["code"] === 200) {
                 const arr = resultObj["data"];
-                for (const music of arr) {
+
+                for (let i = 0; i < arr.length; ++i) {
                     let music_info = new MusicInfo();
-                    music_info.id = music.id;
-                    music_info.name = music.song;
-                    music_info.singer = music.sing;
+                    music_info.id = arr[i].id;
+                    music_info.name = arr[i].song;
+                    music_info.singer = arr[i].sing;
                     music_info.duration = ''; // 无
-                    music_info.url = music.url;
-                    music_info.pic = music.pic;
+                    music_info.url = arr[i].url;
+                    music_info.pic = arr[i].pic;
                     music_info.lrc = ''; // 无
                     music_info.pay = false;
                     music_info.where = MusicFrom.NetEase;
+                    music_info.index = i;
+
                     musics.push(music_info);
                 }
             } else {
