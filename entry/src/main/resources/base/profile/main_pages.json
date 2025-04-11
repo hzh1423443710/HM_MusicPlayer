@@ -1,8 +1,13 @@
 {
   "src": [
+      "pages/AboutPage",
+      "pages/ExportPlayListPage",
       "pages/HomePage",
       "pages/LoginPage",
-      "pages/SettingPage",
-      "pages/SearchPage"
+      "pages/ProfilePage",
+      "pages/RegisterPage",
+      "pages/RetrievePasswdPage",
+      "pages/SearchPage",
+      "pages/SettingPage"
   ]
 }
