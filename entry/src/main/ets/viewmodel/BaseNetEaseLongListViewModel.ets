@@ -24,7 +24,7 @@ export abstract class BaseNetEaseLongListViewModel {
     // 是否正在加载
     isLoading: boolean = false;
     // 批处理数量
-    batchSize: number = 10;
+    batchSize: number = 20;
     // 动态加载索引
     private loadingIndex: number = 0;
 

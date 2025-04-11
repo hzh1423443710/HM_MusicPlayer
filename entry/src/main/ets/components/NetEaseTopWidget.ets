@@ -81,16 +81,12 @@ export struct NetEaseTopWidget {
             .onStateChange((state: RefreshStatus) => {
                 switch (state) {
                     case RefreshStatus.Inactive:
-                    // console.log(`onStateChange Inactive`);
                         break;
                     case RefreshStatus.Drag:
-                    // console.log(`onStateChange Drag`);
                         break;
                     case RefreshStatus.OverDrag:
-                    // console.log(`onStateChange OverDrag`);
                         break;
                     case RefreshStatus.Done:
-                    // console.log(`onStateChange Done`);
                         promptAction.showToast({
                             message: '刷新完成'
                         });
@@ -99,8 +95,6 @@ export struct NetEaseTopWidget {
             })
             .onRefreshing(async () => {
                 // Drag -> OverDrag -> Refreshing -> Done
-                // console.log(`onRefreshing`);
-
                 this.vb_top_list.refreshMusic();
                 this.isRefreshing = false;
             })

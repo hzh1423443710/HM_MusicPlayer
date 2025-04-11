@@ -23,8 +23,32 @@ export struct NetEaseTopContent {
     @State vb_surge: NetEaseTopSurgeViewModel = topSurgeViewModel;
     // 新歌榜
     @State vb_new: NetEaseTopNewViewModel = topNewViewModel;
+    // TODO 资源内
+    fontColor: string = '#182431'
+    selectedFontColor: string = '#007DFF'
 
     aboutToAppear(): void {
+    }
+
+    @Builder
+    TabBuilder(index: number, name: string) {
+        Column() {
+            Row({ space: 5 }) {
+                Text(name)
+                    .fontColor(this.currentIndex === index ? this.selectedFontColor : this.fontColor)
+                    .fontSize(20)
+                    .fontWeight(this.currentIndex === index ? 500 : 400)
+                    .lineHeight(25)
+                    .margin({ top: 17, bottom: 7 })
+            }
+            .alignItems(VerticalAlign.Center)
+
+            Divider()
+                .strokeWidth(2)
+                .color('#007DFF')
+                .opacity(this.currentIndex === index ? 1 : 0)
+                .width(80)
+        }.width('100%')
     }
 
     build() {
@@ -43,7 +67,7 @@ export struct NetEaseTopContent {
                 TabContent() {
                     NetEaseTopWidget({ vb_top_list: $vb_original })
                 }
-                .tabBar(this.vb_original.title)
+                .tabBar(this.TabBuilder(0, this.vb_original.title))
                 .tabIndex(0)
                 .align(Alignment.Top)
 
@@ -51,7 +75,7 @@ export struct NetEaseTopContent {
                 TabContent() {
                     NetEaseTopWidget({ vb_top_list: $vb_hot })
                 }
-                .tabBar(this.vb_hot.title)
+                .tabBar(this.TabBuilder(1, this.vb_hot.title))
                 .tabIndex(1)
                 .align(Alignment.Top)
 
@@ -59,7 +83,7 @@ export struct NetEaseTopContent {
                 TabContent() {
                     NetEaseTopWidget({ vb_top_list: $vb_surge })
                 }
-                .tabBar(this.vb_surge.title)
+                .tabBar(this.TabBuilder(2, this.vb_surge.title))
                 .tabIndex(2)
                 .align(Alignment.Top)
 
@@ -67,7 +91,7 @@ export struct NetEaseTopContent {
                 TabContent() {
                     NetEaseTopWidget({ vb_top_list: $vb_new })
                 }
-                .tabBar(this.vb_new.title)
+                .tabBar(this.TabBuilder(3, this.vb_new.title))
                 .tabIndex(3)
                 .align(Alignment.Top)
 
