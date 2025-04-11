@@ -13,6 +13,10 @@
             "value": "MusicPlayer"
         },
         {
+            "name": "AppFullName",
+            "value": "鸿蒙网络音乐播放器"
+        },
+        {
             "name": "NetAvailable",
             "value": "网络可用"
         },

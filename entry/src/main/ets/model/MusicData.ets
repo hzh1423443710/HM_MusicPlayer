@@ -7,7 +7,8 @@ export enum MusicFrom {
  * 播放列表类型
  */
 export enum PlayListType {
-    NETEASE_RAND, // 随机播放
+    NONE, // 无播放列表
+    RECENT, // 最近播放列表
     QQ_SEARCH, // 搜索
     NETEASE_LISTEN_HOT, // 大家都爱听
     NETEASE_NETWORK_HOT, // 网络热歌
@@ -40,7 +41,7 @@ export class MusicInfo {
     // 播放列表中的索引
     index: number = -1
     // 播放列表id
-    playList: PlayListType = PlayListType.NETEASE_RAND
+    playList: PlayListType = PlayListType.RECENT
 
     constructor(id?: string) {
         if (id)

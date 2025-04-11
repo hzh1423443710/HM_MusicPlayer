@@ -27,7 +27,7 @@ export class RandPlayViewModel {
             throw new Error('获取随机音乐失败');
         } else {
             this.musicInfo = music;
-            this.musicInfo.playList = PlayListType.NETEASE_RAND;
+            this.musicInfo.playList = PlayListType.RECENT;
             // TODO 索引
         }
     }

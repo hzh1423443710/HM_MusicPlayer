@@ -119,6 +119,14 @@
         {
             "name": "button_color",
             "value": "#000000"
+        },
+        {
+            "name": "tab_font_color",
+            "value": "#182431"
+        },
+        {
+            "name": "tab_font_selected_color",
+            "value": "#007DFF"
         }
     ]
 }

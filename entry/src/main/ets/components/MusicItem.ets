@@ -19,7 +19,7 @@ export struct MusicItem {
             pay: false,
             where: MusicFrom.NetEase,
             index: 0,
-            playList: PlayListType.NETEASE_RAND
+            playList: PlayListType.RECENT
         };
 
     build() {

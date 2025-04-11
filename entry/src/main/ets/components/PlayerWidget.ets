@@ -107,7 +107,7 @@ export struct PlayerWidget {
                             AppStorage.SetOrCreate<boolean>('isPlay',!this.isPlay);
                         else {
                             switch (this.songList[0].playList) {
-                                case PlayListType.NETEASE_RAND:
+                                case PlayListType.RECENT:
                                     AppStorage.SetOrCreate<boolean>('isPlay',!this.isPlay);
                                     break;
                                 case PlayListType.QQ_SEARCH:

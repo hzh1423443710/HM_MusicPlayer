@@ -48,8 +48,7 @@ struct Index {
                 .alignContent(Alignment.Top)
                 .align(Alignment.Top)
                 .width(StyleConstants.FULL_WIDTH)
-                // .borderColor(Color.Green)
-                // .borderWidth(1)
+                .padding({ top: $r('app.float.app_margin') })
             }
             .tabBar(this.tabBarBuilder(0, '首页', $r("app.media.home_filled"), $r("app.media.home")))
             .align(Alignment.Top)
@@ -62,6 +61,7 @@ struct Index {
                 }
                 .alignContent(Alignment.Top)
                 .width(StyleConstants.FULL_WIDTH)
+                .padding({ top: $r('app.float.app_margin') })
             }
             .tabBar(this.tabBarBuilder(1, '榜单', $r('app.media.rank_filled'), $r("app.media.rank")))
             .align(Alignment.Top)
@@ -74,7 +74,7 @@ struct Index {
                 }
                 .alignContent(Alignment.Top)
                 .width(StyleConstants.FULL_WIDTH)
-
+                .padding({ top: $r('app.float.app_margin') })
             }
             .tabBar(this.tabBarBuilder(2, '我的', $r("app.media.my_filled"), $r("app.media.my")))
             .align(Alignment.Top)
@@ -85,8 +85,6 @@ struct Index {
         .backgroundImage($r('app.media.ic_avatar3'))
         .backgroundImageSize(ImageSize.Cover)
         .backgroundBlurStyle(BlurStyle.Regular)
-        // .backgroundColor('#F5F5F5')
-        .margin({ top: 40 })
         .padding(10)
         .onChange((index: number) => {
             this.currentIndex = index;

@@ -6,8 +6,6 @@ import promptAction from '@ohos.promptAction';
 struct SearchPage {
     @State inputText: string = '';
     @State currentIndex: number = 0
-    fontColor: string = '#182431'
-    selectedFontColor: string = '#007DFF'
 
     aboutToAppear(): void {
         const params = router.getParams();
@@ -23,7 +21,7 @@ struct SearchPage {
                 Image(image)
                     .size({ width: 28, height: 28 })
                 Text(name)
-                    .fontColor(this.currentIndex === index ? this.selectedFontColor : this.fontColor)
+                    .fontColor(this.currentIndex === index ? $r('app.color.tab_font_selected_color') : $r('app.color.tab_font_color'))
                     .fontSize(22)
                     .fontWeight(this.currentIndex === index ? 500 : 400)
                     .lineHeight(25)
@@ -79,6 +77,10 @@ struct SearchPage {
                 .tabBar(this.TabBuilder(1, '歌手', $r('app.media.singer')))
                 .tabIndex(1)
 
+                // 3.网易云歌单
+
+                // 4.QQ歌单
+
             }
             .vertical(false)
             .onChange((index: number) => {
@@ -88,7 +90,7 @@ struct SearchPage {
         }
         .width('100%')
         .height('100%')
-        .margin({ top: $r('app.float.app_margin') })
+        .padding({ top: $r('app.float.app_margin') })
         .backgroundImage($r('app.media.ic_avatar3'))
         .backgroundImageSize(ImageSize.Cover)
         .backgroundBlurStyle(BlurStyle.Regular)

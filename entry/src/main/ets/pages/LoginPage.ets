@@ -34,7 +34,7 @@ struct LoginPage {
                 .width('78vp')
                 .height('78vp')
                 .margin({ top: '150vp', bottom: '8vp' })
-            Text($r('app.string.EntryAbility_label'))
+            Text($r('app.string.AppFullName'))
                 .fontSize('24fp')
                 .fontWeight(FontWeight.Medium)
                 .fontColor('#182431')

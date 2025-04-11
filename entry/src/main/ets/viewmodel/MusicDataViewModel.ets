@@ -13,7 +13,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -27,7 +27,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -41,7 +41,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -55,7 +55,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 2,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -69,7 +69,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -83,7 +83,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
 
@@ -98,7 +98,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -112,7 +112,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -126,7 +126,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -140,7 +140,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -154,7 +154,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -168,7 +168,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -182,7 +182,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -196,7 +196,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -210,7 +210,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -224,7 +224,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -238,7 +238,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 2,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -252,7 +252,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -266,7 +266,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
 
@@ -281,7 +281,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -295,7 +295,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -309,7 +309,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -323,7 +323,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -337,7 +337,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -351,7 +351,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -365,7 +365,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -379,7 +379,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -393,7 +393,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -407,7 +407,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -421,7 +421,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 2,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -435,7 +435,7 @@ const MusicListData: MusicInfo[] = [
         pay: true,
         where: MusicFrom.NetEase,
         index: 0,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -449,7 +449,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
 
@@ -464,7 +464,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -478,7 +478,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "34",
@@ -491,7 +491,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "35",
@@ -504,7 +504,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -518,7 +518,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -532,7 +532,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -546,7 +546,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 
     {
@@ -560,7 +560,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "40",
@@ -573,7 +573,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "41",
@@ -586,7 +586,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "42",
@@ -599,7 +599,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "43",
@@ -612,7 +612,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "44",
@@ -625,7 +625,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "45",
@@ -638,7 +638,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "46",
@@ -651,7 +651,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "47",
@@ -664,7 +664,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "48",
@@ -677,7 +677,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "49",
@@ -690,7 +690,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "50",
@@ -703,7 +703,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "51",
@@ -716,7 +716,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "52",
@@ -729,7 +729,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "53",
@@ -742,7 +742,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "54",
@@ -755,7 +755,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "55",
@@ -768,7 +768,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "56",
@@ -781,7 +781,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "57",
@@ -794,7 +794,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "58",
@@ -807,7 +807,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "59",
@@ -820,7 +820,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
     {
         id: "60",
@@ -833,7 +833,7 @@ const MusicListData: MusicInfo[] = [
         pay: false,
         where: MusicFrom.NetEase,
         index: 1,
-        playList: PlayListType.NETEASE_RAND
+        playList: PlayListType.RECENT
     },
 ]
 

@@ -23,9 +23,6 @@ export struct NetEaseTopContent {
     @State vb_surge: NetEaseTopSurgeViewModel = topSurgeViewModel;
     // 新歌榜
     @State vb_new: NetEaseTopNewViewModel = topNewViewModel;
-    // TODO 资源内
-    fontColor: string = '#182431'
-    selectedFontColor: string = '#007DFF'
 
     aboutToAppear(): void {
     }
@@ -35,7 +32,7 @@ export struct NetEaseTopContent {
         Column() {
             Row({ space: 5 }) {
                 Text(name)
-                    .fontColor(this.currentIndex === index ? this.selectedFontColor : this.fontColor)
+                    .fontColor(this.currentIndex === index ? $r('app.color.tab_font_selected_color') : $r('app.color.tab_font_color'))
                     .fontSize(20)
                     .fontWeight(this.currentIndex === index ? 500 : 400)
                     .lineHeight(25)
