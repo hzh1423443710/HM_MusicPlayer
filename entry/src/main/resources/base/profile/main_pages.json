@@ -1,13 +1,14 @@
 {
-  "src": [
-      "pages/AboutPage",
-      "pages/ExportPlayListPage",
-      "pages/HomePage",
-      "pages/LoginPage",
-      "pages/ProfilePage",
-      "pages/RegisterPage",
-      "pages/RetrievePasswdPage",
-      "pages/SearchPage",
-      "pages/SettingPage"
-  ]
+    "src": [
+        "pages/AboutPage",
+        "pages/ExportPlayListPage",
+        "pages/HomePage",
+        "pages/LoginPage",
+        "pages/PlayPage",
+        "pages/ProfilePage",
+        "pages/RegisterPage",
+        "pages/RetrievePasswdPage",
+        "pages/SearchPage",
+        "pages/SettingPage"
+    ]
 }

@@ -1,9 +1,9 @@
 import media from '@ohos.multimedia.media'
 import common from '@ohos.app.ability.common';
-import { MusicFrom, MusicInfo } from '../model/MusicData';
+import { enumToString, MusicInfo, PlayListType } from '../model/MusicData';
 import { MediaTools } from '../common/MediaTools'
 import { BackgroundUtil } from '../common/BackgroundUtil'
-
+import inputDevice from '@ohos.multimodalInput.inputDevice';
 
 const TAG = 'MediaService';
 
@@ -42,18 +42,53 @@ enum AudioPlayerState {
 export class MediaService {
     private context: common.UIAbilityContext | undefined = AppStorage.Get('context');
     public avPlayer: media.AVPlayer | null = null;
-    private songItem: MusicInfo = new MusicInfo();
+    /**
+     * 播放顺序
+     */
     private playMode: MusicPlayMode = MusicPlayMode.ORDER;
+    /**
+     * AVPlayer状态
+     */
     private state: AudioPlayerState = AudioPlayerState.IDLE;
-    private isFirst: boolean = true;
+    /**
+     * 是否为prepared状态
+     */
     private isPrepared: boolean = false;
-    private musicIndex: number = 0;
-    // 当前播放列表
-    private songList: MusicInfo[] = [];
+    /**
+     * 当前音乐-在当前列表索引
+     */
+    private currentMusicIndex: number = 0;
+    /**
+     * 当前播放队列
+     */
+    private currentPlayQueue: MusicInfo[] = [];
+    /**
+     * 当前播放-列表类型
+     */
+    private currentPlaylistType = PlayListType.NONE;
+    /**
+     * 播放历史 上限
+     */
+    static readonly PLAY_HISTORY_LIMIT = 500;
+    /**
+     * 播放列表
+     */
+    private playlistMap: Map<PlayListType, MusicInfo[]> = new Map();
+    /**
+     * seek & timeUpdate 播放进度控制
+     */
     private isCurrent: boolean = true;
+    /**
+     * 是否第一次播放
+     */
+    private isFirst: boolean = true;
 
     constructor() {
         this.initAudioPlayer();
+        // 最近播放
+        this.playlistMap.set(PlayListType.RECENT, []);
+        // 随机一曲
+        this.playlistMap.set(PlayListType.NETEASE_RANDOM_SONG, []);
     }
 
     public static getInstance(): MediaService {
@@ -65,23 +100,225 @@ export class MediaService {
         return mediaService;
     }
 
+    /**
+     * 通知更新 随机一曲 组件
+     */
+    private notifyUpdateRandWidget() {
+        if (this.getCurrentPlaylistType() === PlayListType.NETEASE_RANDOM_SONG) {
+            // 使用时间戳
+            AppStorage.SetOrCreate('updateUITrigger', Date.now());
+
+            //  开始播放最后一首时
+            if (this.currentMusicIndex === this.currentPlayQueue.length - 2) {
+                AppStorage.SetOrCreate('needAppend', Date.now());
+            }
+        }
+    }
+
+    /*******************************             debug                  ***************************/
+    public debugPlayQueue() {
+        this.currentPlayQueue.forEach((item, index) => {
+            console.log(`播放队列[${index}] ${item}`);
+        })
+    }
+
+    public debugPlaylist(type: PlayListType) {
+        const playlist = this.playlistMap.get(type);
+        playlist.forEach((item, index) => {
+            console.log(`播放列表${enumToString(PlayListType, type)}:[${index}] ${item}`);
+        });
+    }
+
+    /*******************************            播放队列管理              ***************************/
+    /**
+     * 获取当前正在播放的音乐信息
+     * @returns
+     */
+    public getCurrentMusic(): MusicInfo {
+        if (this.currentPlayQueue.length > 0 && this.currentMusicIndex >= 0 &&
+            this.currentMusicIndex < this.currentPlayQueue.length) {
+            return this.currentPlayQueue[this.currentMusicIndex];
+        }
+        return null;
+    }
+
+    /**
+     * 追加 一组 随机一曲 音乐
+     * @param musics
+     */
+    public appendRandomMusics(musics: MusicInfo[]): MusicInfo {
+        const playlist = this.playlistMap.get(PlayListType.NETEASE_RANDOM_SONG);
+        const curSong = this.getCurrentMusic();
+
+        if (playlist) {
+            // 首次追加
+            musics.forEach(song => {
+                // 已存在
+                const index = playlist.findIndex(item => item.id === song.id);
+                if (index >= 0)
+                    playlist.splice(index, 1);
+
+                playlist.push(song);
+            });
+
+            playlist.forEach((item, index) => {
+                item.index = index;
+            });
+
+            // 正在播放
+            if (this.getCurrentPlaylistType() === PlayListType.NETEASE_RANDOM_SONG) {
+                // 更新播放队列
+                this.setPlayQueue(playlist, PlayListType.NETEASE_RANDOM_SONG);
+                this.currentMusicIndex = this.currentPlayQueue.findIndex(item => item.id === curSong.id);
+
+                return this.currentPlayQueue[this.currentMusicIndex];
+            }
+
+            return playlist[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * 添加当前音乐到播放历史
+     */
+    private addToHistory() {
+        const curSong = this.getCurrentMusic();
+        let playlistRecent = this.playlistMap.get(PlayListType.RECENT);
+        const existingIndex = playlistRecent.findIndex(item => item.id === curSong.id && item.where === curSong.where);
+
+        // 已存在
+        if (existingIndex >= 0) {
+            playlistRecent.splice(existingIndex, 1);
+        }
+
+        // 头插并更新索引
+        playlistRecent.splice(0, 0, curSong);
+
+        if (playlistRecent.length > MediaService.PLAY_HISTORY_LIMIT) {
+            playlistRecent = playlistRecent.slice(0, MediaService.PLAY_HISTORY_LIMIT);
+        }
+
+        this.currentPlayQueue.forEach((item, index) => {
+            item.index = index;
+        })
+    }
+
+    /**
+     * 随机一曲列表 播放
+     * @param song
+     */
+    public playRandomSong() {
+        // 切换播放队列
+        const playlist = this.playlistMap.get(PlayListType.NETEASE_RANDOM_SONG);
+        if (playlist.length === 0)
+            return false;
+
+        this.setPlayQueue(playlist, PlayListType.NETEASE_RANDOM_SONG);
+        this.loadAssent(0);
+
+        return true;
+    }
+
+    // public playRandomSong(song: MusicInfo) {
+    //     if (song.id === null || song.id === undefined || song.id === '') {
+    //         return false;
+    //     }
+    //
+    //
+    //     // TODO 是否已存在
+    //     if (this.getCurrentPlaylistType() === PlayListType.NETEASE_RANDOM_SONG) {
+    //         this.currentPlayQueue.push(song);
+    //         song.index = this.currentPlayQueue.length - 1;
+    //         this.loadAssent(song.index);
+    //     } else {
+    //         this.setPlayQueue([song], PlayListType.NETEASE_RANDOM_SONG);
+    //         this.loadAssent(0);
+    //     }
+    //
+    //     return true;
+    // }
+
+    /**
+     * 播放列表 -> 单曲播放
+     * @param song
+     * @param songs
+     * @param type
+     */
+    public playOne(song: MusicInfo, songs: MusicInfo[], type: PlayListType) {
+        // 非搜索结果 直接更新播放队列
+        if (type !== PlayListType.QQ_SEARCH) {
+            this.setPlayQueue(songs, type);
+            this.loadAssent(this.currentPlayQueue.findIndex(item => item.id === song.id && item.where === song.where));
+        } else {
+            // 搜索结果 && 当前播放队列为空
+            if (this.currentPlaylistType === PlayListType.NONE) {
+                this.setPlayQueue([song], type);
+                this.loadAssent(0);
+            } else {
+                // 当前队列不为NONE, 插入到当前播放队列
+                this.currentPlayQueue.splice(this.currentMusicIndex + 1, 0, song);
+                this.currentPlayQueue.forEach((item, index) => {
+                    item.index = index;
+                });
+                this.loadAssent(this.currentMusicIndex + 1);
+            }
+        }
+    }
+
+    /**
+     * 播放全部
+     * @param songs
+     * @param type
+     */
+    public playAll(songs: MusicInfo[], type: PlayListType) {
+        this.setPlayQueue(songs, type);
+        this.loadAssent(0);
+    }
+
+    /**
+     * 设置播放队列 并 更新索引
+     * @param song
+     * @param type
+     */
+    private setPlayQueue(song: MusicInfo[], type: PlayListType) {
+        this.currentPlayQueue = song;
+        this.currentPlaylistType = type;
+        this.currentPlayQueue.forEach((item, index) => {
+            item.index = index;
+        });
+    }
+
+    public getCurrentPlaylistType(): PlayListType {
+        return this.currentPlaylistType;
+    }
+
+    /*******************************            播放控制管理              ***************************/
+    /**
+     * 初始化音频播放器
+     */
     private initAudioPlayer() {
         media.createAVPlayer().then(async (avPlayer: media.AVPlayer) => {
             if (avPlayer !== null) {
                 this.avPlayer = avPlayer;
                 this.setAVPlayerCallback();
             }
-        })
-            .catch((error: Error) => console.error(TAG, 'this avPlayer: ',
-                `catch error happened, Error cause : ${JSON.stringify(error)}`));
+        }).catch((error: Error) => {
+            console.error(TAG, 'this avPlayer: ',
+                `catch error happened, Error cause : ${JSON.stringify(error)}`)
+        });
     }
 
-
+    /**
+     * 监听播放状态
+     */
     private setAVPlayerCallback() {
         if (!this.avPlayer || this.avPlayer === null) {
             console.error(TAG, `Invoke avPlayer failed`);
             return;
         }
+
         this.avPlayer.on('seekDone', (seekDoneTime: number) => {
             this.isCurrent = true;
             console.info(TAG, `AVPlayer seek succeeded, seek time is ${seekDoneTime}`);
@@ -101,116 +338,158 @@ export class MediaService {
 
         this.avPlayer.on('stateChange', async (state: media.AVPlayerState) => {
             let stateString = state.toString();
+            console.log(TAG, `AVPlayer state ${stateString}`);
+
             switch (stateString) {
                 case 'idle':
-                    console.info(TAG, 'AVPlayer state idle called.');
+                // url:只允许在idle状态下设置 -> initialized 状态
                     this.state = AudioPlayerState.IDLE;
-                    this.avPlayer.url = this.songList[this.musicIndex].url;
+                    this.avPlayer.url = this.currentPlayQueue[this.currentMusicIndex].url;
                     break;
+
                 case 'initialized':
-                    console.info(TAG, 'AVPlayer state initialized called.');
                     this.state = AudioPlayerState.INITIALIZED;
                     if (this.avPlayer) {
-                        this.avPlayer.prepare().then(() => {
-                            console.info(TAG, 'AVPlayer prepare succeeded.');
-                        }, (err: Error) => {
+                        this.avPlayer.prepare().catch((err) => {
                             console.error(TAG, `Invoke prepare failed, Error cause : ${JSON.stringify(err)}`);
                         });
                     }
                     break;
+
                 case 'prepared':
-                    console.info(TAG, 'AVPlayer state prepared called.');
                     this.state = AudioPlayerState.PREPARED;
                     this.isPrepared = true;
                     AppStorage.SetOrCreate('totalTime', MediaTools.msToCountdownTime(this.getDuration()));
                     AppStorage.SetOrCreate('progressMax', this.getDuration());
                     if (this.avPlayer) this.avPlayer.play();
-                    console.info(TAG, 'AVPlayer prepared succeeded.');
                     break;
+
                 case 'playing':
-                    console.info(TAG, 'AVPlayer state playing called.');
                     this.state = AudioPlayerState.PLAY;
+                    this.addToHistory();
                     break;
+
                 case 'paused':
-                    console.info(TAG, 'AVPlayer state paused called.');
                     this.state = AudioPlayerState.PAUSE;
                     break;
+
                 case 'completed':
-                    console.info(TAG, 'AVPlayer state completed called.');
                     this.state = AudioPlayerState.COMPLETED;
                     this.playNextAuto(false);
                     break;
+
                 case 'stopped':
-                    console.info(TAG, 'AVPlayer state stopped called.');
                     this.state = AudioPlayerState.STOP;
                     if (this.avPlayer) this.avPlayer.reset();
                     break;
+
                 case 'released':
-                    console.info(TAG, 'AVPlayer state released called.');
                     this.state = AudioPlayerState.RELEASED;
                     break;
+
                 default:
-                    console.info(TAG, 'AVPlayer state unknown called.');
                     this.state = AudioPlayerState.UNKNOWN;
                     break;
             }
+            // 每次状态变化后, 检测是否更新播放
             this.updateIsPlay(this.state === AudioPlayerState.PLAY);
         })
     }
 
+    public isPlaying(): boolean {
+        return AppStorage.Get<boolean>('isPlay');
+    }
+
+    public isPause(): boolean {
+        return this.state === AudioPlayerState.PAUSE;
+    }
+
     /**
-     * 通过索引 播放音乐列表中的音乐
+     * 更新音乐索引 并加载
      * @param musicIndex
      */
     async loadAssent(musicIndex: number) {
-        if (musicIndex >= this.songList.length) {
+        if (musicIndex >= this.currentPlayQueue.length) {
             console.error(TAG, `current musicIndex ${musicIndex}`);
             return;
         }
+
+        // TODO bug
         BackgroundUtil.startContinuousTask(this.context);
-        this.updateMusicIndex(musicIndex);
+
+        this.updateCurrentMusicIndex(musicIndex);
+        console.log(`index[${this.currentMusicIndex}]:${this.currentPlayQueue[this.currentMusicIndex]}`);
+
+        // 第一次播放 手动更新状态
         if (this.isFirst) {
             this.isFirst = false;
-            this.avPlayer.url = this.songList[this.musicIndex].url;
+            this.avPlayer.url = this.currentPlayQueue[this.currentMusicIndex].url;
         } else {
-            await this.stop();
+            await this.avPlayer.stop();
         }
+
     }
 
     /**
-     * 是否从第一首播放
+     * 获取播放模式
      * @returns
      */
-    public getFirst() {
-        return this.isFirst;
-    }
-
     public getPlayMode() {
         return this.playMode;
     }
 
     /**
-     * 更新是否正在播放
+     * 设置播放模式
      * @param playMode
      */
     public setPlayModel(playMode: MusicPlayMode) {
         this.playMode = playMode;
-        console.info(TAG, 'setPlayModel mode: ' + this.playMode);
+        console.info(TAG, 'setPlayModel mode: ' + enumToString(MusicPlayMode, this.playMode));
     }
 
+    /**
+     * 修改全局播放状态
+     * @param isPlay
+     */
     private updateIsPlay(isPlay: boolean) {
         AppStorage.SetOrCreate<boolean>('isPlay', isPlay);
     }
 
+    /**
+     * 跳转到指定播放位置 (prepared/playing/paused/complete状态下)
+     * @param ms
+     */
     public seek(ms: number) {
         if (this.isPrepared && this.state != AudioPlayerState.ERROR) {
-            let seekMode = this.getCurrentTime() < ms ? 0 : 1;
+            // 快进方向
+            let seekMode = this.getCurrentTime() < ms ? media.SeekMode.SEEK_NEXT_SYNC : media.SeekMode.SEEK_PREV_SYNC;
+            // 跳转位置
             let realTime = (ms <= 0 ? 0 : (ms >= this.getDuration() ? this.getDuration() : ms));
             this.isCurrent = false;
             if (this.avPlayer) this.avPlayer.seek(realTime, seekMode);
         }
     }
 
+    /**
+     * 获取当前播放状态
+     * @returns
+     */
+    public getPlayState(): AudioPlayerState {
+        return this.state;
+    }
+
+    /**
+     * 当前是否处于空闲状态
+     * @returns
+     */
+    public idle(): boolean {
+        return this.state == AudioPlayerState.IDLE;
+    }
+
+    /**
+     * 获取当前位置(ms) prepared/playing/paused/completed状态下有效
+     * @returns
+     */
     private getCurrentTime() {
         if (this.isPrepared && this.avPlayer) {
             return this.avPlayer.currentTime;
@@ -219,10 +498,10 @@ export class MediaService {
     }
 
     /**
-     * 获取播放时长
+     * 获取播放时长(ms) prepared/playing/paused/completed状态下有效
      * @returns
      */
-    private getDuration() {
+    public getDuration() {
         if (this.isPrepared && this.avPlayer) {
             return this.avPlayer.duration;
         }
@@ -230,11 +509,12 @@ export class MediaService {
     }
 
     /**
-     * 播放下一首
+     * 自动播放下一首
      * @param isFromControl
      */
     public playNextAuto(isFromControl: boolean) {
-        console.info(TAG, 'playNextAuto mode:' + this.playMode);
+        console.info(TAG, 'playNextAuto mode:' + enumToString(MusicPlayMode, this.playMode));
+
         switch (this.playMode) {
             case MusicPlayMode.SINGLE_CYCLE:
                 if (isFromControl) {
@@ -254,16 +534,35 @@ export class MediaService {
         }
     }
 
+    /**
+     * 手动-播放下一首
+     */
     private playNext() {
-        console.info(TAG, 'playNext Index:' + this.musicIndex + ', length-1:' + (this.songList.length - 1));
-        if (this.musicIndex === this.songList.length - 1) {
-            this.loadAssent(0);
-        } else {
-            this.loadAssent(this.musicIndex + 1);
+        console.info(TAG, 'playNext Index:' + this.currentMusicIndex + ', length-1:' + (this.currentPlayQueue.length - 1));
+
+        switch (this.playMode) {
+            case MusicPlayMode.RANDOM:
+                this.playRandom();
+                break;
+            case MusicPlayMode.ORDER:
+            case MusicPlayMode.SINGLE_CYCLE:
+                if (this.currentMusicIndex === this.currentPlayQueue.length - 1) {
+                    this.loadAssent(0);
+                } else {
+                    this.loadAssent(this.currentMusicIndex + 1);
+                }
+                break;
+            default:
+                break;
         }
+
+        // 随机一曲 只能 顺序或单曲循环
+        this.notifyUpdateRandWidget();
     }
 
-
+    /**
+     * 手动-播放上一首
+     */
     public playPrevious() {
         switch (this.playMode) {
             case MusicPlayMode.RANDOM:
@@ -271,30 +570,64 @@ export class MediaService {
                 break;
             case MusicPlayMode.ORDER:
             case MusicPlayMode.SINGLE_CYCLE:
-                if (this.musicIndex === 0) {
-                    this.updateMusicIndex(this.songList.length - 1);
+                if (this.currentMusicIndex === 0) {
+                    this.updateCurrentMusicIndex(this.currentPlayQueue.length - 1);
                 } else {
-                    this.updateMusicIndex(this.musicIndex - 1);
+                    this.updateCurrentMusicIndex(this.currentMusicIndex - 1);
                 }
-                console.info(TAG, 'setLastIndex:' + this.musicIndex);
-                this.loadAssent(this.musicIndex);
+                console.info(TAG, 'setLastIndex:' + this.currentMusicIndex);
+                this.loadAssent(this.currentMusicIndex);
                 break;
             default:
                 break;
         }
+
+        this.notifyUpdateRandWidget();
     }
 
+    /**
+     * 随机播放 队列中的一首
+     */
     private playRandom() {
-        let num = Math.round(Math.random() * (this.songList.length - 1));
-        if (this.musicIndex === num) {
+        let index = Math.round(Math.random() * (this.currentPlayQueue.length - 1));
+        if (this.currentMusicIndex === index) {
             this.playRandom();
         } else {
-            this.updateMusicIndex(num);
-            this.loadAssent(num);
+            this.updateCurrentMusicIndex(index);
+            this.loadAssent(index);
         }
-        console.info(TAG, 'play Random:' + this.musicIndex);
+        console.info(TAG, 'play Random:' + this.currentMusicIndex);
     }
 
+    /**
+     * Play music.
+     */
+    public async play() {
+        BackgroundUtil.startContinuousTask(this.context);
+        if (this.isPrepared && this.avPlayer) {
+            this.avPlayer.play().then(() => {
+                this.seek(this.getCurrentTime());
+                this.updateIsPlay(true);
+                this.state = AudioPlayerState.PLAY;
+            })
+        }
+    }
+
+    /**
+     * 暂停播放 -> pause
+     */
+    public pause() {
+        if (this.isPrepared && this.state == AudioPlayerState.PLAY && this.avPlayer) {
+            this.avPlayer.pause().then(() => {
+                this.state = AudioPlayerState.PAUSE;
+                this.updateIsPlay(false);
+            });
+        }
+    }
+
+    /**
+     * 停止播放
+     */
     public async stop() {
         if (this.isPrepared && this.avPlayer) {
             console.info(TAG, 'stop()');
@@ -304,6 +637,9 @@ export class MediaService {
         }
     }
 
+    /**
+     * 重置资源 -> idle
+     */
     private async reset() {
         console.info(TAG, 'reset()');
         if (this.avPlayer) {
@@ -312,6 +648,9 @@ export class MediaService {
         this.isPrepared = false;
     }
 
+    /**
+     * 销毁实例 -> released
+     */
     public release() {
         this.updateIsPlay(false);
         this.stop();
@@ -323,11 +662,15 @@ export class MediaService {
         }
     }
 
-    private updateMusicIndex(musicIndex: number) {
-        console.info(TAG, 'updateMusicIndex ===> ' + musicIndex);
+    /**
+     * 更新当前 音乐索引
+     * @param musicIndex
+     */
+    private updateCurrentMusicIndex(musicIndex: number) {
+        console.info(TAG, 'updateCurrentMusicIndex ===> ' + musicIndex);
         AppStorage.SetOrCreate('selectIndex', musicIndex);
-        if (this.musicIndex != musicIndex) {
-            this.musicIndex = musicIndex;
+        if (this.currentMusicIndex != musicIndex) {
+            this.currentMusicIndex = musicIndex;
         }
     }
 }

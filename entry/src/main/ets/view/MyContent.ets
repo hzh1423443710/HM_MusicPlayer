@@ -1,5 +1,7 @@
-import { HeaderWidget } from '../components/Header';
+import { HeaderWidget } from '../components/HeaderWidget';
 import router from '@ohos.router';
+import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
+import { SettingCell } from '../components/SettingCell';
 
 @Preview
 @Component
@@ -13,6 +15,7 @@ export struct MyContent {
         Column() {
             HeaderWidget({ title: '我的', setting: true })
             Row() {
+                // 用户信息
                 if (this.Logged) {
                     Image("https://api.52vmy.cn/api/avath/qq?qq=1423443710")
                         .width(48)
@@ -33,14 +36,20 @@ export struct MyContent {
                         .width(200)
                         .onClick(() => {
                             router.pushUrl({
-                                url: 'pages/LoginPage'
+                                url: RouterUrlConstants.LOGIN
                             });
                         })
                 }
+
             } // Row
             .alignItems(VerticalAlign.Center)
             .justifyContent(FlexAlign.Center)
             .width('100%')
+
+            // TODO pushURL
+            SettingCell({ text: '收藏(0)', image: $r('app.media.love') })
+            SettingCell({ text: '本地(0)', image: $r('app.media.local') })
+            SettingCell({ text: '最近播放(0)', image: $r('app.media.recent'), imgSize: { width: 30, height: 30 } })
 
         } // Column
     } // build

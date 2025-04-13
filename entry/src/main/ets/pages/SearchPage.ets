@@ -1,5 +1,6 @@
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
+import { PlayerWidget } from '../components/PlayerWidget';
 
 @Entry
 @Component
@@ -65,6 +66,11 @@ struct SearchPage {
             Tabs() {
                 // 1.歌曲结果
                 TabContent() {
+                    Stack() {
+
+                        PlayerWidget()
+                            .zIndex(1)
+                    }
 
                 }
                 .tabBar(this.TabBuilder(0, '歌曲', $r('app.media.song')))
@@ -73,6 +79,8 @@ struct SearchPage {
                 // 2.歌手结果 -> click -> 歌手歌曲page
                 TabContent() {
 
+                    PlayerWidget()
+                        .zIndex(1)
                 }
                 .tabBar(this.TabBuilder(1, '歌手', $r('app.media.singer')))
                 .tabIndex(1)

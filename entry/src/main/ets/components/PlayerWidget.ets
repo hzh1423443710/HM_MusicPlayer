@@ -1,9 +1,11 @@
-import { MusicInfo, PlayListType } from '../model/MusicData'
+import { MusicFrom, MusicInfo, PlayListType } from '../model/MusicData'
 import { PlayerConstants } from '../common/constants/PlayerConstants'
 import { MusicListData } from '../viewmodel/MusicDataViewModel'
 import router from '@ohos.router';
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
 import { StyleConstants } from '../common/constants/StyleConstants';
+import { MediaService } from '../common/MediaService';
+import promptAction from '@ohos.promptAction';
 
 // 播放控制
 @Preview
@@ -12,16 +14,25 @@ export struct PlayerWidget {
     // 正在播放的索引
     @StorageProp('selectIndex') selectIndex: number = 0;
     // 正在播放
-    @StorageLink('isPlay') @Watch('animationFunc') isPlay: boolean = false;
-    // 播放列表
-    songList: MusicInfo[] = MusicListData;
+    @StorageLink('isPlay') @Watch('onPlay') isPlay: boolean = false;
+    @State music: MusicInfo = new MusicInfo();
     // 封面图片旋转
     @State imageRotate: number = 0;
 
-    // 封面旋转动画
-    animationFunc(): void {
+    aboutToAppear(): void {
+        MediaService.getInstance();
+    }
+
+    onPlay(): void {
+        // 封面旋转动画
         this.imageRotate = 0;
         this.imageRotate = this.isPlay ? PlayerConstants.ROTATE : 0;
+
+        // 更新UI显示
+        const music = MediaService.getInstance().getCurrentMusic();
+        if (music && music != this.music) {
+            this.music = music;
+        }
     }
 
     build() {
@@ -29,7 +40,7 @@ export struct PlayerWidget {
             // 封面+歌名+歌手
             Row() {
                 // 封面
-                Image(this.songList[this.selectIndex].pic)
+                Image(this.music.pic)
                     .alt($r("app.media.default_cover_circle"))
                     .height($r('app.float.cover_height'))
                     .width($r('app.float.cover_width'))
@@ -41,23 +52,21 @@ export struct PlayerWidget {
                         iterations: PlayerConstants.ITERATIONS,
                         curve: Curve.Linear
                     })
-                    .onAppear(() => {
-                        this.animationFunc();
-                    })
 
                 Column() {
                     // 歌名
-                    Text(this.songList[this.selectIndex].name)
+                    Marquee({ start: this.isPlay, src: this.music.name })
+                        .width(150)
                         .fontColor($r('app.color.song_name'))
                         .fontSize(18)
-                        .maxLines(1)
+                        .borderWidth(1)
                     // 歌手
                     Row() {
-                        Image(this.songList[this.selectIndex].pay ? $r('app.media.ic_vip') : $r('app.media.ic_sq'))
+                        Image(this.music.pay ? $r('app.media.ic_vip') : $r('app.media.ic_sq'))
                             .height($r('app.float.vip_icon_height'))
                             .width($r('app.float.vip_icon_width'))
                             .margin({ right: $r('app.float.vip_icon_margin') })
-                        Text(this.songList[this.selectIndex].singer)
+                        Text(this.music.singer)
                             .fontColor($r('app.color.singer'))
                             .fontSize(14)
                             .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -71,9 +80,14 @@ export struct PlayerWidget {
             .layoutWeight(PlayerConstants.LAYOUT_WEIGHT_PLAYER_CONTROL)
             .onClick(() => {
                 // 歌词page
-                router.pushUrl({
-                    url: RouterUrlConstants.MUSIC_PLAY
-                }, router.RouterMode.Single)
+                // router.pushUrl({
+                //     url: RouterUrlConstants.PLAY
+                // });
+
+                // debug
+                const media = MediaService.getInstance();
+                media.debugPlayQueue();
+                media.debugPlaylist(PlayListType.NETEASE_RANDOM_SONG);
             })
 
             // 空白
@@ -81,8 +95,8 @@ export struct PlayerWidget {
                 .onClick(() => {
                     console.log('click blank');
                     router.pushUrl({
-                        url: RouterUrlConstants.MUSIC_PLAY
-                    }, router.RouterMode.Single)
+                        url: RouterUrlConstants.PLAY
+                    });
                 })
 
             // 播放控制
@@ -93,7 +107,7 @@ export struct PlayerWidget {
                     .height($r('app.float.control_icon_height'))
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_TWO)
                     .onClick(() => {
-                        console.log('上一首');
+                        MediaService.getInstance().playPrevious();
                     })
                 Image(this.isPlay ? $r('app.media.ic_public_pause') : $r('app.media.ic_public_play'))
                     .fillColor($r('app.color.control_icon_color'))
@@ -103,25 +117,11 @@ export struct PlayerWidget {
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_THREE)
                     .onClick(() => {
                         console.log('播放');
-                        if (this.songList.length === 0)
-                            AppStorage.SetOrCreate<boolean>('isPlay',!this.isPlay);
-                        else {
-                            switch (this.songList[0].playList) {
-                                case PlayListType.RECENT:
-                                    AppStorage.SetOrCreate<boolean>('isPlay',!this.isPlay);
-                                    break;
-                                case PlayListType.QQ_SEARCH:
-                                    AppStorage.SetOrCreate<boolean>('isPlay-SEARCH',!this.isPlay);
-                                    break;
-                                case PlayListType.NETEASE_LISTEN_HOT:
-                                    AppStorage.SetOrCreate<boolean>('isPlay-LISTEN_HOT',!this.isPlay);
-                                    break;
-                                case PlayListType.NETEASE_NETWORK_HOT:
-                                    AppStorage.SetOrCreate<boolean>('isPlay-NETWORK_HOT',!this.isPlay);
-                                    break;
-                            }
+                        if (MediaService.getInstance().getCurrentPlaylistType() === PlayListType.NONE) {
+                            promptAction.showToast({ message: '播放队列为空', bottom: 600 })
+                        } else {
+                            this.isPlay ? MediaService.getInstance().pause() : MediaService.getInstance().play();
                         }
-
                     })
                 Image($r('app.media.ic_public_play_next'))
                     .fillColor($r('app.color.control_icon_color'))
@@ -130,7 +130,7 @@ export struct PlayerWidget {
                     .margin({ right: $r('app.float.control_icon_margin') })
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_TWO)
                     .onClick(() => {
-                        console.log('下一首');
+                        MediaService.getInstance().playNextAuto(true);
                     })
                 Image($r('app.media.ic_music_list'))
                     .fillColor($r('app.color.control_icon_color'))
@@ -138,11 +138,12 @@ export struct PlayerWidget {
                     .height($r('app.float.control_icon_height'))
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_ONE)
             } // Row
-            .justifyContent(FlexAlign.End)
+            .justifyContent(FlexAlign.SpaceBetween)
 
         } // Row
         .width(StyleConstants.FULL_WIDTH)
         .height($r('app.float.player_area_height'))
+        .justifyContent(FlexAlign.SpaceBetween)
 
         .borderRadius(5)
         .backgroundImage($r('app.media.ic_avatar2'))

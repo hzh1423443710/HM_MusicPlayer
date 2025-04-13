@@ -6,9 +6,9 @@
                 "type": "HarmonyOS",
                 "material": {
                     "certpath": "C:\\Users\\hzh\\.ohos\\config\\default_MusicPlayer_HQSlbtRon48JCmZAbtjHSZMPXqK5Vb2exb0XEAcqLgo=.cer",
-                    "storePassword": "0000001AA29104794FC4A1DC3088BDA374146363F796CCD58D78D037F243D0FF1DD8EFDFFCBB62ED6BFE",
+                    "storePassword": "0000001B235B9455FF8E97D09EB3A2A70E02E66A613556A65F797DBA016A584136D5ED784E04787BC7AB3E",
                     "keyAlias": "debugKey",
-                    "keyPassword": "0000001ABC9885C88E03ECF2EBB73702688B10C1816E30FD440C01D6DA3E9E9BFF158C2D21CADE2A4690",
+                    "keyPassword": "0000001B839E62FF42F38C8F487DE9FF9BE2E2A9ADA57F9C64D07DA2B748E44B51C4883190334889BC0BC4",
                     "profile": "C:\\Users\\hzh\\.ohos\\config\\default_MusicPlayer_HQSlbtRon48JCmZAbtjHSZMPXqK5Vb2exb0XEAcqLgo=.p7b",
                     "signAlg": "SHA256withECDSA",
                     "storeFile": "C:\\Users\\hzh\\.ohos\\config\\default_MusicPlayer_HQSlbtRon48JCmZAbtjHSZMPXqK5Vb2exb0XEAcqLgo=.p12"

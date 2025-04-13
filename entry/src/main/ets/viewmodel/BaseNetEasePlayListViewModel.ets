@@ -64,7 +64,6 @@ export abstract class BaseNetEasePlayListViewModel {
                 let music = await this.http.getNetEaseMusic(ids[j]);
                 if (music) {
                     music.index = this.musicList.length + batch.length;
-                    music.playList = this.playListType;
                     batch.push(music);
                 }
             }

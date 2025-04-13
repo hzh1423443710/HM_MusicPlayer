@@ -165,7 +165,6 @@ export class HttpUtils {
                     music_info.id = arr[i].id;
                     music_info.name = arr[i].song;
                     music_info.singer = arr[i].sing;
-                    music_info.duration = ''; // 无
                     music_info.url = arr[i].url;
                     music_info.pic = arr[i].pic;
                     music_info.lrc = ''; // 无

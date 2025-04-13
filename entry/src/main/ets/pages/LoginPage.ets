@@ -1,5 +1,6 @@
 import router from '@ohos.router'
 import promptAction from '@ohos.promptAction'
+import { RouterUrlConstants } from '../common/constants/RouterUrlConstants'
 
 @Extend(TextInput)
 function inputStyle() {
@@ -59,7 +60,7 @@ struct LoginPage {
                 Text('忘记密码')
                     .blueTextStyle()
                     .onClick(() => {
-                        router.pushUrl({ url: "pages/RetrievePasswdPage" })
+                        router.pushUrl({ url: RouterUrlConstants.RETRIEVE_PASSWD })
                     })
             }
             .width('100%')
@@ -75,7 +76,7 @@ struct LoginPage {
                 .margin({ top: '48vp', bottom: '12vp' })
                 .onClick(() => {
                     AppStorage.SetOrCreate<boolean>('Logged', true);
-                    router.replaceUrl({ url: "pages/HomePage" }).then(() => {
+                    router.replaceUrl({ url: RouterUrlConstants.HOME }).then(() => {
                         promptAction.showToast({ message: '登录成功' })
                     })
                 })
@@ -85,7 +86,7 @@ struct LoginPage {
                 .fontSize('16fp')
                 .fontWeight(FontWeight.Medium)
                 .onClick(() => {
-                    router.pushUrl({ url: "pages/RegisterPage" });
+                    router.pushUrl({ url: RouterUrlConstants.REGISTER });
                 })
 
         } // Column

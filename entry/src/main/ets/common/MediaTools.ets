@@ -26,6 +26,11 @@ export class MediaTools {
         return (value.toString().padStart(2, '0'));
     }
 
+    /**
+     * 毫秒 转 倒计时风格 00:00
+     * @param ms
+     * @returns
+     */
     static msToCountdownTime(ms: number): string {
         if (!ms) {
             return '00:00';

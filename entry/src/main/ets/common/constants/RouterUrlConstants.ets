@@ -1,11 +1,12 @@
-
 export class RouterUrlConstants {
-    // 播放区歌词
-    static readonly MUSIC_PLAY: string = 'pages/PlayPage';
-
-    // 首页
-    static readonly MUSIC_HOME: string = 'pages/Home';
-
-    // 评论
-    static readonly MUSIC_COMMENT: string = 'pages/MusicComment';
+    static readonly ABOUT = "pages/AboutPage";
+    static readonly EXPORT_PLAYLIST = "pages/ExportPlayListPage";
+    static readonly HOME = "pages/HomePage";
+    static readonly LOGIN = "pages/LoginPage";
+    static readonly PLAY = "pages/PlayPage";
+    static readonly PROFILE = "pages/ProfilePage";
+    static readonly REGISTER = "pages/RegisterPage";
+    static readonly RETRIEVE_PASSWD = "pages/RetrievePasswdPage";
+    static readonly SEARCH = "pages/SearchPage";
+    static readonly SETTING = "pages/SettingPage";
 }

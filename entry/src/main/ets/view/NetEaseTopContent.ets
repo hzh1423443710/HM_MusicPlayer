@@ -1,3 +1,4 @@
+import { HeaderWidget } from '../components/HeaderWidget';
 import { NetEaseTopWidget } from '../components/NetEaseTopWidget';
 import {
     topSurgeViewModel,
@@ -50,14 +51,7 @@ export struct NetEaseTopContent {
 
     build() {
         Column() {
-            Row() {
-                Text('榜单')
-                    .focusable(true)
-                    .fontSize($r('app.float.tab_content_title'))
-                    .fontWeight(FontWeight.Bold)
-            }
-            .width('100%')
-            .alignItems(VerticalAlign.Top)
+            HeaderWidget({ title: '榜单' })
 
             Tabs() {
                 // 1.原创榜

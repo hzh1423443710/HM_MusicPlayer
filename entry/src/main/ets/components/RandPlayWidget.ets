@@ -1,6 +1,8 @@
-import { MusicInfo } from '../model/MusicData'
+import { MusicInfo, PlayListType } from '../model/MusicData'
 import { RandPlayViewModel } from '../viewmodel/RandPlayViewModel'
 import promptAction from '@ohos.promptAction';
+import { MediaService } from '../common/MediaService';
+import ConnectionUtil from '../common/network/ConnectionUtils'
 
 // 随机一曲
 @Preview
@@ -8,26 +10,59 @@ import promptAction from '@ohos.promptAction';
 export struct RandPlayWidget {
     @Link vb_rand_play: RandPlayViewModel;
     @StorageLink('isPlay') isPlay: boolean = false;
+    @State music: MusicInfo = new MusicInfo();
+    @StorageProp('needAppend') @Watch('onNeedAppend') needAppend: number = 0;
+    @StorageProp('updateUITrigger') @Watch('onUpdateUITrigger') updateUI: number = 0;
 
-    // preview
-    // vb_rand_play = {
-    //     title: '放松吧',
-    //     brief: '尝试来点音乐提提神吧',
-    //     musicInfo: { pic: '', name: '谁(live)', singer: '廖俊涛' }
-    // }
+    onUpdateUITrigger() {
+        this.music = MediaService.getInstance().getCurrentMusic();
+    }
+
+    onNeedAppend() {
+        const media = MediaService.getInstance();
+        this.vb_rand_play.getBatchMusic().then((musics: MusicInfo[]) => {
+            this.music = media.appendRandomMusics(musics);
+        }).catch((e) => {
+            console.error(`getBatchMusic: ${e}`);
+        });
+    }
 
     aboutToAppear(): void {
         console.log('RandPlayWidget aboutToAppear');
-        this.vb_rand_play.loadMusic().then(() => {
-            console.log(`随机一首 加载成功`)
-            this.vb_rand_play.debugInfo();
+        // 初始化 随机一曲 播放队列
+        const media = MediaService.getInstance();
+        this.vb_rand_play.getBatchMusic().then((musics: MusicInfo[]) => {
+            this.music = media.appendRandomMusics(musics);
         }).catch((e) => {
-            console.error(`随机一首 加载失败`)
+            console.error(`getBatchMusic: ${e}`);
         });
     }
 
     aboutToDisappear(): void {
         this.vb_rand_play.destroy()
+    }
+
+    async playCurrentSong() {
+        if (!await ConnectionUtil.isNetworkConnected()) {
+            promptAction.showToast({ message: `网络不可用` })
+            return;
+        }
+
+        const media = MediaService.getInstance();
+        // 当前播放列表未改变
+        if (media.getCurrentPlaylistType() === PlayListType.NETEASE_RANDOM_SONG) {
+            if (this.isPlay)
+                media.pause();
+            if (media.isPause())
+                media.play();
+        } else {
+            if (!media.playRandomSong()) {
+                promptAction.showToast({ message: `${this.music.name}播放失败` })
+            }
+        }
+
+        promptAction.showToast({
+            message: `${this.music.name}` })
     }
 
     build() {
@@ -46,34 +81,28 @@ export struct RandPlayWidget {
 
                     Blank()
 
+                    // Button play
                     Image(this.isPlay ? $r('app.media.ic_public_pause_norm') : $r('app.media.ic_public_play_norm'))
                         .width($r("app.float.control_icon_width"))
                         .height($r("app.float.control_icon_height"))
                         .onClick(() => {
-                            promptAction.showToast({ message: '播放' })
-
+                            this.playCurrentSong();
                         })
                 }
                 .height('100%')
                 .width(80)
                 .padding({ top: 15, bottom: 10, left: 5 })
 
-                Image(this.vb_rand_play.musicInfo.pic)// Image($r('app.media.default_cover_rect'))
+                // Cover
+                Image(this.music.pic)
                     .alt($r('app.media.default_cover_rect'))
                     .width(100)
                     .height(100)
                     .objectFit(ImageFit.Contain)
                     .backdropBlur(20)
                     .onClick(() => {
-                        // 更新
-                        this.vb_rand_play.loadMusic().then(() => {
-                            promptAction.showToast({
-                                message: '刷新成功'
-                            })
-                        });
+                        this.playCurrentSong();
                     })
-
-
             } // Row
             .width('100%')
             .height('85%')
@@ -83,8 +112,9 @@ export struct RandPlayWidget {
             .backgroundImageSize(ImageSize.Cover)
             .backgroundBlurStyle(BlurStyle.Regular)
 
+            // Name + Singer
             Row() {
-                Text(this.vb_rand_play.musicInfo.name + '-' + this.vb_rand_play.musicInfo.singer)// Text('随机一曲' + '-' + '廖峻涛')
+                Text(this.music.name + '-' + this.music.singer)
                     .width('100%')
                     .maxLines(1)
                 // .borderWidth(1)

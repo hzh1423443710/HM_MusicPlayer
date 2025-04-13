@@ -4,7 +4,6 @@ import { PlayerWidget } from '../components/PlayerWidget'
 import { StyleConstants } from '../common/constants/StyleConstants'
 import { NetEaseTopContent } from '../view/NetEaseTopContent'
 import { MyContent } from '../view/MyContent'
-import display from '@ohos.display';
 
 @Entry
 @Component
@@ -42,13 +41,13 @@ struct Index {
             TabContent() {
                 Stack() {
                     HomePageContent()
-                    // 播放控制
+                        .zIndex(0)
                     PlayerWidget()
+                        .zIndex(1)
                 }
                 .alignContent(Alignment.Top)
                 .align(Alignment.Top)
                 .width(StyleConstants.FULL_WIDTH)
-                .padding({ top: $r('app.float.app_margin') })
             }
             .tabBar(this.tabBarBuilder(0, '首页', $r("app.media.home_filled"), $r("app.media.home")))
             .align(Alignment.Top)
@@ -57,11 +56,12 @@ struct Index {
             TabContent() {
                 Stack() {
                     NetEaseTopContent()
+                        .zIndex(0)
                     PlayerWidget()
+                        .zIndex(1)
                 }
                 .alignContent(Alignment.Top)
                 .width(StyleConstants.FULL_WIDTH)
-                .padding({ top: $r('app.float.app_margin') })
             }
             .tabBar(this.tabBarBuilder(1, '榜单', $r('app.media.rank_filled'), $r("app.media.rank")))
             .align(Alignment.Top)
@@ -70,11 +70,12 @@ struct Index {
             TabContent() {
                 Stack() {
                     MyContent()
+                        .zIndex(0)
                     PlayerWidget()
+                        .zIndex(1)
                 }
                 .alignContent(Alignment.Top)
                 .width(StyleConstants.FULL_WIDTH)
-                .padding({ top: $r('app.float.app_margin') })
             }
             .tabBar(this.tabBarBuilder(2, '我的', $r("app.media.my_filled"), $r("app.media.my")))
             .align(Alignment.Top)
@@ -91,4 +92,9 @@ struct Index {
         })
 
     } // build
+
+    pageTransition() {
+        PageTransitionEnter({ duration: 500, curve: Curve.Linear }).slide(SlideEffect.Bottom)
+        PageTransitionExit({ duration: 500, curve: Curve.Ease }).slide(SlideEffect.Bottom)
+    }
 }

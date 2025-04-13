@@ -6,21 +6,7 @@ import { MusicInfo, MusicFrom, PlayListType } from '../model/MusicData'
 export struct MusicItem {
     // 是否显示封面
     showCover: boolean = true;
-    data: MusicInfo =
-        {
-            id: "2689031892",
-            name: "谁(Live)",
-            singer: "廖俊涛",
-            url: "http://music.163.com/song/media/outer/url?id=2689031892",
-            // pic: "https://p1.music.126.net/0bYf5pMHIEukf30qtLct2w==/109951170661034443.jpg",
-            pic: "",
-            lrc: '',
-            duration: "02:21",
-            pay: false,
-            where: MusicFrom.NetEase,
-            index: 0,
-            playList: PlayListType.RECENT
-        };
+    data: MusicInfo = new MusicInfo(0, "2689031892", "谁(Live)", "廖俊涛", "http://music.163.com/song/media/outer/url?id=2689031892");
 
     build() {
         Row({ space: 10 }) {

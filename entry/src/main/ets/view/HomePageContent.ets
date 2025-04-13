@@ -1,6 +1,6 @@
 import { RandPlayWidget } from '../components/RandPlayWidget';
 import { randPlayViewModel, RandPlayViewModel } from '../viewmodel/RandPlayViewModel'
-import { HeaderWidget } from '../components/Header';
+import { HeaderWidget } from '../components/HeaderWidget';
 import { SwiperListWidget } from '../components/SwiperListWidget';
 import {
     EveryLikeListViewModel,
@@ -10,6 +10,9 @@ import {
 } from '../viewmodel/NetEasePlayListViewModel'
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
+import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
+import { MediaService } from '../common/MediaService';
+import { PlayListType } from '../model/MusicData';
 
 @Preview
 @Component
@@ -17,7 +20,6 @@ export struct HomePageContent {
     @State @Watch('onRandPlayChanged') vb_rand_play: RandPlayViewModel = randPlayViewModel;
     @State @Watch('onEveryLikeListChanged') vb_every_like: EveryLikeListViewModel = everyLikeListViewModel;
     @State @Watch('onTreasureMusicChanged') vb_treasure_music: TreasureMusicViewModel = treasureMusicViewModel;
-    @State isRefreshing: boolean = false
 
     onRandPlayChanged() {
         // console.log(`onRandPlayChanged:`)
@@ -51,7 +53,7 @@ export struct HomePageContent {
                 .backgroundColor(Color.White)
                 .onSubmit((value: string) => {
                     router.pushUrl({
-                        url: "pages/SearchPage",
+                        url: RouterUrlConstants.SEARCH,
                         params: {
                             inputText: value
                         }
@@ -59,49 +61,26 @@ export struct HomePageContent {
                 })
 
             // 3.播放列表
-            Refresh({ refreshing: $$this.isRefreshing }) {
-                Scroll() {
-                    Column() {
-                        // 随机播放一曲
-                        RandPlayWidget({ vb_rand_play: $vb_rand_play })
-                        // 大家都爱听（听歌识曲榜 每周四更新）
-                        SwiperListWidget({ viewModel: $vb_every_like })
-                        // 宝藏歌曲 (网络热歌榜 每周五更新)
-                        SwiperListWidget({ viewModel: $vb_treasure_music })
+            Scroll() {
+                Column() {
+                    // 随机播放一曲
+                    RandPlayWidget({ vb_rand_play: $vb_rand_play })
+                    // 大家都爱听（听歌识曲榜 每周四更新）
+                    SwiperListWidget({ viewModel: $vb_every_like })
+                    // 宝藏歌曲 (网络热歌榜 每周五更新)
+                    SwiperListWidget({ viewModel: $vb_treasure_music })
 
-                        // 防止下面看不见
-                        Row()
-                            .backgroundColor(Color.Transparent)
-                            .width('100%')
-                            .height(150)
-                    }
-                    .alignItems(HorizontalAlign.Start)
-                    .justifyContent(FlexAlign.Start)
+                    // 防止下面看不见
+                    Row()
+                        .backgroundColor(Color.Transparent)
+                        .width('100%')
+                        .height(150)
                 }
-                .scrollBar(BarState.Off)
-                .edgeEffect(EdgeEffect.Spring)
+                .alignItems(HorizontalAlign.Start)
+                .justifyContent(FlexAlign.Start)
             }
-            .onStateChange((state: RefreshStatus) => {
-                switch (state) {
-                    case RefreshStatus.Inactive:
-                        break;
-                    case RefreshStatus.Drag:
-                        break;
-                    case RefreshStatus.OverDrag:
-                        break;
-                    case RefreshStatus.Done:
-                        promptAction.showToast({
-                            message: '刷新完成'
-                        });
-                        break;
-                }
-            })
-            .onRefreshing(() => {
-                // 更新
-                this.vb_rand_play.loadMusic().then(() => {
-                    this.isRefreshing = false;
-                });
-            })
+            .scrollBar(BarState.Off)
+            .edgeEffect(EdgeEffect.Spring)
 
         } // Column
         .alignItems(HorizontalAlign.Start)

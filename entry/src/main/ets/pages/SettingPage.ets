@@ -1,7 +1,8 @@
-import { HeaderWidget } from '../components/Header'
+import { HeaderWidget } from '../components/HeaderWidget'
 import { SettingCell } from '../components/SettingCell'
 import promptAction from '@ohos.promptAction'
 import router from '@ohos.router'
+import { RouterUrlConstants } from '../common/constants/RouterUrlConstants'
 
 @Builder
 function smallTitle(text: string) {
@@ -58,7 +59,7 @@ struct SettingPage {
             Button('退出登录')
                 .onClick((event: ClickEvent) => {
                     AppStorage.SetOrCreate<boolean>('Logged', false);
-                    router.replaceUrl({ url: 'pages/HomePage' }).then(() => {
+                    router.replaceUrl({ url: RouterUrlConstants.HOME }).then(() => {
                         promptAction.showToast({ message: '退出成功' });
                     })
                 })
@@ -69,7 +70,6 @@ struct SettingPage {
         } // Column
         .width('100%')
         .height('100%')
-        .padding({ top: $r('app.float.app_margin') })
         .backgroundImage($r('app.media.ic_avatar3'))
         .backgroundImageSize(ImageSize.Cover)
         .backgroundBlurStyle(BlurStyle.Regular)
