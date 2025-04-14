@@ -854,11 +854,19 @@
         },
         {
             "name": "app_margin",
-            "value": "40"
+            "value": "30"
         },
         {
             "name": "swiper_list_height",
             "value": "175"
+        },
+        {
+            "name": "playlist_title_font_size",
+            "value": "20"
+        },
+        {
+            "name": "playlist_brief_font_size",
+            "value": "15"
         }
     ]
 }

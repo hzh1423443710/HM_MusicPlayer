@@ -1,14 +1,29 @@
-import { MusicInfo } from '../model/MusicData';
+import { MusicInfo, PlayListType } from '../model/MusicData';
 import { BaseNetEasePlayListViewModel } from '../viewmodel/BaseNetEasePlayListViewModel'
 import ConnectionUtil from '../common/network/ConnectionUtils'
 import promptAction from '@ohos.promptAction';
 import { MusicItem } from './MusicItem';
+import { MediaService } from '../common/MediaService';
 
 @Preview
 @Component
 export struct SwiperListWidget {
     @Link viewModel: BaseNetEasePlayListViewModel;
     private itemsPerPage: number = 3;
+    @StorageLink('isPlay') @Watch('onPlayChanged') isPlay: boolean = false;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlayListType = PlayListType.NONE;
+    @State playButtonState: boolean = false;
+
+    /**
+     * 播放器播放队列类型发生变化
+     */
+    onQueuePlaylistChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+    }
+
+    onPlayChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+    }
 
     aboutToAppear() {
         this.viewModel.loadMusic().then(() => {
@@ -44,19 +59,20 @@ export struct SwiperListWidget {
                 Text(this.viewModel.title)
                     .fontSize(20)
                     .fontWeight(500)
-                Image($r('app.media.ic_public_play_norm'))
+
+                // Button Play
+                Image(this.playButtonState ? $r('app.media.ic_public_pause_norm') : $r('app.media.ic_public_play_norm'))
                     .width($r("app.float.control_icon_width"))
                     .height($r("app.float.control_icon_height"))
                     .onClick(() => {
-                        promptAction.showToast({
-                            message: '播放 '
-                        })
-                    })
+                        const media = MediaService.getInstance();
+                        media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
+                    });
 
                 Blank()
                 Row() {
                     Text(this.viewModel.brief)
-                        .fontSize(16)
+                        .fontSize($r('app.float.playlist_brief_font_size'))
                         .opacity(0.5)
                     Image($r('app.media.refresh'))
                         .alt($r('sys.media.ohos_app_icon'))

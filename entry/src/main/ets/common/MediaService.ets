@@ -3,7 +3,6 @@ import common from '@ohos.app.ability.common';
 import { enumToString, MusicInfo, PlayListType } from '../model/MusicData';
 import { MediaTools } from '../common/MediaTools'
 import { BackgroundUtil } from '../common/BackgroundUtil'
-import inputDevice from '@ohos.multimodalInput.inputDevice';
 
 const TAG = 'MediaService';
 
@@ -22,7 +21,7 @@ enum MusicPlayMode {
 /**
  * AVPlayer状态
  */
-enum AudioPlayerState {
+export enum AudioPlayerState {
     IDLE,
     INITIALIZED,
     LOAD,
@@ -89,6 +88,8 @@ export class MediaService {
         this.playlistMap.set(PlayListType.RECENT, []);
         // 随机一曲
         this.playlistMap.set(PlayListType.NETEASE_RANDOM_SONG, []);
+
+        this.updateIsPlay(false);
     }
 
     public static getInstance(): MediaService {
@@ -108,7 +109,7 @@ export class MediaService {
             // 使用时间戳
             AppStorage.SetOrCreate('updateUITrigger', Date.now());
 
-            //  开始播放最后一首时
+            // 更新一组 随机一曲
             if (this.currentMusicIndex === this.currentPlayQueue.length - 2) {
                 AppStorage.SetOrCreate('needAppend', Date.now());
             }
@@ -127,6 +128,10 @@ export class MediaService {
         playlist.forEach((item, index) => {
             console.log(`播放列表${enumToString(PlayListType, type)}:[${index}] ${item}`);
         });
+    }
+
+    public debugState() {
+        console.log(`播放器:${this.isPlaying()}-${enumToString(PlayListType, this.getCurrentPlaylistType())}-${enumToString(AudioPlayerState, this.getPlayState())}`);
     }
 
     /*******************************            播放队列管理              ***************************/
@@ -221,25 +226,6 @@ export class MediaService {
         return true;
     }
 
-    // public playRandomSong(song: MusicInfo) {
-    //     if (song.id === null || song.id === undefined || song.id === '') {
-    //         return false;
-    //     }
-    //
-    //
-    //     // TODO 是否已存在
-    //     if (this.getCurrentPlaylistType() === PlayListType.NETEASE_RANDOM_SONG) {
-    //         this.currentPlayQueue.push(song);
-    //         song.index = this.currentPlayQueue.length - 1;
-    //         this.loadAssent(song.index);
-    //     } else {
-    //         this.setPlayQueue([song], PlayListType.NETEASE_RANDOM_SONG);
-    //         this.loadAssent(0);
-    //     }
-    //
-    //     return true;
-    // }
-
     /**
      * 播放列表 -> 单曲播放
      * @param song
@@ -249,12 +235,16 @@ export class MediaService {
     public playOne(song: MusicInfo, songs: MusicInfo[], type: PlayListType) {
         // 非搜索结果 直接更新播放队列
         if (type !== PlayListType.QQ_SEARCH) {
-            this.setPlayQueue(songs, type);
+            this.playlistMap.set(type, songs);
+            this.setPlayQueue(this.playlistMap.get(type), type);
+
             this.loadAssent(this.currentPlayQueue.findIndex(item => item.id === song.id && item.where === song.where));
         } else {
             // 搜索结果 && 当前播放队列为空
-            if (this.currentPlaylistType === PlayListType.NONE) {
-                this.setPlayQueue([song], type);
+            if (this.getCurrentPlaylistType() === PlayListType.NONE) {
+                this.playlistMap.set(type, songs);
+                this.setPlayQueue(this.playlistMap.get(type), type);
+
                 this.loadAssent(0);
             } else {
                 // 当前队列不为NONE, 插入到当前播放队列
@@ -273,18 +263,20 @@ export class MediaService {
      * @param type
      */
     public playAll(songs: MusicInfo[], type: PlayListType) {
-        this.setPlayQueue(songs, type);
+        this.playlistMap.set(type, songs);
+        this.setPlayQueue(this.playlistMap.get(type), type);
         this.loadAssent(0);
     }
 
     /**
      * 设置播放队列 并 更新索引
-     * @param song
+     * @param songs
      * @param type
      */
-    private setPlayQueue(song: MusicInfo[], type: PlayListType) {
-        this.currentPlayQueue = song;
-        this.currentPlaylistType = type;
+    private setPlayQueue(songs: MusicInfo[], type: PlayListType) {
+        this.currentPlayQueue = songs;
+        this.currentPlayQueue = [...songs];
+        this.updateQueuePlaylistType(type);
         this.currentPlayQueue.forEach((item, index) => {
             item.index = index;
         });
@@ -326,7 +318,10 @@ export class MediaService {
 
         this.avPlayer.on('error', (err) => {
             console.error(TAG, `Invoke avPlayer failed, code is ${err.code}, message is ${err.message}`);
-            if (this.avPlayer) this.avPlayer.reset();
+            if (this.avPlayer) {
+                this.avPlayer.reset();
+                this.currentPlayQueue[this.currentMusicIndex].pay = true;
+            }
         });
 
         this.avPlayer.on('timeUpdate', (updateTime: number) => {
@@ -344,7 +339,8 @@ export class MediaService {
                 case 'idle':
                 // url:只允许在idle状态下设置 -> initialized 状态
                     this.state = AudioPlayerState.IDLE;
-                    this.avPlayer.url = this.currentPlayQueue[this.currentMusicIndex].url;
+                    if (!this.currentPlayQueue[this.currentMusicIndex].pay)
+                        this.avPlayer.url = this.currentPlayQueue[this.currentMusicIndex].url;
                     break;
 
                 case 'initialized':
@@ -405,6 +401,18 @@ export class MediaService {
     }
 
     /**
+     * 重新播放
+     * @returns 付费=播放失败
+     */
+    async rePlay() {
+        if (this.currentPlayQueue[this.currentMusicIndex].pay)
+            return false;
+
+        this.avPlayer.url = this.currentPlayQueue[this.currentMusicIndex].url;
+        return true;
+    }
+
+    /**
      * 更新音乐索引 并加载
      * @param musicIndex
      */
@@ -418,7 +426,7 @@ export class MediaService {
         BackgroundUtil.startContinuousTask(this.context);
 
         this.updateCurrentMusicIndex(musicIndex);
-        console.log(`index[${this.currentMusicIndex}]:${this.currentPlayQueue[this.currentMusicIndex]}`);
+        console.log(`loadAssent[${this.currentMusicIndex}] ${this.currentPlayQueue[this.currentMusicIndex]}`);
 
         // 第一次播放 手动更新状态
         if (this.isFirst) {
@@ -427,7 +435,6 @@ export class MediaService {
         } else {
             await this.avPlayer.stop();
         }
-
     }
 
     /**
@@ -453,6 +460,16 @@ export class MediaService {
      */
     private updateIsPlay(isPlay: boolean) {
         AppStorage.SetOrCreate<boolean>('isPlay', isPlay);
+    }
+
+    /**
+     * 更新当前播放队列 类型
+     * @param type
+     */
+    private updateQueuePlaylistType(type: PlayListType) {
+        this.currentPlaylistType = type;
+        AppStorage.SetOrCreate('currentPlaylistType', type);
+        console.log(`播放队列类型 -> ${enumToString(PlayListType, type)}`);
     }
 
     /**
@@ -667,10 +684,7 @@ export class MediaService {
      * @param musicIndex
      */
     private updateCurrentMusicIndex(musicIndex: number) {
-        console.info(TAG, 'updateCurrentMusicIndex ===> ' + musicIndex);
-        AppStorage.SetOrCreate('selectIndex', musicIndex);
-        if (this.currentMusicIndex != musicIndex) {
+        if (this.currentMusicIndex != musicIndex)
             this.currentMusicIndex = musicIndex;
-        }
     }
 }

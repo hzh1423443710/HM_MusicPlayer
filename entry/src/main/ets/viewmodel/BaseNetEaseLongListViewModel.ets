@@ -20,7 +20,7 @@ export abstract class BaseNetEaseLongListViewModel {
     // http-查询参数-歌单id
     playListId: NetEasePlayListId;
     // 播放列表类型
-    playListType: PlayListType;
+    playlistType: PlayListType;
     // 是否正在加载
     isLoading: boolean = false;
     // 批处理数量
@@ -29,7 +29,7 @@ export abstract class BaseNetEaseLongListViewModel {
     private loadingIndex: number = 0;
 
     getPlayListType(): PlayListType {
-        return this.playListType;
+        return this.playlistType;
     }
 
     // 调试信息

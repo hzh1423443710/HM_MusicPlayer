@@ -1,26 +1,28 @@
-import { MusicFrom, MusicInfo, PlayListType } from '../model/MusicData'
+import { MusicInfo, PlayListType } from '../model/MusicData'
 import { PlayerConstants } from '../common/constants/PlayerConstants'
-import { MusicListData } from '../viewmodel/MusicDataViewModel'
 import router from '@ohos.router';
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
 import { StyleConstants } from '../common/constants/StyleConstants';
 import { MediaService } from '../common/MediaService';
 import promptAction from '@ohos.promptAction';
+import pasteboard from '@ohos.pasteboard';
 
 // 播放控制
 @Preview
 @Component
 export struct PlayerWidget {
-    // 正在播放的索引
-    @StorageProp('selectIndex') selectIndex: number = 0;
-    // 正在播放
-    @StorageLink('isPlay') @Watch('onPlay') isPlay: boolean = false;
     @State music: MusicInfo = new MusicInfo();
+    @StorageLink('isPlay') @Watch('onPlay') isPlay: boolean = false;
+    @StorageProp('updateUITrigger') @Watch('onUpdateUITrigger') updateUI: number = 0;
     // 封面图片旋转
     @State imageRotate: number = 0;
 
     aboutToAppear(): void {
         MediaService.getInstance();
+    }
+
+    onUpdateUITrigger() {
+        this.music = MediaService.getInstance().getCurrentMusic();
     }
 
     onPlay(): void {
@@ -60,6 +62,15 @@ export struct PlayerWidget {
                         .fontColor($r('app.color.song_name'))
                         .fontSize(18)
                         .borderWidth(1)
+                        .gesture(LongPressGesture().onAction((event: GestureEvent) => {
+                            const sysBoard = pasteboard.getSystemPasteboard();
+                            const data = pasteboard.createData('text/plain', this.music.name);
+                            sysBoard.setData(data).then(() => {
+                                promptAction.showToast({ message: '复制成功', bottom: 400 })
+                            }).catch((error) => {
+                                console.log('copy error: ' + error);
+                            });
+                        }))
                     // 歌手
                     Row() {
                         Image(this.music.pay ? $r('app.media.ic_vip') : $r('app.media.ic_sq'))
@@ -80,14 +91,9 @@ export struct PlayerWidget {
             .layoutWeight(PlayerConstants.LAYOUT_WEIGHT_PLAYER_CONTROL)
             .onClick(() => {
                 // 歌词page
-                // router.pushUrl({
-                //     url: RouterUrlConstants.PLAY
-                // });
-
-                // debug
-                const media = MediaService.getInstance();
-                media.debugPlayQueue();
-                media.debugPlaylist(PlayListType.NETEASE_RANDOM_SONG);
+                router.pushUrl({
+                    url: RouterUrlConstants.PLAY
+                });
             })
 
             // 空白
@@ -116,12 +122,26 @@ export struct PlayerWidget {
                     .margin({ left: $r('app.float.control_icon_margin'), right: $r('app.float.control_icon_margin') })
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_THREE)
                     .onClick(() => {
-                        console.log('播放');
-                        if (MediaService.getInstance().getCurrentPlaylistType() === PlayListType.NONE) {
+                        const media = MediaService.getInstance();
+                        media.debugState();
+
+                        if (media.getCurrentPlaylistType() === PlayListType.NONE) {
                             promptAction.showToast({ message: '播放队列为空', bottom: 600 })
-                        } else {
-                            this.isPlay ? MediaService.getInstance().pause() : MediaService.getInstance().play();
+                            return;
                         }
+
+                        if (media.getCurrentMusic().pay) {
+                            promptAction.showToast({ message: 'VIP歌曲无法播放', bottom: 400 });
+                            return;
+                        }
+
+                        // 遇到不能试听的VIP歌曲 -> idle
+                        if (media.idle()) {
+                            media.rePlay();
+                            return;
+                        }
+
+                        this.isPlay ? media.pause() : media.play();
                     })
                 Image($r('app.media.ic_public_play_next'))
                     .fillColor($r('app.color.control_icon_color'))
@@ -132,11 +152,20 @@ export struct PlayerWidget {
                     .onClick(() => {
                         MediaService.getInstance().playNextAuto(true);
                     })
+
+                // 播放队列
                 Image($r('app.media.ic_music_list'))
                     .fillColor($r('app.color.control_icon_color'))
                     .width($r('app.float.control_icon_width'))
                     .height($r('app.float.control_icon_height'))
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_ONE)
+                    .onClick(() => {
+                        // debug
+                        const media = MediaService.getInstance();
+                        media.debugPlayQueue();
+                        media.debugPlaylist(media.getCurrentPlaylistType());
+
+                    })
             } // Row
             .justifyContent(FlexAlign.SpaceBetween)
 
@@ -145,22 +174,14 @@ export struct PlayerWidget {
         .height($r('app.float.player_area_height'))
         .justifyContent(FlexAlign.SpaceBetween)
 
-        .borderRadius(5)
         .backgroundImage($r('app.media.ic_avatar2'))
         .backgroundImageSize(ImageSize.Cover)
         .backgroundBlurStyle(BlurStyle.Regular)
+        .shadow({ radius: 10, color: 'rgba(150, 205, 205, 0.8)', offsetY: -2 })
 
         .padding({
             left: $r('app.float.player_padding'),
             right: $r('app.float.player_padding')
-        })
-        .position({
-            x: 0,
-            y: StyleConstants.FULL_HEIGHT
-        })
-        .translate({
-            x: 0,
-            y: StyleConstants.TRANSLATE_PLAYER_Y
         })
 
     } // build

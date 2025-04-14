@@ -1,6 +1,6 @@
 import router from '@ohos.router';
-import promptAction from '@ohos.promptAction';
 import { PlayerWidget } from '../components/PlayerWidget';
+import { HeaderWidget } from '../components/HeaderWidget';
 
 @Entry
 @Component
@@ -40,69 +40,75 @@ struct SearchPage {
 
     build() {
         Column() {
-            // 搜索栏
-            Row({ space: 20 }) {
-                Image($r('app.media.ic_public_back'))
-                    .width(32)
-                    .height(32)
-                    .margin({ left: 10 })
-                    .onClick(() => {
-                        router.back();
-                    })
+            // 顶部区域
+            Column() {
+                HeaderWidget({ title: '' })
 
-                Search({ placeholder: '搜索', value: this.inputText })
-                    .borderWidth(1)
-                    .borderColor(Color.Brown)
-                    .width('85%')
-                    .backgroundColor(Color.White)
-                    .onSubmit((value: string) => {
-                        promptAction.showToast({ message: '搜索', bottom: '600' })
-                    })
-            } // Row
-            .justifyContent(FlexAlign.Start)
-            .alignItems(VerticalAlign.Center)
+                // 搜索栏
+                Row({ space: 10 }) {
+                    Image($r('app.media.ic_public_back'))
+                        .width(32)
+                        .height(32)
+                        .margin({ left: 10 })
+                        .onClick(() => {
+                            router.back();
+                        })
 
-            // 搜索结果
-            Tabs() {
-                // 1.歌曲结果
-                TabContent() {
-                    Stack() {
-
-                        PlayerWidget()
-                            .zIndex(1)
-                    }
-
+                    Search({ placeholder: '搜索', value: this.inputText })
+                        .borderWidth(1)
+                        .borderColor(Color.Brown)
+                        .width('85%')
+                        .backgroundColor(Color.White)
+                        .onSubmit((value: string) => {
+                            // 搜索逻辑
+                        })
                 }
-                .tabBar(this.TabBuilder(0, '歌曲', $r('app.media.song')))
-                .tabIndex(0)
-
-                // 2.歌手结果 -> click -> 歌手歌曲page
-                TabContent() {
-
-                    PlayerWidget()
-                        .zIndex(1)
-                }
-                .tabBar(this.TabBuilder(1, '歌手', $r('app.media.singer')))
-                .tabIndex(1)
-
-                // 3.网易云歌单
-
-                // 4.QQ歌单
-
+                .justifyContent(FlexAlign.Start)
+                .alignItems(VerticalAlign.Center)
             }
-            .vertical(false)
-            .onChange((index: number) => {
-                this.currentIndex = index
-            })
 
-        }
+            // 中间内容区域 - 使用layoutWeight占据剩余空间
+            Column() {
+                Tabs() {
+                    // 1.歌曲结果
+                    TabContent() {
+                        List() {
+                            ForEach([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], (item) => {
+                                ListItem() {
+                                    Text(`搜索结果 ${item}`)
+                                        .height(60)
+                                        .padding(10)
+                                }
+                            })
+                        }
+                        .width('100%')
+                    }
+                    .tabBar(this.TabBuilder(0, '歌曲', $r('app.media.song')))
+                    .tabIndex(0)
+
+                    // 2.歌手结果
+                    TabContent() {
+                        Text("歌手搜索结果")
+                    }
+                    .tabBar(this.TabBuilder(1, '歌手', $r('app.media.singer')))
+                    .tabIndex(1)
+
+                    // 可以添加更多TabContent
+                }
+                .vertical(false)
+                .onChange((index: number) => {
+                    this.currentIndex = index
+                })
+            } // Column
+            .layoutWeight(1) // 关键点：使用layoutWeight占据剩余空间
+
+            // 底部固定的播放器区域
+            PlayerWidget()
+        } // Column
         .width('100%')
         .height('100%')
-        .padding({ top: $r('app.float.app_margin') })
         .backgroundImage($r('app.media.ic_avatar3'))
         .backgroundImageSize(ImageSize.Cover)
         .backgroundBlurStyle(BlurStyle.Regular)
-        .alignItems(HorizontalAlign.Start)
-        .justifyContent(FlexAlign.Start)
     }
 }

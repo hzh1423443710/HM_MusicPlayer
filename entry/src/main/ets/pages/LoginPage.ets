@@ -75,10 +75,8 @@ struct LoginPage {
                 .backgroundColor('#007DFF')
                 .margin({ top: '48vp', bottom: '12vp' })
                 .onClick(() => {
-                    AppStorage.SetOrCreate<boolean>('Logged', true);
-                    router.replaceUrl({ url: RouterUrlConstants.HOME }).then(() => {
-                        promptAction.showToast({ message: '登录成功' })
-                    })
+                    AppStorage.SetOrCreate<boolean>('isLogged', true);
+                    router.back();
                 })
 
             Text('注册账号')

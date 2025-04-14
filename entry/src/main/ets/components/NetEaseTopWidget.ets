@@ -1,25 +1,37 @@
-import { MusicInfo } from '../model/MusicData';
+import { MusicInfo, PlayListType } from '../model/MusicData';
 import { MusicItem } from './MusicItem';
 import { BaseNetEaseLongListViewModel } from '../viewmodel/BaseNetEaseLongListViewModel'
-import ConnectionUtil from '../common/network/ConnectionUtils'
 import promptAction from '@ohos.promptAction';
-import { NetEasePlayListId } from '../common/constants/Netease';
+import { MediaService } from '../common/MediaService';
 
 @Preview
 @Component
 export struct NetEaseTopWidget {
-    // @StorageLink('Play')
-    @Link vb_top_list: BaseNetEaseLongListViewModel;
+    @Link viewModel: BaseNetEaseLongListViewModel;
     @State isRefreshing: boolean = false
+    @StorageLink('isPlay') @Watch('onPlayChanged') isPlay: boolean = false;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlayListType = PlayListType.NONE;
+    @State playButtonState: boolean = false;
+
+    /**
+     * 播放器播放队列类型发生变化
+     */
+    onQueuePlaylistChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+    }
+
+    onPlayChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+    }
 
     aboutToAppear() {
         console.log(`NetEaseTopWidget aboutToAppear`);
         // 首次加载
-        this.vb_top_list.loadMusicFirst();
+        this.viewModel.loadMusicFirst();
     }
 
     aboutToDisappear(): void {
-        this.vb_top_list.destroy();
+        this.viewModel.destroy();
     }
 
     build() {
@@ -27,17 +39,19 @@ export struct NetEaseTopWidget {
             // Header
             Row({ space: 5 }) {
                 Text('播放列表')
-                Image($r('app.media.ic_public_play_norm'))
-                    .width(24)
-                    .height(24)
+                    .fontSize($r('app.float.playlist_title_font_size'))
+                    .fontWeight(FontWeight.Bold)
+
+                Image(this.playButtonState ? $r('app.media.ic_public_pause_norm') : $r('app.media.ic_public_play_norm'))
+                    .width($r('app.float.control_icon_width'))
+                    .height($r('app.float.control_icon_height'))
                     .onClick(() => {
-                        promptAction.showToast({
-                            message: '播放 '
-                        })
+                        const media = MediaService.getInstance();
+                        media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
                     })
                 Blank()
                 Row() {
-                    Text(this.vb_top_list.brief)
+                    Text(this.viewModel.brief)
                 }
 
             }
@@ -46,7 +60,7 @@ export struct NetEaseTopWidget {
             // 播放列表
             Refresh({ refreshing: $$this.isRefreshing }) {
                 List() {
-                    LazyForEach(this.vb_top_list.songDataSource, (item: MusicInfo, index: number) => {
+                    LazyForEach(this.viewModel.songDataSource, (item: MusicInfo, index: number) => {
                         ListItem() {
                             Row() {
                                 Text(`${index + 1}`)
@@ -69,7 +83,7 @@ export struct NetEaseTopWidget {
                 .cachedCount(10)
                 .onReachEnd(() => {
                     // 触底动态加载
-                    let cnt: number = this.vb_top_list.loadMusicNonFirst();
+                    let cnt: number = this.viewModel.loadMusicNonFirst();
                     if (cnt > 0) {
                         promptAction.showToast({ message: `${cnt}首加载成功` })
                     } else {
@@ -95,7 +109,7 @@ export struct NetEaseTopWidget {
             })
             .onRefreshing(async () => {
                 // Drag -> OverDrag -> Refreshing -> Done
-                this.vb_top_list.refreshMusic();
+                this.viewModel.refreshMusic();
                 this.isRefreshing = false;
             })
         } // Column

@@ -56,7 +56,7 @@ export struct NetEaseTopContent {
             Tabs() {
                 // 1.原创榜
                 TabContent() {
-                    NetEaseTopWidget({ vb_top_list: $vb_original })
+                    NetEaseTopWidget({ viewModel: $vb_original })
                 }
                 .tabBar(this.TabBuilder(0, this.vb_original.title))
                 .tabIndex(0)
@@ -64,7 +64,7 @@ export struct NetEaseTopContent {
 
                 // 2.热歌榜
                 TabContent() {
-                    NetEaseTopWidget({ vb_top_list: $vb_hot })
+                    NetEaseTopWidget({ viewModel: $vb_hot })
                 }
                 .tabBar(this.TabBuilder(1, this.vb_hot.title))
                 .tabIndex(1)
@@ -72,7 +72,7 @@ export struct NetEaseTopContent {
 
                 // 3.飙升榜
                 TabContent() {
-                    NetEaseTopWidget({ vb_top_list: $vb_surge })
+                    NetEaseTopWidget({ viewModel: $vb_surge })
                 }
                 .tabBar(this.TabBuilder(2, this.vb_surge.title))
                 .tabIndex(2)
@@ -80,7 +80,7 @@ export struct NetEaseTopContent {
 
                 // 4.新歌榜
                 TabContent() {
-                    NetEaseTopWidget({ vb_top_list: $vb_new })
+                    NetEaseTopWidget({ viewModel: $vb_new })
                 }
                 .tabBar(this.TabBuilder(3, this.vb_new.title))
                 .tabIndex(3)

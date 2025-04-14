@@ -64,7 +64,7 @@ export struct HomePageContent {
             Scroll() {
                 Column() {
                     // 随机播放一曲
-                    RandPlayWidget({ vb_rand_play: $vb_rand_play })
+                    RandPlayWidget({ viewModel: $vb_rand_play })
                     // 大家都爱听（听歌识曲榜 每周四更新）
                     SwiperListWidget({ viewModel: $vb_every_like })
                     // 宝藏歌曲 (网络热歌榜 每周五更新)

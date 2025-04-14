@@ -1,4 +1,5 @@
 import { MusicInfo, MusicFrom, PlayListType } from '../model/MusicData'
+import promptAction from '@ohos.promptAction';
 
 // 一首音乐 cover + name + singer + Like
 @Preview
@@ -34,9 +35,20 @@ export struct MusicItem {
             .padding({ top: 5, bottom: 5 })
 
             Blank()
-            Image($r('app.media.ic_public_like'))
+
+            // Love
+            Image(this.data.love ? $r('app.media.ic_public_like_filled') : $r('app.media.ic_public_like'))
+                .fillColor(this.data.love ? Color.Red : Color.Gray)
                 .height(30)
                 .width(30)
+                .onClick(() => {
+                    if (!AppStorage.Get<boolean>('isLogged')) {
+                        promptAction.showToast({ message: '请先登录' });
+                        return;
+                    }
+
+                    this.data.love = !this.data.love;
+                })
 
         } // Row
         .width('100%')

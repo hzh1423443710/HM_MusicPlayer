@@ -18,7 +18,7 @@ struct PlayPage {
 
     // 转场动画
     pageTransition() {
-        PageTransitionEnter({ duration: 500, curve: Curve.Linear }).slide(SlideEffect.Bottom)
-        PageTransitionExit({ duration: 500, curve: Curve.Ease }).slide(SlideEffect.Top)
+        PageTransitionEnter({ duration: 500, curve: Curve.Smooth }).slide(SlideEffect.Bottom);
+        PageTransitionExit({ duration: 500, curve: Curve.Smooth }).slide(SlideEffect.Bottom);
     }
 }

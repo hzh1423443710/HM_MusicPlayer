@@ -13,7 +13,7 @@ export class EveryLikeListViewModel extends BaseNetEasePlayListViewModel {
         this.brief = '每周四更新';
         this.batchSize = 3;
         this.playListId = NetEasePlayListId.LISTEN_HOT;
-        this.playListType = PlayListType.NETEASE_LISTEN_HOT;
+        this.playlistType = PlayListType.NETEASE_LISTEN_HOT;
     }
 }
 
@@ -28,7 +28,7 @@ export class TreasureMusicViewModel extends BaseNetEasePlayListViewModel {
         this.brief = '每周五更新';
         this.batchSize = 3;
         this.playListId = NetEasePlayListId.NET_HOT;
-        this.playListType = PlayListType.NETEASE_NETWORK_HOT;
+        this.playlistType = PlayListType.NETEASE_NETWORK_HOT;
     }
 }
 

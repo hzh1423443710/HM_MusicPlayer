@@ -9,14 +9,14 @@ export struct MyContent {
     /**
      * 登录状态
      */
-    @StorageLink('Logged') Logged: boolean = false;
+    @StorageLink('isLogged') isLogged: boolean = false;
 
     build() {
         Column() {
             HeaderWidget({ title: '我的', setting: true })
             Row() {
                 // 用户信息
-                if (this.Logged) {
+                if (this.isLogged) {
                     Image("https://api.52vmy.cn/api/avath/qq?qq=1423443710")
                         .width(48)
                         .height(48)

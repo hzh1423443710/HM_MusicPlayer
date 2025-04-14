@@ -1,4 +1,4 @@
-import { MusicInfo } from '../model/MusicData'
+import { MusicInfo, PlayListType } from '../model/MusicData'
 import { HttpUtils } from '../common/network/HttpUtils'
 
 @Observed
@@ -7,8 +7,13 @@ export class RandPlayViewModel {
     title: string = '放松吧';
     brief: string = '尝试来点音乐提提神吧';
     batch: number = 5;
+    playlistType: PlayListType = PlayListType.NETEASE_RANDOM_SONG;
     private http: HttpUtils = new HttpUtils();
 
+    /**
+     * 获取一批 随机一曲音乐
+     * @returns
+     */
     async getBatchMusic() {
         let musics: MusicInfo[] = [];
 

@@ -1,14 +1,15 @@
 import ConnectionUtils from '../common/network/ConnectionUtils'
 import { HomePageContent } from '../view/HomePageContent'
 import { PlayerWidget } from '../components/PlayerWidget'
-import { StyleConstants } from '../common/constants/StyleConstants'
 import { NetEaseTopContent } from '../view/NetEaseTopContent'
 import { MyContent } from '../view/MyContent'
+import { BreakpointSystem } from '../common/BreakpointSystem'
 
 @Entry
 @Component
-struct Index {
+struct HomePage {
     @State currentIndex: number = 0;
+    private breakpointSystem: BreakpointSystem = new BreakpointSystem();
 
     async aboutToAppear() {
         console.log('HomePage aboutToAppear');
@@ -16,85 +17,104 @@ struct Index {
         ConnectionUtils.openRegister();
         // 监听具体事件
         ConnectionUtils.registerEvents();
+
+        this.breakpointSystem.register();
     }
 
     aboutToDisappear(): void {
         console.log('HomePage aboutToDisappear');
         // 关闭监听能力
         ConnectionUtils.closeRegister();
-    }
 
-    @Builder
-    tabBarBuilder(selfIndex: number, title: string, selectedImg: Resource, normalImg: Resource) {
-        Column() {
-            Image(this.currentIndex === selfIndex ? selectedImg : normalImg)
-                .fillColor(this.currentIndex === selfIndex ? '#1698CE' : '#6B6B6B')
-                .size({ width: 25, height: 25 })
-            Text(title)
-                .fontColor(this.currentIndex === selfIndex ? '#1698CE' : '#6B6B6B')
-        }
+        this.breakpointSystem.unregister();
     }
 
     build() {
-        Tabs() {
-            // 1.首页
-            TabContent() {
-                Stack() {
-                    HomePageContent()
-                        .zIndex(0)
-                    PlayerWidget()
-                        .zIndex(1)
-                }
-                .alignContent(Alignment.Top)
-                .align(Alignment.Top)
-                .width(StyleConstants.FULL_WIDTH)
-            }
-            .tabBar(this.tabBarBuilder(0, '首页', $r("app.media.home_filled"), $r("app.media.home")))
-            .align(Alignment.Top)
+        Column() {
+            // 内容区域
+            Stack({ alignContent: Alignment.BottomEnd }) {
+                Column() {
+                    Swiper() {
+                        // 1.首页内容
+                        HomePageContent()
 
-            // 2.榜单
-            TabContent() {
-                Stack() {
-                    NetEaseTopContent()
-                        .zIndex(0)
-                    PlayerWidget()
-                        .zIndex(1)
-                }
-                .alignContent(Alignment.Top)
-                .width(StyleConstants.FULL_WIDTH)
-            }
-            .tabBar(this.tabBarBuilder(1, '榜单', $r('app.media.rank_filled'), $r("app.media.rank")))
-            .align(Alignment.Top)
+                        // 2.榜单内容
+                        NetEaseTopContent()
 
-            // 3.我的
-            TabContent() {
-                Stack() {
-                    MyContent()
-                        .zIndex(0)
-                    PlayerWidget()
-                        .zIndex(1)
+                        // 3.我的内容
+                        MyContent()
+                    }
+                    .index(this.currentIndex)
+                    .indicator(false)
+                    .loop(false)
+                    .onChange((index: number) => {
+                        this.currentIndex = index;
+                    })
                 }
-                .alignContent(Alignment.Top)
-                .width(StyleConstants.FULL_WIDTH)
-            }
-            .tabBar(this.tabBarBuilder(2, '我的', $r("app.media.my_filled"), $r("app.media.my")))
-            .align(Alignment.Top)
+                .padding({ left: 10, right: 10 })
+                .layoutWeight(1)
+                .width('100%')
 
-        } // Tabs
-        .barPosition(BarPosition.End)
-        .scrollable(false)
+                // 播放控制器 最上层
+                PlayerWidget()
+                    .zIndex(100)
+            } // Stack
+            .layoutWeight(1)
+            .width('100%')
+
+            // 底部导航栏
+            Row() {
+                ForEach([
+                    {
+                        index: 0,
+                        title: '首页',
+                        selectedImg: $r("app.media.home_filled"),
+                        normalImg: $r("app.media.home")
+                    },
+                    {
+                        index: 1,
+                        title: '榜单',
+                        selectedImg: $r('app.media.rank_filled'),
+                        normalImg: $r("app.media.rank")
+                    },
+                    {
+                        index: 2,
+                        title: '我的',
+                        selectedImg: $r("app.media.my_filled"),
+                        normalImg: $r("app.media.my")
+                    }], (item) => {
+                    Column() {
+                        Image(this.currentIndex === item.index ? item.selectedImg : item.normalImg)
+                            .fillColor(this.currentIndex === item.index ? '#1698CE' : '#6B6B6B')
+                            .size({ width: 25, height: 25 })
+                        Text(item.title)
+                            .fontColor(this.currentIndex === item.index ? '#1698CE' : '#6B6B6B')
+                    }
+                    .onClick(() => {
+                        this.currentIndex = item.index;
+                    })
+                    .layoutWeight(1)
+                    .justifyContent(FlexAlign.Center)
+                })
+
+            } // Row
+            .width('100%')
+            .padding({ top: 5, bottom: 5 })
+            .height(56)
+            .backgroundColor('#FFFFFF')
+            .border({ width: { top: 0.5 }, color: { top: '#E4E4E4' } })
+
+        } // Column
+        .width('100%')
+        .height('100%')
         .backgroundImage($r('app.media.ic_avatar3'))
         .backgroundImageSize(ImageSize.Cover)
         .backgroundBlurStyle(BlurStyle.Regular)
-        .padding(10)
-        .onChange((index: number) => {
-            this.currentIndex = index;
-        })
 
     } // build
 
     pageTransition() {
-        PageTransitionEnter({ duration: 500, curve: Curve.Linear }).slide(SlideEffect.Bottom)
-        PageTransitionExit({ duration: 500, curve: Curve.Ease }).slide(SlideEffect.Bottom)
+        PageTransitionEnter({ duration: 500, curve: Curve.Smooth, type: RouteType.Pop })
+        PageTransitionExit({ duration: 500, curve: Curve.Smooth, type: RouteType.Push })
     }
 }

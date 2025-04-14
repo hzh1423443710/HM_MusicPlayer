@@ -58,10 +58,8 @@ struct SettingPage {
 
             Button('退出登录')
                 .onClick((event: ClickEvent) => {
-                    AppStorage.SetOrCreate<boolean>('Logged', false);
-                    router.replaceUrl({ url: RouterUrlConstants.HOME }).then(() => {
-                        promptAction.showToast({ message: '退出成功' });
-                    })
+                    AppStorage.SetOrCreate<boolean>('isLogged', false);
+                    router.back();
                 })
                 .fontSize(20)
                 .fontColor(Color.Black)

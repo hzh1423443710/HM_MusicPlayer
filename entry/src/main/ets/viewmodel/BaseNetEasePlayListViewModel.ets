@@ -15,7 +15,7 @@ export abstract class BaseNetEasePlayListViewModel {
     // http-查询参数-歌单id
     playListId: NetEasePlayListId;
     // 播放列表类型
-    playListType: PlayListType;
+    playlistType: PlayListType;
     // 是否正在加载
     isLoading: boolean = false;
     // 更新触发器
@@ -27,7 +27,7 @@ export abstract class BaseNetEasePlayListViewModel {
     }
 
     getPlayListType(): PlayListType {
-        return this.playListType;
+        return this.playlistType;
     }
 
     // 调试信息

@@ -8,19 +8,38 @@ import ConnectionUtil from '../common/network/ConnectionUtils'
 @Preview
 @Component
 export struct RandPlayWidget {
-    @Link vb_rand_play: RandPlayViewModel;
-    @StorageLink('isPlay') isPlay: boolean = false;
+    @Link viewModel: RandPlayViewModel;
+    @StorageLink('isPlay') @Watch('onPlayChanged') isPlay: boolean = false;
     @State music: MusicInfo = new MusicInfo();
     @StorageProp('needAppend') @Watch('onNeedAppend') needAppend: number = 0;
     @StorageProp('updateUITrigger') @Watch('onUpdateUITrigger') updateUI: number = 0;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlayListType = PlayListType.NONE;
+    @State playButtonState: boolean = false;
 
+    /**
+     * 播放器播放队列类型发生变化
+     */
+    onQueuePlaylistChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+    }
+
+    onPlayChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+    }
+
+    /**
+     * 更新UI显示
+     */
     onUpdateUITrigger() {
         this.music = MediaService.getInstance().getCurrentMusic();
     }
 
+    /**
+     * 追加一组 随机一曲音乐 到播放器
+     */
     onNeedAppend() {
         const media = MediaService.getInstance();
-        this.vb_rand_play.getBatchMusic().then((musics: MusicInfo[]) => {
+        this.viewModel.getBatchMusic().then((musics: MusicInfo[]) => {
             this.music = media.appendRandomMusics(musics);
         }).catch((e) => {
             console.error(`getBatchMusic: ${e}`);
@@ -30,8 +49,19 @@ export struct RandPlayWidget {
     aboutToAppear(): void {
         console.log('RandPlayWidget aboutToAppear');
         // 初始化 随机一曲 播放队列
+        this.loadMusic();
+        // this.music = media.appendRandomMusics([
+        // // 可以试听的VIP歌曲
+        //     new MusicInfo(0, "2114626833", "Once Upon A Time (House Mix)", "Max Oazo", "http://music.163.com/song/media/outer/url?id=2114626833", "http://p2.music.126.net/tyMdxKFIdPdc59zPGTuXuA==/109951169237097692.jpg"),
+        //     // 不能试听的VIP歌曲
+        //     new MusicInfo(1, "2690339159", "Redline", "乐正绫", "http://music.163.com/song/media/outer/url?id=2690339159", "http://p1.music.126.net/x08erxs8P8tGxKeCqrVzlg==/109951170678036936.jpg")
+        //
+        // ]);
+    }
+
+    loadMusic() {
         const media = MediaService.getInstance();
-        this.vb_rand_play.getBatchMusic().then((musics: MusicInfo[]) => {
+        this.viewModel.getBatchMusic().then((musics: MusicInfo[]) => {
             this.music = media.appendRandomMusics(musics);
         }).catch((e) => {
             console.error(`getBatchMusic: ${e}`);
@@ -39,7 +69,8 @@ export struct RandPlayWidget {
     }
 
     aboutToDisappear(): void {
-        this.vb_rand_play.destroy()
+        this.viewModel.destroy()
+        console.log('RandPlayWidget aboutToDisappear');
     }
 
     async playCurrentSong() {
@@ -49,12 +80,23 @@ export struct RandPlayWidget {
         }
 
         const media = MediaService.getInstance();
+        media.debugState();
+
         // 当前播放列表未改变
-        if (media.getCurrentPlaylistType() === PlayListType.NETEASE_RANDOM_SONG) {
-            if (this.isPlay)
+        if (media.getCurrentPlaylistType() === this.viewModel.playlistType) {
+            if (media.isPlaying())
                 media.pause();
+
             if (media.isPause())
                 media.play();
+
+            // 遇到不能试听的VIP歌曲 -> idle
+            if (media.idle()) {
+                if (!media.rePlay()) {
+                    promptAction.showToast({ message: 'VIP歌曲无法播放', bottom: 400 });
+                    return;
+                }
+            }
         } else {
             if (!media.playRandomSong()) {
                 promptAction.showToast({ message: `${this.music.name}播放失败` })
@@ -69,20 +111,20 @@ export struct RandPlayWidget {
         Column() {
             Row({ space: 10 }) {
                 Column() {
-                    Text(this.vb_rand_play.title)
-                        .fontSize(18)
+                    Text(this.viewModel.title)
+                        .fontSize($r('app.float.playlist_title_font_size'))
                         .fontWeight(FontWeight.Bold)
 
-                    Text(this.vb_rand_play.brief)
-                        .fontSize(15)
+                    Text(this.viewModel.brief)
+                        .fontSize($r('app.float.playlist_brief_font_size'))
                         .textOverflow({ overflow: TextOverflow.Ellipsis })
                         .maxLines(2)
                         .margin({ top: 4 })
 
                     Blank()
 
-                    // Button play
-                    Image(this.isPlay ? $r('app.media.ic_public_pause_norm') : $r('app.media.ic_public_play_norm'))
+                    // Button Play
+                    Image(this.playButtonState ? $r('app.media.ic_public_pause_norm') : $r('app.media.ic_public_play_norm'))
                         .width($r("app.float.control_icon_width"))
                         .height($r("app.float.control_icon_height"))
                         .onClick(() => {
