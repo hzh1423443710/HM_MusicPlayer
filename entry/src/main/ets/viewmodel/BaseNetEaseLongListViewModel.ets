@@ -72,14 +72,35 @@ export abstract class BaseNetEaseLongListViewModel {
 
     /**
      * 首次加载 batchSize 首
+     * @returns Promise<number> 返回加载的歌曲数量
      */
-    loadMusicFirst() {
-        this.loadMusic().then(() => {
+    async loadMusicFirst(): Promise<number> {
+        try {
+            // 加载音乐数据
+            await this.loadMusic();
+
+            // 计算加载前的数量
+            const countBefore = this.songDataSource.totalCount();
+
+            // 批量加载到数据源
             this.loadBatchToDataSource();
-            console.log(`${this.title} 加载成功`);
-        }).catch(() => {
-            console.error(`${this.title} 加载失败`);
-        });
+
+            // 计算新加载的数量
+            const loadedCount = this.songDataSource.totalCount() - countBefore;
+            console.log(`${this.title} 加载成功，共加载 ${loadedCount} 首歌曲`);
+
+            return loadedCount;
+        } catch (error) {
+            console.error(`${this.title} 加载失败: ${error}`);
+            this.brief = '加载失败(点击刷新)';
+
+            // 检查网络状态
+            const netAvailable = await this.http.netAvailable();
+            if (netAvailable)
+                throw new Error(`${this.title} 加载失败`);
+            else
+                throw new Error(`网络不可用`);
+        }
     }
 
     /**
@@ -112,11 +133,15 @@ export abstract class BaseNetEaseLongListViewModel {
 
     /**
      * 刷新数据源
+     * @returns Promise<number> 返回加载的歌曲数量
      */
-    refreshMusic() {
+    async refreshMusic(): Promise<number> {
         // 清空旧数据
         this.songDataSource.clearData();
-        this.loadMusicFirst();
+        this.loadingIndex = 0; // 重置加载索引
+
+        // 调用首次加载并返回结果
+        return await this.loadMusicFirst();
     }
 
     // 资源清理

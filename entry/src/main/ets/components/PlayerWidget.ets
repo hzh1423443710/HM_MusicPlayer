@@ -2,7 +2,6 @@ import { MusicInfo, PlayListType } from '../model/MusicData'
 import { PlayerConstants } from '../common/constants/PlayerConstants'
 import router from '@ohos.router';
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
-import { StyleConstants } from '../common/constants/StyleConstants';
 import { MediaService } from '../common/MediaService';
 import promptAction from '@ohos.promptAction';
 import pasteboard from '@ohos.pasteboard';
@@ -126,12 +125,12 @@ export struct PlayerWidget {
                         media.debugState();
 
                         if (media.getCurrentPlaylistType() === PlayListType.NONE) {
-                            promptAction.showToast({ message: '播放队列为空', bottom: 600 })
+                            promptAction.showToast({ message: '播放队列为空' })
                             return;
                         }
 
                         if (media.getCurrentMusic().pay) {
-                            promptAction.showToast({ message: 'VIP歌曲无法播放', bottom: 400 });
+                            promptAction.showToast({ message: 'VIP歌曲无法播放' });
                             return;
                         }
 
@@ -170,7 +169,7 @@ export struct PlayerWidget {
             .justifyContent(FlexAlign.SpaceBetween)
 
         } // Row
-        .width(StyleConstants.FULL_WIDTH)
+        .width('100%')
         .height($r('app.float.player_area_height'))
         .justifyContent(FlexAlign.SpaceBetween)
 

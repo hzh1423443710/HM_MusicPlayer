@@ -1,6 +1,6 @@
 import { NetEasePlayListId } from '../common/constants/Netease';
 import { PlayListType } from '../model/MusicData';
-import { BaseNetEasePlayListViewModel } from './BaseNetEasePlayListViewModel'
+import { BaseNetEasePlayListViewModel } from './BaseNetEaseSwiperListViewModel'
 
 /**
  * 网易云 听歌识曲榜

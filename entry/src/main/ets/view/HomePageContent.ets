@@ -7,7 +7,7 @@ import {
     everyLikeListViewModel,
     TreasureMusicViewModel,
     treasureMusicViewModel
-} from '../viewmodel/NetEasePlayListViewModel'
+} from '../viewmodel/NetEaseSwiperListViewModel'
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';

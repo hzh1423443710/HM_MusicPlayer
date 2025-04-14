@@ -2,7 +2,6 @@ import { MusicInfo, PlayListType } from '../model/MusicData'
 import { RandPlayViewModel } from '../viewmodel/RandPlayViewModel'
 import promptAction from '@ohos.promptAction';
 import { MediaService } from '../common/MediaService';
-import ConnectionUtil from '../common/network/ConnectionUtils'
 
 // 随机一曲
 @Preview
@@ -42,14 +41,14 @@ export struct RandPlayWidget {
         this.viewModel.getBatchMusic().then((musics: MusicInfo[]) => {
             this.music = media.appendRandomMusics(musics);
         }).catch((e) => {
-            console.error(`getBatchMusic: ${e}`);
+            console.error(`${this.viewModel.name}: ${e}`);
         });
     }
 
     aboutToAppear(): void {
         console.log('RandPlayWidget aboutToAppear');
-        // 初始化 随机一曲 播放队列
-        this.loadMusic();
+        this.loadFirst();
+
         // this.music = media.appendRandomMusics([
         // // 可以试听的VIP歌曲
         //     new MusicInfo(0, "2114626833", "Once Upon A Time (House Mix)", "Max Oazo", "http://music.163.com/song/media/outer/url?id=2114626833", "http://p2.music.126.net/tyMdxKFIdPdc59zPGTuXuA==/109951169237097692.jpg"),
@@ -59,13 +58,16 @@ export struct RandPlayWidget {
         // ]);
     }
 
-    loadMusic() {
-        const media = MediaService.getInstance();
-        this.viewModel.getBatchMusic().then((musics: MusicInfo[]) => {
-            this.music = media.appendRandomMusics(musics);
-        }).catch((e) => {
-            console.error(`getBatchMusic: ${e}`);
-        });
+    loadFirst() {
+        // 初始化 随机一曲 播放队列
+        this.viewModel.getBatchMusic()
+            .then((musics: MusicInfo[]) => {
+                this.music = MediaService.getInstance().appendRandomMusics(musics);
+            })
+            .catch((e: Error) => {
+                console.error(`${this.viewModel.name}: ${e}`);
+                promptAction.showToast({ message: e.message });
+            });
     }
 
     aboutToDisappear(): void {
@@ -74,8 +76,13 @@ export struct RandPlayWidget {
     }
 
     async playCurrentSong() {
-        if (!await ConnectionUtil.isNetworkConnected()) {
-            promptAction.showToast({ message: `网络不可用` })
+        // if (!await ConnectionUtil.isNetworkConnected()) {
+        //     promptAction.showToast({ message: `网络不可用` })
+        //     return;
+        // }
+        //
+        if (this.music.equals(new MusicInfo())) {
+            this.loadFirst();
             return;
         }
 

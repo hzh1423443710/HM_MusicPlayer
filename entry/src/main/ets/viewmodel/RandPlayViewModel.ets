@@ -1,5 +1,5 @@
+import { HttpUtils } from '../common/network/HttpUtils';
 import { MusicInfo, PlayListType } from '../model/MusicData'
-import { HttpUtils } from '../common/network/HttpUtils'
 
 @Observed
 export class RandPlayViewModel {
@@ -12,21 +12,28 @@ export class RandPlayViewModel {
 
     /**
      * 获取一批 随机一曲音乐
-     * @returns
+     * @returns Promise<MusicInfo[]>
      */
-    async getBatchMusic() {
+    async getBatchMusic(): Promise<MusicInfo[]> {
         let musics: MusicInfo[] = [];
 
-        for (let i = 0; i < this.batch; ++i) {
-            let music = await this.http.getRandMusic();
-            if (music === null) {
-                throw new Error('获取随机音乐失败');
-            } else {
-                musics.push(music);
+        try {
+            for (let i = 0; i < this.batch; ++i) {
+                let music = await this.http.getRandMusic();
+                if (music === null)
+                    throw new Error();
+                else
+                    musics.push(music);
             }
-        }
 
-        return musics;
+            return musics;
+        } catch (error) {
+            const isNetworkAvailable = await this.http.netAvailable().catch(() => false);
+            if (isNetworkAvailable)
+                throw new Error('获取随机音乐失败');
+            else
+                throw new Error('网络不可用');
+        }
     }
 
     destroy() {

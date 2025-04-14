@@ -63,6 +63,10 @@
         {
             "name": "api_netease_top",
             "value": "https://api.52vmy.cn/api/music/wy/top"
+        },
+        {
+            "name": "api_qq_search",
+            "value": "https://api.vkeys.cn/v2/music/tencent"
         }
     ]
 }

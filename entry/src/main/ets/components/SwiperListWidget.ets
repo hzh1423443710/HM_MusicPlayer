@@ -1,6 +1,5 @@
 import { MusicInfo, PlayListType } from '../model/MusicData';
-import { BaseNetEasePlayListViewModel } from '../viewmodel/BaseNetEasePlayListViewModel'
-import ConnectionUtil from '../common/network/ConnectionUtils'
+import { BaseNetEasePlayListViewModel } from '../viewmodel/BaseNetEaseSwiperListViewModel'
 import promptAction from '@ohos.promptAction';
 import { MusicItem } from './MusicItem';
 import { MediaService } from '../common/MediaService';
@@ -9,7 +8,6 @@ import { MediaService } from '../common/MediaService';
 @Component
 export struct SwiperListWidget {
     @Link viewModel: BaseNetEasePlayListViewModel;
-    private itemsPerPage: number = 3;
     @StorageLink('isPlay') @Watch('onPlayChanged') isPlay: boolean = false;
     @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlayListType = PlayListType.NONE;
     @State playButtonState: boolean = false;
@@ -26,31 +24,28 @@ export struct SwiperListWidget {
     }
 
     aboutToAppear() {
-        this.viewModel.loadMusic().then(() => {
-            console.log(`${this.viewModel.title} 加载成功`)
-            // this.viewModel.debugInfo();
-        }).catch((e) => {
-            console.error(`${this.viewModel.title} 加载失败`)
-        });
+        this.viewModel.loadMusic()
+            .catch((e: Error) => {
+                console.error(`${this.viewModel.title} 加载失败: ${e.message}`);
+                promptAction.showToast({ message: e.message });
+            });
     }
 
     aboutToDisappear(): void {
         this.viewModel.destroy()
     }
 
-    // 计算总页数
-    private getPageCount(): number {
-        if (!this.viewModel.musicList || this.viewModel.musicList.length === 0) {
-            return 0;
-        }
-        return Math.ceil(this.viewModel.musicList.length / this.itemsPerPage);
-    }
+    refreshSwiper() {
+        // 显示正在刷新的提示
+        promptAction.showToast({ message: '正在刷新' });
 
-    // 获取指定页的歌曲
-    private getMusicItemsForPage(pageIndex: number): MusicInfo[] {
-        const startIndex = pageIndex * this.itemsPerPage;
-        const endIndex = Math.min(startIndex + this.itemsPerPage, this.viewModel.musicList.length);
-        return this.viewModel.musicList.slice(startIndex, endIndex);
+        this.viewModel.loadMusic()
+            .then(() => {
+                promptAction.showToast({ message: '刷新成功' });
+            })
+            .catch((e) => {
+                promptAction.showToast({ message: e.message || '未知错误' });
+            });
     }
 
     build() {
@@ -66,7 +61,12 @@ export struct SwiperListWidget {
                     .height($r("app.float.control_icon_height"))
                     .onClick(() => {
                         const media = MediaService.getInstance();
-                        media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
+                        if (media.getCurrentPlaylistType() !== this.viewModel.playlistType) {
+                            media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
+                            return;
+                        }
+
+                        this.playButtonState ? media.pause() : media.play();
                     });
 
                 Blank()
@@ -81,32 +81,7 @@ export struct SwiperListWidget {
                         .fillColor($r('app.color.button_color'))
                 }
                 .onClick(() => {
-                    // 网络是否连接
-                    ConnectionUtil.isNetworkConnected().then((ok) => {
-                        if (this.viewModel.isLoading) {
-                            promptAction.showToast({
-                                message: '已经在加载了',
-                            });
-                            return;
-                        }
-                        if (ok) {
-                            promptAction.showToast({
-                                message: '正在刷新',
-                            });
-
-                            this.viewModel.loadMusic().then(() => {
-                                promptAction.showToast({
-                                    message: `刷新成功`,
-                                });
-                            });
-
-                        } else {
-                            promptAction.showToast({
-                                message: '网络未连接',
-                            })
-                        }
-
-                    });
+                    this.refreshSwiper();
                 })
 
             } // Row
@@ -116,12 +91,15 @@ export struct SwiperListWidget {
 
             // 播放列表
             Swiper() {
-                // 根据总歌曲数量计算页数
-                ForEach(new Array(this.getPageCount()).fill(0), (_, pageIndex: number) => {
+                ForEach(new Array(this.viewModel.getPageCount()).fill(0), (_, pageIndex: number) => {
                     Column() {
                         // 获取当前页的歌曲并显示
-                        ForEach(this.getMusicItemsForPage(pageIndex), (item: MusicInfo) => {
+                        ForEach(this.viewModel.getMusicItemsForPage(pageIndex), (item: MusicInfo) => {
                             MusicItem({ data: item })
+                                .onClick(() => {
+                                    MediaService.getInstance()
+                                        .playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
+                                })
 
                         }, (item) => item.id) // 使用ID作为唯一键
                     }
@@ -132,7 +110,7 @@ export struct SwiperListWidget {
             .autoPlay(false)
             .indicator(false)
             .height($r('app.float.swiper_list_height'))
-        } // Column
 
-    }
+        } // Column
+    } // build
 }

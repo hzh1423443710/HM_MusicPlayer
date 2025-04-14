@@ -26,12 +26,30 @@ export struct NetEaseTopWidget {
 
     aboutToAppear() {
         console.log(`NetEaseTopWidget aboutToAppear`);
-        // 首次加载
-        this.viewModel.loadMusicFirst();
+
+        // 使用异步方式处理
+        this.viewModel.loadMusicFirst()
+            .catch((e: Error) => {
+                console.error(`${this.viewModel.title}: ${e}`);
+                promptAction.showToast({ message: e.message });
+            });
     }
 
     aboutToDisappear(): void {
         this.viewModel.destroy();
+    }
+
+    // 刷新按钮点击处理
+    refreshButtonClicked() {
+        promptAction.showToast({ message: '正在刷新...' });
+
+        this.viewModel.refreshMusic()
+            .then((count) => {
+                promptAction.showToast({ message: `刷新成功` });
+            })
+            .catch((e: Error) => {
+                promptAction.showToast({ message: e.message });
+            });
     }
 
     build() {
@@ -47,13 +65,25 @@ export struct NetEaseTopWidget {
                     .height($r('app.float.control_icon_height'))
                     .onClick(() => {
                         const media = MediaService.getInstance();
-                        media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
+                        if (media.getCurrentPlaylistType() !== this.viewModel.playlistType) {
+                            media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
+                            return;
+                        }
+
+                        this.playButtonState ? media.pause() : media.play();
                     })
                 Blank()
                 Row() {
                     Text(this.viewModel.brief)
+                    Image($r('app.media.refresh'))
+                        .alt($r('sys.media.ohos_app_icon'))
+                        .height(24)
+                        .width(24)
+                        .fillColor($r('app.color.button_color'))
                 }
-
+                .onClick(() => {
+                    this.refreshButtonClicked();
+                })
             }
             .width('100%')
 
@@ -68,7 +98,11 @@ export struct NetEaseTopWidget {
                                     .width(50)
                                 MusicItem({ data: item, showCover: !(index >= 3) })// .width('90%')
                                     // MusicItem({ data: item })// .width('90%')
-                                    .layoutWeight(1)
+                                    // .layoutWeight(1)
+                                    .onClick(() => {
+                                        MediaService.getInstance()
+                                            .playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
+                                    })
                             }
                             .justifyContent(FlexAlign.Start)
                         }
@@ -108,9 +142,14 @@ export struct NetEaseTopWidget {
                 }
             })
             .onRefreshing(async () => {
-                // Drag -> OverDrag -> Refreshing -> Done
-                this.viewModel.refreshMusic();
-                this.isRefreshing = false;
+                this.viewModel.refreshMusic()
+                    .catch((e: Error) => {
+                        promptAction.showToast({ message: e.message });
+                    })
+                    .finally(() => {
+                        this.isRefreshing = false;
+                    });
+
             })
         } // Column
         .height('80%')
