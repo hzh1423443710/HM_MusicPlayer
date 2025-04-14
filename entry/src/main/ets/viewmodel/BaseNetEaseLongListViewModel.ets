@@ -9,10 +9,10 @@ import { SongDataSource } from './SongDataSource';
 @Observed
 export abstract class BaseNetEaseLongListViewModel {
     protected http: HttpUtils = new HttpUtils();
-    // LazyForEach 数据源 动态加载
+    // 唯一数据源
     songDataSource: SongDataSource = new SongDataSource();
-    // 100首歌曲信息
-    musicList: MusicInfo[] = [];
+    // 存储完整的音乐列表
+    private fullMusicList: MusicInfo[] = [];
     // 标题
     title: string = '';
     // 简介
@@ -28,6 +28,10 @@ export abstract class BaseNetEaseLongListViewModel {
     // 动态加载索引
     private loadingIndex: number = 0;
 
+    get musicList(): MusicInfo[] {
+        return this.songDataSource.musics;
+    }
+
     getPlayListType(): PlayListType {
         return this.playlistType;
     }
@@ -40,20 +44,30 @@ export abstract class BaseNetEaseLongListViewModel {
     }
 
     protected async loadMusic() {
-        if (this.isLoading)
-            return;
+        if (this.isLoading) return;
 
         this.isLoading = true;
-        // 获取100首信息
-        this.musicList = await this.http.getNetEaseTop(this.playListId);
-        if (this.musicList != null)
-            this.brief = `${this.musicList.length}首`;
-        else {
-            this.isLoading = false;
-            throw new Error(`${this.title} loadMusic Failed`);
-        }
 
-        this.isLoading = false;
+        // 清空旧数据
+        this.songDataSource.clearData();
+
+        try {
+            // 获取音乐数据
+            const musics = await this.http.getNetEaseTop(this.playListId);
+
+            if (musics && musics.length > 0) {
+                this.brief = `${musics.length}首`;
+                // 仅保存一次
+                this.loadingIndex = 0; // 重置加载索引
+            } else {
+                throw new Error(`${this.title} loadMusic Failed`);
+            }
+
+            // 存储获取到的完整数据引用
+            this.fullMusicList = musics;
+        } finally {
+            this.isLoading = false;
+        }
     }
 
     /**
@@ -61,9 +75,7 @@ export abstract class BaseNetEaseLongListViewModel {
      */
     loadMusicFirst() {
         this.loadMusic().then(() => {
-            for (this.loadingIndex = 0; this.loadingIndex < this.batchSize; this.loadingIndex++) {
-                this.songDataSource.pushData(this.musicList[this.loadingIndex]);
-            }
+            this.loadBatchToDataSource();
             console.log(`${this.title} 加载成功`);
         }).catch(() => {
             console.error(`${this.title} 加载失败`);
@@ -71,30 +83,38 @@ export abstract class BaseNetEaseLongListViewModel {
     }
 
     /**
-     * 非首次加载
+     * 加载批次数据
      */
-    loadMusicNonFirst() {
-        if (this.isLoading)
-            return;
+    private loadBatchToDataSource() {
+        const endIndex = Math.min(this.loadingIndex + this.batchSize, this.fullMusicList.length);
 
-        if (this.loadingIndex < this.musicList.length) {
-            this.isLoading = true;
-
-            for (let i = 0; i < this.batchSize && this.loadingIndex < this.musicList.length; ++i, ++this.loadingIndex) {
-                this.songDataSource.pushData(this.musicList[this.loadingIndex]);
-            }
-
-            this.isLoading = false;
-            return this.batchSize;
+        for (; this.loadingIndex < endIndex; this.loadingIndex++) {
+            this.songDataSource.pushData(this.fullMusicList[this.loadingIndex]);
         }
-        else {
-            return 0;
-        }
-
     }
 
+    /**
+     * 非首次加载
+     * @returns 返回加载的数量
+     */
+    loadMusicNonFirst() {
+        if (this.isLoading) return 0;
+        if (this.loadingIndex >= this.fullMusicList.length) return 0;
+
+        this.isLoading = true;
+
+        const startIndex = this.loadingIndex;
+        this.loadBatchToDataSource();
+
+        this.isLoading = false;
+        return this.loadingIndex - startIndex;
+    }
+
+    /**
+     * 刷新数据源
+     */
     refreshMusic() {
-        // 先清空
+        // 清空旧数据
         this.songDataSource.clearData();
         this.loadMusicFirst();
     }
@@ -102,5 +122,6 @@ export abstract class BaseNetEaseLongListViewModel {
     // 资源清理
     destroy() {
         this.http.destroy();
+        this.fullMusicList = [];
     }
 }
