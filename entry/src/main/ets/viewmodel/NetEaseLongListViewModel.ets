@@ -1,5 +1,5 @@
 import { NetEasePlayListId } from '../common/constants/Netease';
-import { PlayListType } from '../model/MusicData';
+import { PlaylistType } from '../model/MusicData';
 import { BaseNetEaseLongListViewModel } from './BaseNetEaseLongListViewModel';
 
 /**
@@ -13,7 +13,7 @@ export class NetEaseTopSurgeViewModel extends BaseNetEaseLongListViewModel {
         this.brief = '';
         this.playListId = NetEasePlayListId.SURGE;
         // this.batchSize = 5;
-        this.playlistType = PlayListType.NETEASE_TOP_SURGE;
+        this.playlistType = PlaylistType.NETEASE_TOP_SURGE;
     }
 }
 
@@ -28,7 +28,7 @@ export class NetEaseTopNewViewModel extends BaseNetEaseLongListViewModel {
         this.brief = '';
         this.playListId = NetEasePlayListId.NEW;
         // this.batchSize = 5;
-        this.playlistType = PlayListType.NETEASE_TOP_NEW;
+        this.playlistType = PlaylistType.NETEASE_TOP_NEW;
     }
 }
 
@@ -43,7 +43,7 @@ export class NetEaseTopOriginalViewModel extends BaseNetEaseLongListViewModel {
         this.brief = '';
         this.playListId = NetEasePlayListId.ORIGINAL;
         // this.batchSize = 5;
-        this.playlistType = PlayListType.NETEASE_TOP_ORIGINAL;
+        this.playlistType = PlaylistType.NETEASE_TOP_ORIGINAL;
     }
 }
 
@@ -58,7 +58,7 @@ export class NetEaseTopHotViewModel extends BaseNetEaseLongListViewModel {
         this.brief = '';
         this.playListId = NetEasePlayListId.HOT;
         // this.batchSize = 5;
-        this.playlistType = PlayListType.NETEASE_TOP_HOT;
+        this.playlistType = PlaylistType.NETEASE_TOP_HOT;
     }
 }
 

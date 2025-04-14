@@ -1,40 +1,41 @@
-import { MusicInfo } from '../model/MusicData'
-
-export class SongDataSource implements IDataSource {
-    musics: MusicInfo[] = [];
+/**
+ * LazyForEach 数据源
+ */
+export class DataSource<T> implements IDataSource {
+    items: T[] = [];
     /**
      * 数据变化监听器
      */
     private listener: DataChangeListener[] = [];
 
-    constructor(items?: MusicInfo[]) {
+    constructor(items?: T[]) {
         if (items) {
             for (let i = 0; i < items.length; i++) {
-                this.musics.push(items[i]);
+                this.items.push(items[i]);
             }
         }
     }
 
     totalCount(): number {
-        return this.musics.length;
+        return this.items.length;
     }
 
-    getData(index: number): MusicInfo {
-        return this.musics[index];
+    getData(index: number): T {
+        return this.items[index];
     }
 
-    addData(index: number, item: MusicInfo): void {
-        this.musics.splice(index, 0, item);
+    addData(index: number, item: T): void {
+        this.items.splice(index, 0, item);
         this.notifyDataAdd(index);
     }
 
-    pushData(item: MusicInfo): void {
-        this.musics.push(item);
-        this.notifyDataAdd(this.musics.length - 1);
+    pushData(item: T): void {
+        this.items.push(item);
+        this.notifyDataAdd(this.items.length - 1);
     }
 
     clearData(): void {
-        this.musics = [];
+        this.items = [];
         this.notifyDataReload();
     }
 

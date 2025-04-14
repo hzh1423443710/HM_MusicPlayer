@@ -1,4 +1,4 @@
-import { MusicInfo, PlayListType } from '../model/MusicData'
+import { MusicInfo, PlaylistType } from '../model/MusicData'
 import { PlayerConstants } from '../common/constants/PlayerConstants'
 import router from '@ohos.router';
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
@@ -124,7 +124,7 @@ export struct PlayerWidget {
                         const media = MediaService.getInstance();
                         media.debugState();
 
-                        if (media.getCurrentPlaylistType() === PlayListType.NONE) {
+                        if (media.getCurrentPlaylistType() === PlaylistType.NONE) {
                             promptAction.showToast({ message: '播放队列为空' })
                             return;
                         }

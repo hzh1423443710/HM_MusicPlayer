@@ -1,6 +1,6 @@
 import media from '@ohos.multimedia.media'
 import common from '@ohos.app.ability.common';
-import { enumToString, MusicInfo, PlayListType } from '../model/MusicData';
+import { enumToString, MusicInfo, PlaylistType } from '../model/MusicData';
 import { MediaTools } from '../common/MediaTools'
 import { BackgroundUtil } from '../common/BackgroundUtil'
 
@@ -64,7 +64,7 @@ export class MediaService {
     /**
      * 当前播放-列表类型
      */
-    private currentPlaylistType = PlayListType.NONE;
+    private currentPlaylistType = PlaylistType.NONE;
     /**
      * 播放历史 上限
      */
@@ -72,7 +72,7 @@ export class MediaService {
     /**
      * 播放列表
      */
-    private playlistMap: Map<PlayListType, MusicInfo[]> = new Map();
+    private playlistMap: Map<PlaylistType, MusicInfo[]> = new Map();
     /**
      * seek & timeUpdate 播放进度控制
      */
@@ -85,9 +85,9 @@ export class MediaService {
     constructor() {
         this.initAudioPlayer();
         // 最近播放
-        this.playlistMap.set(PlayListType.RECENT, []);
+        this.playlistMap.set(PlaylistType.RECENT, []);
         // 随机一曲
-        this.playlistMap.set(PlayListType.NETEASE_RANDOM_SONG, []);
+        this.playlistMap.set(PlaylistType.NETEASE_RANDOM_SONG, []);
 
         this.updateIsPlay(false);
     }
@@ -105,7 +105,7 @@ export class MediaService {
      * 通知更新 随机一曲 组件
      */
     private notifyUpdateRandWidget() {
-        if (this.getCurrentPlaylistType() === PlayListType.NETEASE_RANDOM_SONG) {
+        if (this.getCurrentPlaylistType() === PlaylistType.NETEASE_RANDOM_SONG) {
             // 使用时间戳
             AppStorage.SetOrCreate('updateUITrigger', Date.now());
 
@@ -123,15 +123,15 @@ export class MediaService {
         })
     }
 
-    public debugPlaylist(type: PlayListType) {
+    public debugPlaylist(type: PlaylistType) {
         const playlist = this.playlistMap.get(type);
         playlist.forEach((item, index) => {
-            console.log(`播放列表${enumToString(PlayListType, type)}:[${index}] ${item}`);
+            console.log(`播放列表${enumToString(PlaylistType, type)}:[${index}] ${item}`);
         });
     }
 
     public debugState() {
-        console.log(`播放器:${this.isPlaying()}-${enumToString(PlayListType, this.getCurrentPlaylistType())}-${enumToString(AudioPlayerState, this.getPlayState())}`);
+        console.log(`播放器:${this.isPlaying()}-${enumToString(PlaylistType, this.getCurrentPlaylistType())}-${enumToString(AudioPlayerState, this.getPlayState())}`);
     }
 
     /*******************************            播放队列管理              ***************************/
@@ -152,7 +152,7 @@ export class MediaService {
      * @param musics
      */
     public appendRandomMusics(musics: MusicInfo[]): MusicInfo {
-        const playlist = this.playlistMap.get(PlayListType.NETEASE_RANDOM_SONG);
+        const playlist = this.playlistMap.get(PlaylistType.NETEASE_RANDOM_SONG);
         const curSong = this.getCurrentMusic();
 
         if (playlist) {
@@ -171,9 +171,9 @@ export class MediaService {
             });
 
             // 正在播放
-            if (this.getCurrentPlaylistType() === PlayListType.NETEASE_RANDOM_SONG) {
+            if (this.getCurrentPlaylistType() === PlaylistType.NETEASE_RANDOM_SONG) {
                 // 更新播放队列
-                this.setPlayQueue(playlist, PlayListType.NETEASE_RANDOM_SONG);
+                this.setPlayQueue(playlist, PlaylistType.NETEASE_RANDOM_SONG);
                 this.currentMusicIndex = this.currentPlayQueue.findIndex(item => item.id === curSong.id);
 
                 return this.currentPlayQueue[this.currentMusicIndex];
@@ -190,7 +190,7 @@ export class MediaService {
      */
     private addToHistory() {
         const curSong = this.getCurrentMusic();
-        let playlistRecent = this.playlistMap.get(PlayListType.RECENT);
+        let playlistRecent = this.playlistMap.get(PlaylistType.RECENT);
         const existingIndex = playlistRecent.findIndex(item => item.id === curSong.id && item.where === curSong.where);
 
         // 已存在
@@ -216,11 +216,11 @@ export class MediaService {
      */
     public playRandomSong() {
         // 切换播放队列
-        const playlist = this.playlistMap.get(PlayListType.NETEASE_RANDOM_SONG);
+        const playlist = this.playlistMap.get(PlaylistType.NETEASE_RANDOM_SONG);
         if (playlist.length === 0)
             return false;
 
-        this.setPlayQueue(playlist, PlayListType.NETEASE_RANDOM_SONG);
+        this.setPlayQueue(playlist, PlaylistType.NETEASE_RANDOM_SONG);
         this.loadAssent(0);
 
         return true;
@@ -232,16 +232,16 @@ export class MediaService {
      * @param songs
      * @param type
      */
-    public playOne(song: MusicInfo, songs: MusicInfo[], type: PlayListType) {
+    public playOne(song: MusicInfo, songs: MusicInfo[], type: PlaylistType) {
         // 非搜索结果 直接更新播放队列
-        if (type !== PlayListType.QQ_SEARCH) {
+        if (type !== PlaylistType.QQ_SEARCH) {
             this.playlistMap.set(type, songs);
             this.setPlayQueue(this.playlistMap.get(type), type);
 
             this.loadAssent(this.currentPlayQueue.findIndex(item => item.id === song.id && item.where === song.where));
         } else {
             // 搜索结果 && 当前播放队列为空
-            if (this.getCurrentPlaylistType() === PlayListType.NONE) {
+            if (this.getCurrentPlaylistType() === PlaylistType.NONE) {
                 this.playlistMap.set(type, songs);
                 this.setPlayQueue(this.playlistMap.get(type), type);
 
@@ -262,7 +262,7 @@ export class MediaService {
      * @param songs
      * @param type
      */
-    public playAll(songs: MusicInfo[], type: PlayListType) {
+    public playAll(songs: MusicInfo[], type: PlaylistType) {
         this.playlistMap.set(type, songs);
         this.setPlayQueue(this.playlistMap.get(type), type);
         this.loadAssent(0);
@@ -273,7 +273,7 @@ export class MediaService {
      * @param songs
      * @param type
      */
-    private setPlayQueue(songs: MusicInfo[], type: PlayListType) {
+    private setPlayQueue(songs: MusicInfo[], type: PlaylistType) {
         this.currentPlayQueue = songs;
         this.currentPlayQueue = [...songs];
         this.updateQueuePlaylistType(type);
@@ -282,7 +282,7 @@ export class MediaService {
         });
     }
 
-    public getCurrentPlaylistType(): PlayListType {
+    public getCurrentPlaylistType(): PlaylistType {
         return this.currentPlaylistType;
     }
 
@@ -466,10 +466,10 @@ export class MediaService {
      * 更新当前播放队列 类型
      * @param type
      */
-    private updateQueuePlaylistType(type: PlayListType) {
+    private updateQueuePlaylistType(type: PlaylistType) {
         this.currentPlaylistType = type;
         AppStorage.SetOrCreate('currentPlaylistType', type);
-        console.log(`播放队列类型 -> ${enumToString(PlayListType, type)}`);
+        console.log(`播放队列类型 -> ${enumToString(PlaylistType, type)}`);
     }
 
     /**

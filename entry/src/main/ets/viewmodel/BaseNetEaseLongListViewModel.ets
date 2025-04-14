@@ -1,7 +1,7 @@
 import { NetEasePlayListId } from '../common/constants/Netease';
 import { HttpUtils } from '../common/network/HttpUtils';
-import { MusicInfo, PlayListType } from '../model/MusicData';
-import { SongDataSource } from './SongDataSource';
+import { MusicInfo, PlaylistType } from '../model/MusicData';
+import { DataSource } from './SongDataSource';
 
 /**
  * 长列表
@@ -10,7 +10,7 @@ import { SongDataSource } from './SongDataSource';
 export abstract class BaseNetEaseLongListViewModel {
     protected http: HttpUtils = new HttpUtils();
     // 唯一数据源
-    songDataSource: SongDataSource = new SongDataSource();
+    songDataSource: DataSource<MusicInfo> = new DataSource<MusicInfo>();
     // 存储完整的音乐列表
     private fullMusicList: MusicInfo[] = [];
     // 标题
@@ -20,7 +20,7 @@ export abstract class BaseNetEaseLongListViewModel {
     // http-查询参数-歌单id
     playListId: NetEasePlayListId;
     // 播放列表类型
-    playlistType: PlayListType;
+    playlistType: PlaylistType;
     // 是否正在加载
     isLoading: boolean = false;
     // 批处理数量
@@ -29,17 +29,17 @@ export abstract class BaseNetEaseLongListViewModel {
     private loadingIndex: number = 0;
 
     get musicList(): MusicInfo[] {
-        return this.songDataSource.musics;
+        return this.songDataSource.items;
     }
 
-    getPlayListType(): PlayListType {
+    getPlayListType(): PlaylistType {
         return this.playlistType;
     }
 
     // 调试信息
     debugInfo() {
-        for (let i = 0; i < this.songDataSource.musics.length; ++i) {
-            console.log(`${i}-${this.songDataSource.musics[i]}`);
+        for (let i = 0; i < this.songDataSource.items.length; ++i) {
+            console.log(`${i}-${this.songDataSource.items[i]}`);
         }
     }
 

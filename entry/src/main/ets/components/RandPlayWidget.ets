@@ -1,4 +1,4 @@
-import { MusicInfo, PlayListType } from '../model/MusicData'
+import { MusicInfo, PlaylistType } from '../model/MusicData'
 import { RandPlayViewModel } from '../viewmodel/RandPlayViewModel'
 import promptAction from '@ohos.promptAction';
 import { MediaService } from '../common/MediaService';
@@ -12,7 +12,7 @@ export struct RandPlayWidget {
     @State music: MusicInfo = new MusicInfo();
     @StorageProp('needAppend') @Watch('onNeedAppend') needAppend: number = 0;
     @StorageProp('updateUITrigger') @Watch('onUpdateUITrigger') updateUI: number = 0;
-    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlayListType = PlayListType.NONE;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
     @State playButtonState: boolean = false;
 
     /**

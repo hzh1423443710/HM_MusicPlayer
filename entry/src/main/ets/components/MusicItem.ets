@@ -1,4 +1,4 @@
-import { MusicInfo, MusicFrom, PlayListType } from '../model/MusicData'
+import { MusicInfo, MusicFrom, PlaylistType } from '../model/MusicData'
 import promptAction from '@ohos.promptAction';
 
 // 一首音乐 cover + name + singer + Like
@@ -7,12 +7,12 @@ import promptAction from '@ohos.promptAction';
 export struct MusicItem {
     // 是否显示封面
     showCover: boolean = true;
-    data: MusicInfo = new MusicInfo(0, "2689031892", "谁(Live)", "廖俊涛", "http://music.163.com/song/media/outer/url?id=2689031892");
+    song: MusicInfo = new MusicInfo(0, "2689031892", "谁(Live)", "廖俊涛", "http://music.163.com/song/media/outer/url?id=2689031892");
 
     build() {
         Row({ space: 10 }) {
             if (this.showCover) {
-                Image(this.data.pic)
+                Image(this.song.pic)
                     .alt($r("app.media.default_cover_rect"))
                     .borderWidth(1)
                     .borderColor(Color.Brown)
@@ -20,11 +20,11 @@ export struct MusicItem {
                     .width($r('app.float.cover_width'))
             }
             Column() {
-                Text(this.data.name)
+                Text(this.song.name)
                     .fontColor($r('app.color.song_name'))
                     .fontSize(18)
                     .maxLines(1)
-                Text(this.data.singer)
+                Text(this.song.singer)
                     .fontColor($r('app.color.singer'))
                     .fontSize(14)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -37,8 +37,8 @@ export struct MusicItem {
             Blank()
 
             // Love
-            Image(this.data.love ? $r('app.media.ic_public_like_filled') : $r('app.media.ic_public_like'))
-                .fillColor(this.data.love ? Color.Red : Color.Gray)
+            Image(this.song.love ? $r('app.media.ic_public_like_filled') : $r('app.media.ic_public_like'))
+                .fillColor(this.song.love ? Color.Red : Color.Gray)
                 .height(30)
                 .width(30)
                 .onClick(() => {
@@ -47,7 +47,7 @@ export struct MusicItem {
                         return;
                     }
 
-                    this.data.love = !this.data.love;
+                    this.song.love = !this.song.love;
                 })
 
         } // Row

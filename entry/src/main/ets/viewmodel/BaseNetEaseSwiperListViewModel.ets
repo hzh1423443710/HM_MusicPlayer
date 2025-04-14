@@ -1,17 +1,17 @@
 import { NetEasePlayListId } from '../common/constants/Netease';
 import { HttpUtils } from '../common/network/HttpUtils';
-import { MusicInfo, PlayListType } from '../model/MusicData'
-import { SongDataSource } from './SongDataSource'
+import { MusicInfo, PlaylistType } from '../model/MusicData'
+import { DataSource } from './SongDataSource'
 
 @Observed
 export abstract class BaseNetEasePlayListViewModel {
     protected http: HttpUtils = new HttpUtils();
     // 使用 SongDataSource 作为单一数据源
-    songDataSource: SongDataSource = new SongDataSource();
+    songDataSource: DataSource<MusicInfo> = new DataSource<MusicInfo>();
 
     // 为了兼容性保留 musicList getter
     get musicList(): MusicInfo[] {
-        return this.songDataSource.musics;
+        return this.songDataSource.items;
     }
 
     // 标题
@@ -21,7 +21,7 @@ export abstract class BaseNetEasePlayListViewModel {
     // http-查询参数-歌单id
     playListId: NetEasePlayListId;
     // 播放列表类型
-    playlistType: PlayListType;
+    playlistType: PlaylistType;
     // 是否正在加载
     isLoading: boolean = false;
     // 更新触发器
@@ -32,7 +32,7 @@ export abstract class BaseNetEasePlayListViewModel {
         this.updateTrigger++;
     }
 
-    public getPlayListType(): PlayListType {
+    public getPlayListType(): PlaylistType {
         return this.playlistType;
     }
 
@@ -87,7 +87,7 @@ export abstract class BaseNetEasePlayListViewModel {
             }
 
             // 返回音乐列表
-            return this.songDataSource.musics;
+            return this.songDataSource.items;
         } catch (error) {
             console.error(`${this.title} 加载失败: ${error}`);
             const isNetworkAvailable = await this.http.netAvailable().catch(() => false);

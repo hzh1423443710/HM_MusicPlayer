@@ -1,5 +1,5 @@
 import { HttpUtils } from '../common/network/HttpUtils';
-import { MusicInfo, PlayListType } from '../model/MusicData'
+import { MusicInfo, PlaylistType } from '../model/MusicData'
 
 @Observed
 export class RandPlayViewModel {
@@ -7,7 +7,7 @@ export class RandPlayViewModel {
     title: string = '放松吧';
     brief: string = '尝试来点音乐提提神吧';
     batch: number = 5;
-    playlistType: PlayListType = PlayListType.NETEASE_RANDOM_SONG;
+    playlistType: PlaylistType = PlaylistType.NETEASE_RANDOM_SONG;
     private http: HttpUtils = new HttpUtils();
 
     /**

@@ -1,4 +1,4 @@
-import { MusicInfo, PlayListType } from '../model/MusicData';
+import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { BaseNetEasePlayListViewModel } from '../viewmodel/BaseNetEaseSwiperListViewModel'
 import promptAction from '@ohos.promptAction';
 import { MusicItem } from './MusicItem';
@@ -9,7 +9,7 @@ import { MediaService } from '../common/MediaService';
 export struct SwiperListWidget {
     @Link viewModel: BaseNetEasePlayListViewModel;
     @StorageLink('isPlay') @Watch('onPlayChanged') isPlay: boolean = false;
-    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlayListType = PlayListType.NONE;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
     @State playButtonState: boolean = false;
 
     /**
@@ -95,7 +95,7 @@ export struct SwiperListWidget {
                     Column() {
                         // 获取当前页的歌曲并显示
                         ForEach(this.viewModel.getMusicItemsForPage(pageIndex), (item: MusicInfo) => {
-                            MusicItem({ data: item })
+                            MusicItem({ song: item })
                                 .onClick(() => {
                                     MediaService.getInstance()
                                         .playOne(item, this.viewModel.musicList, this.viewModel.playlistType);

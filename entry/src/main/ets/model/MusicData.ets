@@ -6,7 +6,7 @@ export enum MusicFrom {
 /**
  * 播放列表类型
  */
-export enum PlayListType {
+export enum PlaylistType {
     NONE, // 无播放列表
     RECENT, // 最近播放-上限500首
     QQ_SEARCH, // 搜索结果

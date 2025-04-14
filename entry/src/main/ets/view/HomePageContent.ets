@@ -12,7 +12,7 @@ import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
 import { MediaService } from '../common/MediaService';
-import { PlayListType } from '../model/MusicData';
+import { PlaylistType } from '../model/MusicData';
 
 @Preview
 @Component

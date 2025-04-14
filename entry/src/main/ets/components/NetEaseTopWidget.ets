@@ -1,4 +1,4 @@
-import { MusicInfo, PlayListType } from '../model/MusicData';
+import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { MusicItem } from './MusicItem';
 import { BaseNetEaseLongListViewModel } from '../viewmodel/BaseNetEaseLongListViewModel'
 import promptAction from '@ohos.promptAction';
@@ -10,7 +10,7 @@ export struct NetEaseTopWidget {
     @Link viewModel: BaseNetEaseLongListViewModel;
     @State isRefreshing: boolean = false
     @StorageLink('isPlay') @Watch('onPlayChanged') isPlay: boolean = false;
-    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlayListType = PlayListType.NONE;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
     @State playButtonState: boolean = false;
 
     /**
@@ -96,7 +96,7 @@ export struct NetEaseTopWidget {
                                 Text(`${index + 1}`)
                                     .textAlign(TextAlign.Center)// .width('10%')
                                     .width(50)
-                                MusicItem({ data: item, showCover: !(index >= 3) })// .width('90%')
+                                MusicItem({ song: item, showCover: !(index >= 3) })// .width('90%')
                                     // MusicItem({ data: item })// .width('90%')
                                     // .layoutWeight(1)
                                     .onClick(() => {
