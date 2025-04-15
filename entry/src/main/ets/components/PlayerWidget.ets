@@ -6,11 +6,14 @@ import { MediaService } from '../common/MediaService';
 import promptAction from '@ohos.promptAction';
 import pasteboard from '@ohos.pasteboard';
 
+/**
+ * 与MediaService 组成 MVVM 状态显示
+ */
 // 播放控制
 @Preview
 @Component
 export struct PlayerWidget {
-    @State music: MusicInfo = new MusicInfo();
+    @State music: MusicInfo = new MusicInfo(0, '', '鸿蒙音乐 听我想听');
     @StorageLink('isPlay') @Watch('onPlay') isPlay: boolean = false;
     @StorageProp('updateUITrigger') @Watch('onUpdateUITrigger') updateUI: number = 0;
     // 封面图片旋转

@@ -17,21 +17,9 @@ import { PlaylistType } from '../model/MusicData';
 @Preview
 @Component
 export struct HomePageContent {
-    @State @Watch('onRandPlayChanged') vb_rand_play: RandPlayViewModel = randPlayViewModel;
-    @State @Watch('onEveryLikeListChanged') vb_every_like: EveryLikeListViewModel = everyLikeListViewModel;
-    @State @Watch('onTreasureMusicChanged') vb_treasure_music: TreasureMusicViewModel = treasureMusicViewModel;
-
-    onRandPlayChanged() {
-        // console.log(`onRandPlayChanged:`)
-    }
-
-    onEveryLikeListChanged() {
-        // console.log(`onEveryLikeListChanged:`)
-    }
-
-    onTreasureMusicChanged() {
-        // console.log(`onTreasureMusicChanged:`)
-    }
+    @State vb_rand_play: RandPlayViewModel = randPlayViewModel;
+    @State vb_every_like: EveryLikeListViewModel = everyLikeListViewModel;
+    @State vb_treasure_music: TreasureMusicViewModel = treasureMusicViewModel;
 
     aboutToAppear() {
         console.log('HomePageContent aboutToAppear')
@@ -41,24 +29,34 @@ export struct HomePageContent {
     }
 
     build() {
-        Column() {
+        Column({ space: 5 }) {
             // 1.标题
             HeaderWidget({ title: '首页' })
 
-            // 2.搜索
-            Search({ placeholder: '搜索' })
-                .borderWidth(1)
-                .borderColor(Color.Brown)
-                .width('85%')
-                .backgroundColor(Color.White)
-                .onSubmit((value: string) => {
-                    router.pushUrl({
-                        url: RouterUrlConstants.SEARCH,
-                        params: {
-                            inputText: value
-                        }
-                    })
-                })
+            // 2.模拟搜索栏
+            Row() {
+                Image($r('app.media.search'))
+                    .width(20)
+                    .height(20)
+                    .margin({ left: 10, right: 10 })
+
+                Text('搜索')
+                    .fontSize(16)
+                    .height(20)
+                    .opacity(0.6)
+                Blank()
+            }
+            .borderWidth(1)
+            .borderRadius(20)
+            .height(40)
+            .width('85%')
+            .borderColor(Color.Brown)
+            .backgroundColor(Color.White)
+            .onClick(() => {
+                router.pushUrl({
+                    url: RouterUrlConstants.SEARCH,
+                });
+            })
 
             // 3.播放列表
             Scroll() {

@@ -1,4 +1,4 @@
-import { NetEasePlayListId } from '../common/constants/Netease';
+import { NetEasePlaylistId } from '../common/constants/NetEaseAPI';
 import { PlaylistType } from '../model/MusicData';
 import { BaseNetEasePlayListViewModel } from './BaseNetEaseSwiperListViewModel'
 
@@ -11,8 +11,8 @@ export class EveryLikeListViewModel extends BaseNetEasePlayListViewModel {
         super();
         this.title = '大家都爱听';
         this.brief = '每周四更新';
-        this.batchSize = 3;
-        this.playListId = NetEasePlayListId.LISTEN_HOT;
+        this.pageSize = 3;
+        this.playListId = NetEasePlaylistId.LISTEN_HOT;
         this.playlistType = PlaylistType.NETEASE_LISTEN_HOT;
     }
 }
@@ -26,8 +26,8 @@ export class TreasureMusicViewModel extends BaseNetEasePlayListViewModel {
         super();
         this.title = '宝藏歌曲';
         this.brief = '每周五更新';
-        this.batchSize = 3;
-        this.playListId = NetEasePlayListId.NET_HOT;
+        this.pageSize = 3;
+        this.playListId = NetEasePlaylistId.NET_HOT;
         this.playlistType = PlaylistType.NETEASE_NETWORK_HOT;
     }
 }

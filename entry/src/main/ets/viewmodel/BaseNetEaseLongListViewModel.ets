@@ -1,4 +1,4 @@
-import { NetEasePlayListId } from '../common/constants/Netease';
+import { NetEasePlaylistId } from '../common/constants/NetEaseAPI';
 import { HttpUtils } from '../common/network/HttpUtils';
 import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { DataSource } from './SongDataSource';
@@ -18,7 +18,7 @@ export abstract class BaseNetEaseLongListViewModel {
     // 简介
     brief: string = '';
     // http-查询参数-歌单id
-    playListId: NetEasePlayListId;
+    playListId: NetEasePlaylistId
     // 播放列表类型
     playlistType: PlaylistType;
     // 是否正在加载
@@ -53,10 +53,11 @@ export abstract class BaseNetEaseLongListViewModel {
 
         try {
             // 获取音乐数据
-            const musics = await this.http.getNetEaseTop(this.playListId);
+            // const musics = await this.http.getNetEaseTop(this.playListId);
+            const songs = await this.http.getNetEaseListSongs(this.playListId);
 
-            if (musics && musics.length > 0) {
-                this.brief = `${musics.length}首`;
+            if (songs && songs.length > 0) {
+                this.brief = `${songs.length}首`;
                 // 仅保存一次
                 this.loadingIndex = 0; // 重置加载索引
             } else {
@@ -64,7 +65,7 @@ export abstract class BaseNetEaseLongListViewModel {
             }
 
             // 存储获取到的完整数据引用
-            this.fullMusicList = musics;
+            this.fullMusicList = songs;
         } finally {
             this.isLoading = false;
         }

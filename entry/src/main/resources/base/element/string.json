@@ -40,33 +40,5 @@
             "name": "My",
             "value": "我的"
         },
-        {
-            "name": "api_rand_music",
-            "value": "https://api.52vmy.cn/api/music/wy/rand"
-        },
-        {
-            "name": "api_NetEase_playlist_id",
-            "value": "https://music.163.com/api/playlist/detail"
-        },
-        {
-            "name": "api_netease_playlist_top",
-            "value": "https://api.52vmy.cn/api/music/wy/top"
-        },
-        {
-            "name": "api_netease_music",
-            "value": "https://api.vkeys.cn/v2/music/netease"
-        },
-        {
-            "name": "api_netease_music_lrc",
-            "value": "https://api.vkeys.cn/v2/music/netease/lyric"
-        },
-        {
-            "name": "api_netease_top",
-            "value": "https://api.52vmy.cn/api/music/wy/top"
-        },
-        {
-            "name": "api_qq_search",
-            "value": "https://api.vkeys.cn/v2/music/tencent"
-        }
     ]
 }

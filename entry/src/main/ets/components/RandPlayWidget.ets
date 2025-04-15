@@ -155,7 +155,6 @@ export struct RandPlayWidget {
             } // Row
             .width('100%')
             .height('85%')
-            // .borderWidth(1)
             .borderRadius(20)
             .backgroundImage($r('app.media.ic_avatar1'))
             .backgroundImageSize(ImageSize.Cover)
@@ -166,7 +165,6 @@ export struct RandPlayWidget {
                 Text(this.music.name + '-' + this.music.singer)
                     .width('100%')
                     .maxLines(1)
-                // .borderWidth(1)
             }
             .height('15%')
 

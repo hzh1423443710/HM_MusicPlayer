@@ -1,4 +1,4 @@
-import { NetEasePlayListId } from '../common/constants/Netease';
+import { NetEasePlaylistId } from '../common/constants/NetEaseAPI';
 import { HttpUtils } from '../common/network/HttpUtils';
 import { MusicInfo, PlaylistType } from '../model/MusicData'
 import { DataSource } from './SongDataSource'
@@ -6,10 +6,9 @@ import { DataSource } from './SongDataSource'
 @Observed
 export abstract class BaseNetEasePlayListViewModel {
     protected http: HttpUtils = new HttpUtils();
-    // 使用 SongDataSource 作为单一数据源
+    // LazyForEach 数据源
     songDataSource: DataSource<MusicInfo> = new DataSource<MusicInfo>();
 
-    // 为了兼容性保留 musicList getter
     get musicList(): MusicInfo[] {
         return this.songDataSource.items;
     }
@@ -19,18 +18,13 @@ export abstract class BaseNetEasePlayListViewModel {
     // 简介
     brief: string = '';
     // http-查询参数-歌单id
-    playListId: NetEasePlayListId;
+    playListId: NetEasePlaylistId;
     // 播放列表类型
     playlistType: PlaylistType;
     // 是否正在加载
     isLoading: boolean = false;
-    // 更新触发器
-    updateTrigger: number = 0;
-    batchSize: number;
-
-    protected notifyUpdate() {
-        this.updateTrigger++;
-    }
+    // 每页显示的歌曲数量
+    pageSize: number;
 
     public getPlayListType(): PlaylistType {
         return this.playlistType;
@@ -52,39 +46,14 @@ export abstract class BaseNetEasePlayListViewModel {
         try {
             // 清空旧数据
             this.songDataSource.clearData();
-
-            // 获取所有的音乐id
-            let ids: string[];
-            while (true) {
-                ids = await this.http.getNetEaseListId(this.playListId) as string[];
-                if (ids === null)
-                    throw new Error(`获取网易云歌单id失败, id: ${this.playListId}`);
-                if (ids.length === 0)
-                    continue;
-                break;
+            const songs = await this.http.getNetEaseListSongs(this.playListId);
+            for (let i = 0; i < 10; ++i) {
+                this.songDataSource.pushData(songs[i]);
             }
-
-            // 批量处理
-            for (let i = 0; i < ids.length; i += this.batchSize) {
-                let batch = [];
-                const end = Math.min(i + this.batchSize, ids.length);
-
-                for (let j = i; j < end; j++) {
-                    let music = await this.http.getNetEaseMusic(ids[j]);
-                    if (music) {
-                        music.index = this.songDataSource.totalCount() + batch.length;
-                        batch.push(music);
-                    }
-                }
-
-                // 将批次数据添加到数据源
-                batch.forEach(item => {
-                    this.songDataSource.pushData(item);
-                });
-
-                // 通知UI更新
-                this.notifyUpdate();
-            }
+            // songs.forEach((item) => {
+            //     this.songDataSource.pushData(item);
+            //     // this.notifyUpdate();
+            // })
 
             // 返回音乐列表
             return this.songDataSource.items;
@@ -103,8 +72,8 @@ export abstract class BaseNetEasePlayListViewModel {
 
     // 获取指定页的歌曲 (用于分页显示)
     public getMusicItemsForPage(pageIndex: number): MusicInfo[] {
-        const startIndex = pageIndex * this.batchSize;
-        const endIndex = Math.min(startIndex + this.batchSize, this.songDataSource.totalCount());
+        const startIndex = pageIndex * this.pageSize;
+        const endIndex = Math.min(startIndex + this.pageSize, this.songDataSource.totalCount());
 
         // 从songDataSource获取数据
         const items = [];
@@ -116,7 +85,7 @@ export abstract class BaseNetEasePlayListViewModel {
 
     // 获取总页数
     public getPageCount(): number {
-        return Math.ceil(this.songDataSource.totalCount() / this.batchSize);
+        return Math.ceil(this.songDataSource.totalCount() / this.pageSize);
     }
 
     // 资源清理

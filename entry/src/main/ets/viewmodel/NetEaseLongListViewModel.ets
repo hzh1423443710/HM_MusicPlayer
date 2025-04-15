@@ -1,4 +1,4 @@
-import { NetEasePlayListId } from '../common/constants/Netease';
+import { NetEasePlaylistId } from '../common/constants/NetEaseAPI';
 import { PlaylistType } from '../model/MusicData';
 import { BaseNetEaseLongListViewModel } from './BaseNetEaseLongListViewModel';
 
@@ -11,7 +11,7 @@ export class NetEaseTopSurgeViewModel extends BaseNetEaseLongListViewModel {
         super();
         this.title = '飙升榜';
         this.brief = '';
-        this.playListId = NetEasePlayListId.SURGE;
+        this.playListId = NetEasePlaylistId.SURGE;
         // this.batchSize = 5;
         this.playlistType = PlaylistType.NETEASE_TOP_SURGE;
     }
@@ -26,7 +26,7 @@ export class NetEaseTopNewViewModel extends BaseNetEaseLongListViewModel {
         super();
         this.title = '新歌榜';
         this.brief = '';
-        this.playListId = NetEasePlayListId.NEW;
+        this.playListId = NetEasePlaylistId.NEW;
         // this.batchSize = 5;
         this.playlistType = PlaylistType.NETEASE_TOP_NEW;
     }
@@ -41,7 +41,7 @@ export class NetEaseTopOriginalViewModel extends BaseNetEaseLongListViewModel {
         super();
         this.title = '原创榜';
         this.brief = '';
-        this.playListId = NetEasePlayListId.ORIGINAL;
+        this.playListId = NetEasePlaylistId.ORIGINAL;
         // this.batchSize = 5;
         this.playlistType = PlaylistType.NETEASE_TOP_ORIGINAL;
     }
@@ -56,7 +56,7 @@ export class NetEaseTopHotViewModel extends BaseNetEaseLongListViewModel {
         super();
         this.title = '热歌榜';
         this.brief = '';
-        this.playListId = NetEasePlayListId.HOT;
+        this.playListId = NetEasePlaylistId.HOT;
         // this.batchSize = 5;
         this.playlistType = PlaylistType.NETEASE_TOP_HOT;
     }

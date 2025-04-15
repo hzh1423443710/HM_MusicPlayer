@@ -9,7 +9,7 @@ export enum MusicFrom {
 export enum PlaylistType {
     NONE, // 无播放列表
     RECENT, // 最近播放-上限500首
-    QQ_SEARCH, // 搜索结果
+    SEARCH, // 搜索结果
     NETEASE_RANDOM_SONG, // 随机一曲
     NETEASE_LISTEN_HOT, // 大家都爱听
     NETEASE_NETWORK_HOT, // 网络热歌
@@ -31,9 +31,9 @@ export class MusicInfo {
     // 歌曲id
     id: string = '';
     // 歌曲名
-    name: string = '谁(Live)';
+    name: string = '';
     //歌手
-    singer: string = '廖俊涛';
+    singer: string = '';
     // 外链
     url?: string = '';
     // 封面 pic
@@ -49,7 +49,7 @@ export class MusicInfo {
     // 用户喜欢
     love?: boolean = false;
 
-    constructor(index: number = 0, id: string = '', name = '谁(Live)', singer = '廖俊涛', url = '', pic = '', lrc = '', pay = false, where = MusicFrom.NetEase) {
+    constructor(index: number = 0, id: string = '', name = '', singer = '', url = '', pic = '', lrc = '', pay = false, where = MusicFrom.NetEase) {
         this.index = index;
         this.id = id;
         this.name = name;
