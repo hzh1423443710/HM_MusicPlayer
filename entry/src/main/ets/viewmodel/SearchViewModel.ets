@@ -67,11 +67,6 @@ export class SearchViewModel {
     setSearchType(type: SearchType) {
         if (this.searchType !== type) {
             this.searchType = type;
-
-            // 歌手搜索只支持QQ音乐
-            if (type === SearchType.SINGER) {
-                this.platform = MusicPlatform.QQ;
-            }
         }
     }
 
@@ -79,24 +74,13 @@ export class SearchViewModel {
      * 切换搜索平台
      */
     switchPlatform() {
-        // 只在搜索歌曲时可切换平台
-        if (this.searchType === SearchType.SONG) {
-            this.platform = (this.platform === MusicPlatform.NETEASE) ?
-            MusicPlatform.QQ : MusicPlatform.NETEASE;
+        this.platform = (this.platform === MusicPlatform.NETEASE) ?
+        MusicPlatform.QQ : MusicPlatform.NETEASE;
 
-            // 如果已有搜索内容，切换平台后重新搜索
-            if (this.keyword && this.keyword.trim() !== '') {
-                this.search();
-            }
+        // 如果已有搜索内容，切换平台后重新搜索
+        if (this.keyword && this.keyword.trim() !== '') {
+            this.search();
         }
-    }
-
-    /**
-     * 只有搜索歌曲时才可以切换平台; 搜索歌手仅QQ音乐
-     * @returns
-     */
-    canSwitchPlatform(): boolean {
-        return this.searchType === SearchType.SONG;
     }
 
     /**
@@ -111,7 +95,7 @@ export class SearchViewModel {
     /**
      * 重置所有
      */
-    resetAll(){
+    resetAll() {
         this.currentPage = 1;
         this.hasMore = false;
         this.errorMessage = '';
@@ -241,7 +225,13 @@ export class SearchViewModel {
      * @returns
      */
     private async searchSingers(): Promise<boolean> {
-        let results = await this.http.getSingersByQQ(this.keyword, this.currentPage);
+
+        let results: SingerInfo[] = [];
+        if (this.platform === MusicPlatform.NETEASE)
+            results = await this.http.getSingersByNetEase(this.keyword, this.currentPage);
+        else
+            results = await this.http.getSingersByQQ(this.keyword, this.currentPage);
+
         if (results === null) {
             this.searchState = SearchState.ERROR;
             this.errorMessage = '网络错误或服务不可用';

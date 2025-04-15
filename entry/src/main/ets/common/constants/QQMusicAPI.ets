@@ -55,3 +55,7 @@ export const QQMusicQualityString: Map<QQMusicQuality, string> = new Map([
     [QQMusicQuality.PREMIUM_ATMOS, "臻品全景声"],
     [QQMusicQuality.PREMIUM_MASTER, "臻品母带2.0"]
 ]);
+
+export class QQMusicAPI {
+
+}

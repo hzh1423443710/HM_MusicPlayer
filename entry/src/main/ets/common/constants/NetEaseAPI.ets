@@ -13,21 +13,26 @@ export class NetEaseAPI {
      */
     static readonly PLAYLIST_ALL = NetEaseAPI.HOST + "/playlist/track/all";
     /**
-     * 搜索 "https://163api.qijieya.cn/docs/#/?id=%e6%90%9c%e7%b4%a2"
+     * 歌曲/歌手搜索 "https://163api.qijieya.cn/docs/#/?id=%e6%90%9c%e7%b4%a2"
      * param: keyword
      */
-    // static readonly SEARCH = NetEaseAPI.HOST + "/search";
+    static readonly SEARCH = NetEaseAPI.HOST + "/search";
     /**
      * 获取播放链接 "https://163api.qijieya.cn/docs/#/?id=%e6%90%9c%e7%b4%a2"
      * param: id
      */
     // static readonly SONG_URL = NetEaseAPI.HOST + "/song/url";
     /**
+     * 歌手所有歌曲
+     * param: id歌手id
+     */
+    static readonly SINGER_SONGS = NetEaseAPI.HOST + "/artist/songs";
+    /**
      * 随机一曲
      */
     static readonly RAND_SONG = "https://api.52vmy.cn/api/music/wy/rand"
     /**
-     * 网易云播放链接
+     * 网易云 播放链接 + 歌曲搜索
      */
     static readonly SEARCH_OR_PLAY_URL = "https://api.vkeys.cn/v2/music/netease";
     /**
@@ -112,6 +117,36 @@ export class NetEasePlaylistId {
     static readonly NET_HOT = "6723173524";
 }
 
+function getRandomPlaylistIds(num: number): string[] {
+    // 获取所有歌单 ID
+    const allIds = [
+        NetEasePlaylistId.RAP,
+        NetEasePlaylistId.CLASSICAL,
+        NetEasePlaylistId.ELECTRONIC,
+        NetEasePlaylistId.TREND,
+        NetEasePlaylistId.OCCIDENT_HOT,
+        NetEasePlaylistId.OCCIDENT_NEW,
+        NetEasePlaylistId.NATIONAL_WIND,
+        NetEasePlaylistId.FOLK,
+        NetEasePlaylistId.RUSSIA,
+        NetEasePlaylistId.VIETNAM,
+        NetEasePlaylistId.SLOW_ROCK_DJ,
+        NetEasePlaylistId.LISTEN_HOT,
+        NetEasePlaylistId.NET_HOT
+    ];
+
+    // 检查是否可以生成足够的唯一 ID
+    if (num > allIds.length) {
+        throw new Error("请求的数量超过了可用的播放列表 ID 数量");
+    }
+
+    // 打乱数组顺序
+    const shuffledIds = allIds.sort(() => Math.random() - 0.5);
+
+    // 返回前 num 个 ID
+    return shuffledIds.slice(0, num);
+}
+
 /**
  * 网易云 音质 枚举
  */
@@ -150,3 +185,5 @@ export const NetEaseQualityString: Map<NetEaseQuality, string> = new Map([
     [NetEaseQuality.SURROUND, "沉浸环绕声（Surround Audio）"],
     [NetEaseQuality.MASTER, "超清母带（Master）"]
 ]);
+
+export const playlistIds: string[] = getRandomPlaylistIds(2);
