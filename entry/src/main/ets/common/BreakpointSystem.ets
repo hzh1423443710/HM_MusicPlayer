@@ -68,14 +68,18 @@ export class BreakpointSystem {
 
         this.orientationListener = mediaQuery.matchMediaSync(BreakpointConstants.ORIENTATION);
 
+        // 横屏
         this.orientationListener.on('change', (result: mediaQuery.MediaQueryResult) => {
             if (result.matches) {
+                // console.log('横屏');
             }
-
         });
 
-        this.orientationListener.on('change', (result: mediaQuery.MediaQueryResult) => {
+        // 竖屏
+        this.portraitListener = mediaQuery.matchMediaSync(BreakpointConstants.PORTRAIT);
+        this.portraitListener.on('change', (result: mediaQuery.MediaQueryResult) => {
             if (result.matches) {
+                // console.log('竖屏');
             }
         });
     }
