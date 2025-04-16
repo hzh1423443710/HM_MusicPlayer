@@ -2,38 +2,57 @@ import { MusicInfo, PlaylistType } from '../model/MusicData'
 import { PlayerConstants } from '../common/constants/PlayerConstants'
 import router from '@ohos.router';
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
-import { MediaService } from '../common/MediaService';
+import { PlayerState, MediaService } from '../common/MediaService';
 import promptAction from '@ohos.promptAction';
 import pasteboard from '@ohos.pasteboard';
 
-/**
- * 与MediaService 组成 MVVM 状态显示
- */
-// 播放控制
 @Preview
 @Component
 export struct PlayerWidget {
     @State music: MusicInfo = new MusicInfo(0, '', '鸿蒙音乐 听我想听');
-    @StorageLink('isPlay') @Watch('onPlay') isPlay: boolean = false;
-    @StorageProp('updateUITrigger') @Watch('onUpdateUITrigger') updateUI: number = 0;
-    // 封面图片旋转
+    @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @State imageRotate: number = 0;
+    media: MediaService = MediaService.getInstance();
 
     aboutToAppear(): void {
-        MediaService.getInstance();
     }
 
-    onUpdateUITrigger() {
-        this.music = MediaService.getInstance().getCurrentMusic();
+    aboutToDisappear(): void {
+        this.media.release();
+    }
+
+    /**
+     * 播放状态发生变化
+     */
+    onPlayStateChanged() {
+        const new_song = this.media.getCurrentMusic();
+        if (!new_song.equals(this.music))
+            this.music = new_song;
+
+        if (this.music.pay) {
+            promptAction.showToast({ message: '播放失败' });
+            return;
+        }
+
+        switch (this.playState) {
+            case PlayerState.INITIALIZED:
+                promptAction.showToast({ message: '加载中' });
+                break;
+            case PlayerState.PREPARED:
+                promptAction.showToast({ message: '加载完毕' });
+                break;
+            default:
+                break;
+        }
     }
 
     onPlay(): void {
         // 封面旋转动画
         this.imageRotate = 0;
-        this.imageRotate = this.isPlay ? PlayerConstants.ROTATE : 0;
+        this.imageRotate = this.playState === PlayerState.PLAY ? PlayerConstants.ROTATE : 0;
 
         // 更新UI显示
-        const music = MediaService.getInstance().getCurrentMusic();
+        const music = this.media.getCurrentMusic();
         if (music && music != this.music) {
             this.music = music;
         }
@@ -59,7 +78,7 @@ export struct PlayerWidget {
 
                 Column() {
                     // 歌名
-                    Marquee({ start: this.isPlay, src: this.music.name })
+                    Marquee({ start: this.playState === PlayerState.PLAY, src: this.music.name })
                         .width(150)
                         .fontColor($r('app.color.song_name'))
                         .fontSize(18)
@@ -92,7 +111,6 @@ export struct PlayerWidget {
             } // Row
             .layoutWeight(PlayerConstants.LAYOUT_WEIGHT_PLAYER_CONTROL)
             .onClick(() => {
-                // 歌词page
                 router.pushUrl({
                     url: RouterUrlConstants.PLAY
                 });
@@ -115,35 +133,34 @@ export struct PlayerWidget {
                     .height($r('app.float.control_icon_height'))
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_TWO)
                     .onClick(() => {
-                        MediaService.getInstance().playPrevious();
+                        this.media.playPrevious();
                     })
-                Image(this.isPlay ? $r('app.media.ic_public_pause') : $r('app.media.ic_public_play'))
+                Image(this.playState === PlayerState.PLAY ? $r('app.media.ic_public_pause') : $r('app.media.ic_public_play'))
                     .fillColor($r('app.color.control_icon_color'))
                     .width($r('app.float.control_icon_width'))
                     .height($r('app.float.control_icon_height'))
                     .margin({ left: $r('app.float.control_icon_margin'), right: $r('app.float.control_icon_margin') })
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_THREE)
                     .onClick(() => {
-                        const media = MediaService.getInstance();
-                        media.debugState();
+                        this.media.debugState();
 
-                        if (media.getCurrentPlaylistType() === PlaylistType.NONE) {
+                        if (this.media.getCurrentPlaylistType() === PlaylistType.NONE) {
                             promptAction.showToast({ message: '播放队列为空' })
                             return;
                         }
 
-                        if (media.getCurrentMusic().pay) {
+                        if (this.media.getCurrentMusic().pay) {
                             promptAction.showToast({ message: 'VIP歌曲无法播放' });
                             return;
                         }
 
                         // 遇到不能试听的VIP歌曲 -> idle
-                        if (media.idle()) {
-                            media.rePlay();
+                        if (this.playState === PlayerState.IDLE) {
+                            this.media.rePlay();
                             return;
                         }
 
-                        this.isPlay ? media.pause() : media.play();
+                        this.playState === PlayerState.PLAY ? this.media.pause() : this.media.play();
                     })
                 Image($r('app.media.ic_public_play_next'))
                     .fillColor($r('app.color.control_icon_color'))
@@ -152,7 +169,7 @@ export struct PlayerWidget {
                     .margin({ right: $r('app.float.control_icon_margin') })
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_TWO)
                     .onClick(() => {
-                        MediaService.getInstance().playNextAuto(true);
+                        this.media.playNextAuto(true);
                     })
 
                 // 播放队列
@@ -163,9 +180,8 @@ export struct PlayerWidget {
                     .displayPriority(PlayerConstants.DISPLAY_PRIORITY_ONE)
                     .onClick(() => {
                         // debug
-                        const media = MediaService.getInstance();
-                        media.debugPlayQueue();
-                        media.debugPlaylist(media.getCurrentPlaylistType());
+                        this.media.debugPlayQueue();
+                        this.media.debugPlaylist(this.media.getCurrentPlaylistType());
 
                     })
             } // Row

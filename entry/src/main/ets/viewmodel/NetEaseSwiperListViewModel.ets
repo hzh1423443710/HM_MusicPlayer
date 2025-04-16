@@ -10,7 +10,7 @@ export class EveryLikeListViewModel extends BaseNetEasePlayListViewModel {
     constructor() {
         super();
         this.title = '大家都爱听';
-        this.brief = '每周四更新';
+        // this.brief = '每周四更新';
         this.pageSize = 3;
         // this.playListId = NetEasePlaylistId.LISTEN_HOT;
         this.playListId = playlistIds[0];
@@ -26,7 +26,7 @@ export class TreasureMusicViewModel extends BaseNetEasePlayListViewModel {
     constructor() {
         super();
         this.title = '宝藏歌曲';
-        this.brief = '每周五更新';
+        // this.brief = '每周五更新';
         this.pageSize = 3;
         // this.playListId = NetEasePlaylistId.NET_HOT;
         this.playListId = playlistIds[1];

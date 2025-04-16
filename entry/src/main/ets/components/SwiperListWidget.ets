@@ -2,25 +2,26 @@ import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { BaseNetEasePlayListViewModel } from '../viewmodel/BaseNetEaseSwiperListViewModel'
 import promptAction from '@ohos.promptAction';
 import { MusicItem } from './MusicItem';
-import { AudioPlayerState, MediaService } from '../common/MediaService';
+import { PlayerState, MediaService } from '../common/MediaService';
 
 @Preview
 @Component
 export struct SwiperListWidget {
     @Link viewModel: BaseNetEasePlayListViewModel;
-    @StorageLink('isPlay') @Watch('onPlayChanged') isPlay: boolean = false;
+    @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
     @State playButtonState: boolean = false;
+    media: MediaService = MediaService.getInstance();
 
     /**
      * 播放器播放队列类型发生变化
      */
     onQueuePlaylistChanged() {
-        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.playState === PlayerState.PLAY;
     }
 
-    onPlayChanged() {
-        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+    onPlayStateChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.playState === PlayerState.PLAY;
     }
 
     aboutToAppear() {
@@ -60,13 +61,12 @@ export struct SwiperListWidget {
                     .width($r("app.float.control_icon_width"))
                     .height($r("app.float.control_icon_height"))
                     .onClick(() => {
-                        const media = MediaService.getInstance();
-                        if (media.getCurrentPlaylistType() !== this.viewModel.playlistType) {
-                            media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
+                        if (this.media.getCurrentPlaylistType() !== this.viewModel.playlistType) {
+                            this.media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
                             return;
                         }
 
-                        this.playButtonState ? media.pause() : media.play();
+                        this.playButtonState ? this.media.pause() : this.media.play();
                     });
 
                 Blank()
@@ -97,8 +97,7 @@ export struct SwiperListWidget {
                         ForEach(this.viewModel.getMusicItemsForPage(pageIndex), (item: MusicInfo) => {
                             MusicItem({ song: item })
                                 .onClick(() => {
-                                    MediaService.getInstance()
-                                        .playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
+                                    this.media.playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
                                 })
 
                         })

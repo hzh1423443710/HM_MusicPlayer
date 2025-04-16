@@ -2,32 +2,34 @@ import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { MusicItem } from './MusicItem';
 import { BaseNetEaseLongListViewModel } from '../viewmodel/BaseNetEaseLongListViewModel'
 import promptAction from '@ohos.promptAction';
-import { MediaService } from '../common/MediaService';
+import { MediaService, PlayerState } from '../common/MediaService';
 
 @Preview
 @Component
 export struct NetEaseTopWidget {
     @Link viewModel: BaseNetEaseLongListViewModel;
-    @State isRefreshing: boolean = false
-    @StorageLink('isPlay') @Watch('onPlayChanged') isPlay: boolean = false;
+    @State isRefreshing: boolean = false;
+    @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
     @State playButtonState: boolean = false;
+    media: MediaService = MediaService.getInstance();
 
     /**
-     * 播放器播放队列类型发生变化
+     * 播放器播放队列 类型发生变化
      */
     onQueuePlaylistChanged() {
-        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.playState === PlayerState.PLAY;
     }
 
-    onPlayChanged() {
-        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.isPlay;
+    /**
+     * 播放状态发生变化
+     */
+    onPlayStateChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.playState === PlayerState.PLAY;
     }
 
     aboutToAppear() {
         console.log(`NetEaseTopWidget aboutToAppear`);
-
-        // 使用异步方式处理
         this.viewModel.loadMusicFirst()
             .catch((e: Error) => {
                 console.error(`${this.viewModel.title}: ${e}`);
@@ -64,13 +66,12 @@ export struct NetEaseTopWidget {
                     .width($r('app.float.control_icon_width'))
                     .height($r('app.float.control_icon_height'))
                     .onClick(() => {
-                        const media = MediaService.getInstance();
-                        if (media.getCurrentPlaylistType() !== this.viewModel.playlistType) {
-                            media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
+                        if (this.media.getCurrentPlaylistType() !== this.viewModel.playlistType) {
+                            this.media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
                             return;
                         }
 
-                        this.playButtonState ? media.pause() : media.play();
+                        this.playButtonState ? this.media.pause() : this.media.play();
                     })
                 Blank()
                 Row() {
@@ -94,23 +95,18 @@ export struct NetEaseTopWidget {
                         ListItem() {
                             Row() {
                                 Text(`${index + 1}`)
-                                    .textAlign(TextAlign.Center)// .width('10%')
+                                    .textAlign(TextAlign.Center)
                                     .width(50)
-                                MusicItem({ song: item, showCover: !(index >= 3) })// .width('90%')
-                                    // MusicItem({ data: item })// .width('90%')
+                                MusicItem({ song: item, showCover: !(index >= 3) })
                                     // .layoutWeight(1)
                                     .onClick(() => {
-                                        MediaService.getInstance()
-                                            .playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
+                                        this.media.playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
                                     })
                             }
                             .justifyContent(FlexAlign.Start)
-                        }
-
-                        // .onAppear(() => {
-                        // })
+                        } // ListItem
                     })
-                }
+                } // List
                 .scrollBar(BarState.Off)
                 .edgeEffect(EdgeEffect.Spring)
                 .width('100%')

@@ -47,7 +47,7 @@ export abstract class BaseNetEasePlayListViewModel {
             // 清空旧数据
             this.songDataSource.clearData();
             const songs = await this.http.getNetEaseListSongs(this.playListId);
-            for (let i = 0; i < 10; ++i) {
+            for (let i = 0; i < 12; ++i) {
                 this.songDataSource.pushData(songs[i]);
             }
             // songs.forEach((item) => {

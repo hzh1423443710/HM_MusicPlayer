@@ -1,4 +1,4 @@
-import { MusicInfo, MusicFrom, PlaylistType } from '../model/MusicData'
+import { MusicInfo } from '../model/MusicData'
 import promptAction from '@ohos.promptAction';
 
 // 一首音乐 cover + name + singer + Like

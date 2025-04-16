@@ -21,7 +21,7 @@ enum MusicPlayMode {
 /**
  * AVPlayer状态
  */
-export enum AudioPlayerState {
+export enum PlayerState {
     IDLE,
     INITIALIZED,
     LOAD,
@@ -49,10 +49,6 @@ export class MediaService {
      * 播放顺序
      */
     private playMode: MusicPlayMode = MusicPlayMode.ORDER;
-    /**
-     * AVPlayer状态
-     */
-    private state: AudioPlayerState = AudioPlayerState.IDLE;
     /**
      * 是否为prepared状态
      */
@@ -92,8 +88,15 @@ export class MediaService {
         this.playlistMap.set(PlaylistType.RECENT, []);
         // 随机一曲
         this.playlistMap.set(PlaylistType.NETEASE_RANDOM_SONG, []);
+    }
 
-        this.updateIsPlay(false);
+    // ================================== 播放状态管理 ==================================
+    public setPlayState(state: PlayerState) {
+        AppStorage.SetOrCreate('playState', state);
+    }
+
+    private getPlayState(): PlayerState {
+        return AppStorage.Get<PlayerState>('playState');
     }
 
     public static getInstance(): MediaService {
@@ -110,9 +113,6 @@ export class MediaService {
      */
     private notifyUpdateRandWidget() {
         if (this.getCurrentPlaylistType() === PlaylistType.NETEASE_RANDOM_SONG) {
-            // 使用时间戳
-            AppStorage.SetOrCreate('updateUITrigger', Date.now());
-
             // 更新一组 随机一曲
             if (this.currentMusicIndex === this.currentPlayQueue.length - 2) {
                 AppStorage.SetOrCreate('needAppend', Date.now());
@@ -120,7 +120,7 @@ export class MediaService {
         }
     }
 
-    /*******************************             debug                  ***************************/
+    // ================================== debug =================================
     public debugPlayQueue() {
         this.currentPlayQueue.forEach((item, index) => {
             console.log(`播放队列[${index}] ${item}`);
@@ -135,10 +135,10 @@ export class MediaService {
     }
 
     public debugState() {
-        console.log(TAG, `当前状态: ${enumToString(PlaylistType, this.getCurrentPlaylistType())}, 正在播放:${this.isPlaying()}, ${enumToString(AudioPlayerState, this.getPlayState())}, url=${this.avPlayer.url}`);
+        console.log(TAG, `当前状态: ${enumToString(PlaylistType, this.getCurrentPlaylistType())}, ${enumToString(PlayerState, this.getPlayState())}, ${enumToString(PlayerState, this.getPlayState())}, url=${this.avPlayer.url}`);
     }
 
-    /*******************************            播放队列管理              ***************************/
+    // ================================== 播放队列管理 =================================
     /**
      * 获取当前正在播放的音乐信息
      * @returns
@@ -279,7 +279,7 @@ export class MediaService {
      */
     private setPlayQueue(songs: MusicInfo[], type: PlaylistType) {
         this.currentPlayQueue = songs;
-        this.currentPlayQueue = [...songs];
+        // this.currentPlayQueue = [...songs];
         this.updateQueuePlaylistType(type);
         this.currentPlayQueue.forEach((item, index) => {
             item.index = index;
@@ -290,7 +290,7 @@ export class MediaService {
         return this.currentPlaylistType;
     }
 
-    /*******************************            播放控制管理              ***************************/
+    // ================================== 播放控制管理 =================================
     /**
      * 初始化音频播放器
      */
@@ -343,7 +343,7 @@ export class MediaService {
             switch (stateString) {
                 case 'idle':
                 // url:只允许在idle状态下设置 -> initialized 状态
-                    this.state = AudioPlayerState.IDLE;
+                    this.setPlayState(PlayerState.IDLE);
                     if (!this.currentPlayQueue[this.currentMusicIndex].pay) {
                         const url = this.currentPlayQueue[this.currentMusicIndex].url;
                         if (url === '') {
@@ -355,7 +355,7 @@ export class MediaService {
                     break;
 
                 case 'initialized':
-                    this.state = AudioPlayerState.INITIALIZED;
+                    this.setPlayState(PlayerState.INITIALIZED);
                     if (this.avPlayer) {
                         this.avPlayer.prepare().catch((err: Error) => {
                             console.error(TAG, `AVPlayer prepare failed,${err.name} ${err.message}`);
@@ -364,7 +364,7 @@ export class MediaService {
                     break;
 
                 case 'prepared':
-                    this.state = AudioPlayerState.PREPARED;
+                    this.setPlayState(PlayerState.PREPARED);
                     this.isPrepared = true;
                     AppStorage.SetOrCreate('totalTime', MediaTools.msToCountdownTime(this.getDuration()));
                     AppStorage.SetOrCreate('progressMax', this.getDuration());
@@ -372,43 +372,33 @@ export class MediaService {
                     break;
 
                 case 'playing':
-                    this.state = AudioPlayerState.PLAY;
+                    this.setPlayState(PlayerState.PLAY);
                     this.addToHistory();
                     break;
 
                 case 'paused':
-                    this.state = AudioPlayerState.PAUSE;
+                    this.setPlayState(PlayerState.PAUSE);
                     break;
 
                 case 'completed':
-                    this.state = AudioPlayerState.COMPLETED;
+                    this.setPlayState(PlayerState.COMPLETED);
                     this.playNextAuto(false);
                     break;
 
                 case 'stopped':
-                    this.state = AudioPlayerState.STOP;
+                    this.setPlayState(PlayerState.STOP);
                     if (this.avPlayer) this.avPlayer.reset();
                     break;
 
                 case 'released':
-                    this.state = AudioPlayerState.RELEASED;
+                    this.setPlayState(PlayerState.RELEASED);
                     break;
 
                 default:
-                    this.state = AudioPlayerState.UNKNOWN;
+                    this.setPlayState(PlayerState.UNKNOWN);
                     break;
             }
-            // 每次状态变化后, 检测是否更新播放
-            this.updateIsPlay(this.state === AudioPlayerState.PLAY);
         })
-    }
-
-    public isPlaying(): boolean {
-        return AppStorage.Get<boolean>('isPlay');
-    }
-
-    public isPause(): boolean {
-        return this.state === AudioPlayerState.PAUSE;
     }
 
     /**
@@ -467,14 +457,6 @@ export class MediaService {
     }
 
     /**
-     * 修改全局播放状态
-     * @param isPlay
-     */
-    private updateIsPlay(isPlay: boolean) {
-        AppStorage.SetOrCreate<boolean>('isPlay', isPlay);
-    }
-
-    /**
      * 更新当前播放队列 类型
      * @param type
      */
@@ -488,7 +470,7 @@ export class MediaService {
      * @param ms
      */
     public seek(ms: number) {
-        if (this.isPrepared && this.state != AudioPlayerState.ERROR) {
+        if (this.isPrepared && this.getPlayState() != PlayerState.ERROR) {
             // 快进方向
             let seekMode = this.getCurrentTime() < ms ? media.SeekMode.SEEK_NEXT_SYNC : media.SeekMode.SEEK_PREV_SYNC;
             // 跳转位置
@@ -496,22 +478,6 @@ export class MediaService {
             this.isCurrent = false;
             if (this.avPlayer) this.avPlayer.seek(realTime, seekMode);
         }
-    }
-
-    /**
-     * 获取当前播放状态
-     * @returns
-     */
-    public getPlayState(): AudioPlayerState {
-        return this.state;
-    }
-
-    /**
-     * 当前是否处于空闲状态
-     * @returns
-     */
-    public idle(): boolean {
-        return this.state == AudioPlayerState.IDLE;
     }
 
     /**
@@ -632,12 +598,12 @@ export class MediaService {
      */
     public async play() {
         BackgroundUtil.startContinuousTask(this.context);
+
         if (this.isPrepared && this.avPlayer) {
             this.avPlayer.play().then(() => {
                 this.seek(this.getCurrentTime());
-                this.updateIsPlay(true);
-                this.state = AudioPlayerState.PLAY;
-            })
+                this.setPlayState(PlayerState.PLAY);
+            });
         }
     }
 
@@ -645,10 +611,9 @@ export class MediaService {
      * 暂停播放 -> pause
      */
     public pause() {
-        if (this.isPrepared && this.state == AudioPlayerState.PLAY && this.avPlayer) {
+        if (this.isPrepared && this.getPlayState() === PlayerState.PLAY && this.avPlayer) {
             this.avPlayer.pause().then(() => {
-                this.state = AudioPlayerState.PAUSE;
-                this.updateIsPlay(false);
+                this.setPlayState(PlayerState.PAUSE);
             });
         }
     }
@@ -657,22 +622,17 @@ export class MediaService {
      * 停止播放
      */
     public async stop() {
-        if (this.isPrepared && this.avPlayer) {
-            console.info(TAG, 'stop()');
+        if (this.isPrepared && this.avPlayer)
             await this.avPlayer.stop();
-            this.updateIsPlay(false);
-            this.state = AudioPlayerState.PAUSE;
-        }
     }
 
     /**
      * 重置资源 -> idle
      */
     private async reset() {
-        console.info(TAG, 'reset()');
-        if (this.avPlayer) {
+        if (this.avPlayer)
             await this.avPlayer.reset();
-        }
+
         this.isPrepared = false;
     }
 
@@ -680,14 +640,15 @@ export class MediaService {
      * 销毁实例 -> released
      */
     public release() {
-        this.updateIsPlay(false);
         this.stop();
         this.reset();
-        if (this.avPlayer) this.avPlayer.release();
-        this.state = AudioPlayerState.IDLE;
-        if (this.context) {
+        if (this.avPlayer)
+            this.avPlayer.release();
+
+        this.setPlayState(PlayerState.IDLE);
+
+        if (this.context)
             BackgroundUtil.stopContinuousTask(this.context);
-        }
     }
 
     /**
