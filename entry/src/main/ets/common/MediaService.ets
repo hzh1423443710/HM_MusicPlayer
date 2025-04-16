@@ -38,6 +38,10 @@ export enum AudioPlayerState {
     UNKNOWN
 }
 
+/**
+ * 网易云有id 就有外链; QQ有id，得不到外链
+ * 网易云/QQ 音乐 统一 播放时再根据id获取其外链
+ */
 export class MediaService {
     private context: common.UIAbilityContext | undefined = AppStorage.Get('context');
     public avPlayer: media.AVPlayer | null = null;
@@ -131,7 +135,7 @@ export class MediaService {
     }
 
     public debugState() {
-        console.log(`播放器:${this.isPlaying()}-${enumToString(PlaylistType, this.getCurrentPlaylistType())}-${enumToString(AudioPlayerState, this.getPlayState())}`);
+        console.log(TAG, `当前状态: ${enumToString(PlaylistType, this.getCurrentPlaylistType())}, 正在播放:${this.isPlaying()}, ${enumToString(AudioPlayerState, this.getPlayState())}, url=${this.avPlayer.url}`);
     }
 
     /*******************************            播放队列管理              ***************************/
@@ -234,7 +238,7 @@ export class MediaService {
      */
     public playOne(song: MusicInfo, songs: MusicInfo[], type: PlaylistType) {
         // 非搜索结果 直接更新播放队列
-        if (type !== PlaylistType.QQ_SEARCH) {
+        if (type !== PlaylistType.SEARCH) {
             this.playlistMap.set(type, songs);
             this.setPlayQueue(this.playlistMap.get(type), type);
 
@@ -313,13 +317,14 @@ export class MediaService {
 
         this.avPlayer.on('seekDone', (seekDoneTime: number) => {
             this.isCurrent = true;
-            console.info(TAG, `AVPlayer seek succeeded, seek time is ${seekDoneTime}`);
+            console.info(TAG, `AVPlayer onSeekDone: seek time is ${seekDoneTime}`);
         });
 
         this.avPlayer.on('error', (err) => {
-            console.error(TAG, `Invoke avPlayer failed, code is ${err.code}, message is ${err.message}`);
+            console.error(TAG, `AVPlayer onError: code is ${err.code}, message is ${err.message}`);
             if (this.avPlayer) {
                 this.avPlayer.reset();
+                this.isFirst = true;
                 this.currentPlayQueue[this.currentMusicIndex].pay = true;
             }
         });
@@ -339,15 +344,21 @@ export class MediaService {
                 case 'idle':
                 // url:只允许在idle状态下设置 -> initialized 状态
                     this.state = AudioPlayerState.IDLE;
-                    if (!this.currentPlayQueue[this.currentMusicIndex].pay)
-                        this.avPlayer.url = this.currentPlayQueue[this.currentMusicIndex].url;
+                    if (!this.currentPlayQueue[this.currentMusicIndex].pay) {
+                        const url = this.currentPlayQueue[this.currentMusicIndex].url;
+                        if (url === '') {
+                            console.error(TAG, `currentPlayQueue[${this.currentMusicIndex}] url is empty`);
+                            return;
+                        }
+                        this.avPlayer.url = url;
+                    }
                     break;
 
                 case 'initialized':
                     this.state = AudioPlayerState.INITIALIZED;
                     if (this.avPlayer) {
-                        this.avPlayer.prepare().catch((err) => {
-                            console.error(TAG, `Invoke prepare failed, Error cause : ${JSON.stringify(err)}`);
+                        this.avPlayer.prepare().catch((err: Error) => {
+                            console.error(TAG, `AVPlayer prepare failed,${err.name} ${err.message}`);
                         });
                     }
                     break;
@@ -426,7 +437,8 @@ export class MediaService {
         BackgroundUtil.startContinuousTask(this.context);
 
         this.updateCurrentMusicIndex(musicIndex);
-        console.log(`loadAssent[${this.currentMusicIndex}] ${this.currentPlayQueue[this.currentMusicIndex]}`);
+        this.debugState();
+        console.log(`准备加载: index-${this.currentMusicIndex}, ${enumToString(PlaylistType, this.currentPlaylistType)} ${this.currentPlayQueue[this.currentMusicIndex]}`);
 
         // 第一次播放 手动更新状态
         if (this.isFirst) {
@@ -469,7 +481,6 @@ export class MediaService {
     private updateQueuePlaylistType(type: PlaylistType) {
         this.currentPlaylistType = type;
         AppStorage.SetOrCreate('currentPlaylistType', type);
-        console.log(`播放队列类型 -> ${enumToString(PlaylistType, type)}`);
     }
 
     /**

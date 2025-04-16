@@ -70,7 +70,7 @@ export class NetEasePlaylistId {
     /**
      * 云音乐古典榜
      */
-    static readonly CLASSICAL = "201209";
+    static readonly CLASSICAL = "71384707";
     /**
      * 云音乐电音榜
      */

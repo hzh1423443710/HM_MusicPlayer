@@ -2,7 +2,7 @@ import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { BaseNetEasePlayListViewModel } from '../viewmodel/BaseNetEaseSwiperListViewModel'
 import promptAction from '@ohos.promptAction';
 import { MusicItem } from './MusicItem';
-import { MediaService } from '../common/MediaService';
+import { AudioPlayerState, MediaService } from '../common/MediaService';
 
 @Preview
 @Component
@@ -101,7 +101,7 @@ export struct SwiperListWidget {
                                         .playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
                                 })
 
-                        }, (item) => item.id) // 使用ID作为唯一键
+                        })
                     }
                 }, (_, index) => `page_${index}`) // 使用页码作为唯一键
             }

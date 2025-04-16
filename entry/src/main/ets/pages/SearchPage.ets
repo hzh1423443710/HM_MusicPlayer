@@ -52,12 +52,10 @@ struct SearchPage {
                         .width(24)
                         .height(24)
 
-                    if (this.viewModel.canSwitchPlatform()) {
-                        Toggle({ type: ToggleType.Switch })
-                            .onClick(() => {
-                                this.viewModel.switchPlatform();
-                            })
-                    }
+                    Toggle({ type: ToggleType.Switch })
+                        .onClick(() => {
+                            this.viewModel.switchPlatform();
+                        })
 
                     Image($r('app.media.refresh'))
                         .width(28)
@@ -170,11 +168,9 @@ struct SearchPage {
                 .vertical(false)
                 .onChange((index: number) => {
                     this.currentTabIndex = index
-                    const old_platform = this.viewModel.platform;
                     this.viewModel.setSearchType(index as SearchType);
 
                     if (this.viewModel.searchType === SearchType.SONG) {
-                        // TODO small bug
                         if (this.viewModel.songDataSource.totalCount() === 0)
                             this.viewModel.search(true);
                     }

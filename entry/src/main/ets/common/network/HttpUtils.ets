@@ -39,25 +39,30 @@ export class HttpUtils {
         let music_info = new MusicInfo();
         let api_url = NetEaseAPI.RAND_SONG;
 
-        await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-            let resultObj = JSON.parse(data.result as string);
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
+                // 访问QBS限制 Token购买
+                // hilog.error(0x0000, TAG, `${this.getRandMusic.name}: ${data.result as string}`);
+                let resultObj = JSON.parse(data.result as string);
 
-            if (data.responseCode === 200 && resultObj.code === 200) {
-                music_info.id = resultObj.data.id;
-                music_info.name = resultObj.data.song;
-                music_info.singer = resultObj.data.singer;
-                music_info.url = resultObj.data.Music;
-                music_info.pic = resultObj.data.cover;
-                music_info.lrc = resultObj.data.lrc || '';
-                music_info.pay = false;
-                music_info.where = MusicFrom.NetEase;
 
-            } else {
-                hilog.error(0x0000, TAG, `${this.getRandMusic.name}: ${data.responseCode}`);
-            }
-        }).catch((err) => {
-            hilog.error(0x0000, TAG, `${this.getRandMusic.name}: ${err}`);
-        })
+                if (data.responseCode === 200 && resultObj.code === 200) {
+                    music_info.id = resultObj.data.id;
+                    music_info.name = resultObj.data.song;
+                    music_info.singer = resultObj.data.singer;
+                    music_info.url = resultObj.data.Music;
+                    music_info.pic = resultObj.data.cover;
+                    music_info.lrc = resultObj.data.lrc || '';
+                    music_info.pay = false;
+                    music_info.where = MusicFrom.NetEase;
+
+                } else {
+                    hilog.error(0x0000, TAG, `${this.getRandMusic.name}: ${data.responseCode}`);
+                }
+            })
+            .catch((err) => {
+                hilog.error(0x0000, TAG, `${this.getRandMusic.name}: ${err}`);
+            })
 
         return music_info;
     }
@@ -78,35 +83,37 @@ export class HttpUtils {
 
         const songs: MusicInfo[] = [];
 
-        await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-            let resultObj = JSON.parse(data.result as string);
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
+                let resultObj = JSON.parse(data.result as string);
 
-            if (data.responseCode == 200 && resultObj.code == 200) {
-                resultObj.songs.forEach((item) => {
-                    let song = new MusicInfo();
-                    song.id = item.id;
-                    song.name = item.name;
-                    item.ar.forEach((singer, index) => {
-                        if (index > 0)
-                            song.singer += '/' + singer.name;
-                        else
-                            song.singer += singer.name;
+                if (data.responseCode == 200 && resultObj.code == 200) {
+                    resultObj.songs.forEach((item) => {
+                        let song = new MusicInfo();
+                        song.id = item.id;
+                        song.name = item.name;
+                        item.ar.forEach((singer, index) => {
+                            if (index > 0)
+                                song.singer += '/' + singer.name;
+                            else
+                                song.singer += singer.name;
+                        });
+                        // 某些VIP歌曲不能试听
+                        song.url = `http://music.163.com/song/media/outer/url?id=${item.id}`
+                        song.pic = item.al.picUrl;
+                        song.lrc = '';
+                        song.pay = false;
+                        song.where = MusicFrom.NetEase;
+                        songs.push(song);
                     });
-                    // 某些VIP歌曲不能试听
-                    song.url = `http://music.163.com/song/media/outer/url?id=${item.id}`
-                    song.pic = item.al.picUrl;
-                    song.lrc = '';
-                    song.pay = false;
-                    song.where = MusicFrom.NetEase;
-                    songs.push(song);
-                });
 
-            } else {
-                hilog.error(0x0000, TAG, `${this.getNetEaseListSongs.name}: ${data.responseCode} ${resultObj.code}`)
-            }
-        }).catch((e) => {
-            hilog.error(0x0000, TAG, `${this.getNetEaseListSongs.name}: ${e}`);
-        });
+                } else {
+                    hilog.error(0x0000, TAG, `${this.getNetEaseListSongs.name}: ${data.responseCode} ${resultObj.code}, ${id}`)
+                }
+            })
+            .catch((e) => {
+                hilog.error(0x0000, TAG, `${this.getNetEaseListSongs.name}: ${e}`);
+            });
 
         return songs;
     }
