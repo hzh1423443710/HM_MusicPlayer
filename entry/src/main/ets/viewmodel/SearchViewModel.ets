@@ -190,8 +190,13 @@ export class SearchViewModel {
         let results: MusicInfo[] = [];
         if (this.platform === MusicPlatform.NETEASE)
             results = await this.http.getSongsByNetEase(this.keyword, this.currentPage);
+        // results = await this.http.getSongsByNetEase(this.keyword, (this.currentPage - 1) * this.pageSize);
         else
             results = await this.http.getSongsByQQ(this.keyword, this.currentPage);
+
+        // results.forEach((item, index) => {
+        //     console.log(`${index}-${item}`);
+        // })
 
         if (results === null) {
             this.searchState = SearchState.ERROR;

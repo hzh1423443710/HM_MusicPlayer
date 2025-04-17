@@ -4,6 +4,7 @@ import { PlayerWidget } from '../components/PlayerWidget'
 import { NetEaseTopContent } from '../view/NetEaseTopContent'
 import { MyContent } from '../view/MyContent'
 import { BreakpointSystem } from '../common/BreakpointSystem'
+import { MediaService } from '../common/MediaService'
 
 @Entry
 @Component
@@ -27,6 +28,7 @@ struct HomePage {
         ConnectionUtils.closeRegister();
 
         this.breakpointSystem.unregister();
+        MediaService.getInstance().release();
     }
 
     build() {

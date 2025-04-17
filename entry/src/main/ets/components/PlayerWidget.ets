@@ -9,16 +9,14 @@ import pasteboard from '@ohos.pasteboard';
 @Preview
 @Component
 export struct PlayerWidget {
-    @State music: MusicInfo = new MusicInfo(0, '', '鸿蒙音乐 听我想听');
+    @State music: MusicInfo = null;
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @State imageRotate: number = 0;
     media: MediaService = MediaService.getInstance();
 
     aboutToAppear(): void {
-    }
-
-    aboutToDisappear(): void {
-        this.media.release();
+        const new_song = this.media.getCurrentMusic();
+        this.music = (new_song === null) ? new MusicInfo(0, '', '鸿蒙音乐 听我想听') : new_song;
     }
 
     /**
@@ -44,18 +42,14 @@ export struct PlayerWidget {
             default:
                 break;
         }
+
+        this.rotateCover();
     }
 
-    onPlay(): void {
+    rotateCover() {
         // 封面旋转动画
         this.imageRotate = 0;
         this.imageRotate = this.playState === PlayerState.PLAY ? PlayerConstants.ROTATE : 0;
-
-        // 更新UI显示
-        const music = this.media.getCurrentMusic();
-        if (music && music != this.music) {
-            this.music = music;
-        }
     }
 
     build() {
@@ -75,14 +69,17 @@ export struct PlayerWidget {
                         iterations: PlayerConstants.ITERATIONS,
                         curve: Curve.Linear
                     })
+                    .onAppear(() => {
+                        this.rotateCover()
+                    })
 
                 Column() {
                     // 歌名
                     Marquee({ start: this.playState === PlayerState.PLAY, src: this.music.name })
                         .width(150)
                         .fontColor($r('app.color.song_name'))
-                        .fontSize(18)
-                        .borderWidth(1)
+                        .fontSize(18)// .borderWidth(1)
+                        .alignSelf(ItemAlign.Start)
                         .gesture(LongPressGesture().onAction((event: GestureEvent) => {
                             const sysBoard = pasteboard.getSystemPasteboard();
                             const data = pasteboard.createData('text/plain', this.music.name);

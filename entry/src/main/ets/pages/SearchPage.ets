@@ -4,7 +4,7 @@ import { HeaderWidget } from '../components/HeaderWidget';
 import { SearchState, SearchType, MusicPlatform, SearchViewModel, searchViewModel } from '../viewmodel/SearchViewModel'
 import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { MusicItem } from '../components/MusicItem';
-import { MediaService } from '../common/MediaService';
+import { MediaService, PlayerState } from '../common/MediaService';
 import promptAction from '@ohos.promptAction';
 import { SingerItem } from '../components/SingerItem';
 import { SingerInfo } from '../model/SingerData';
@@ -15,11 +15,21 @@ struct SearchPage {
     @State currentTabIndex: number = 0
     @State isRefreshing: boolean = false;
     @State viewModel: SearchViewModel = searchViewModel;
+    @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
+    @State currentMusic: MusicInfo = new MusicInfo();
 
     aboutToAppear(): void {
-        console.log(`SearchPage`)
+        console.log(`SearchPage appear`)
         // 清空上次结果
         this.viewModel.resetAll();
+    }
+
+    onPlayStateChanged() {
+        this.currentMusic = MediaService.getInstance().getCurrentMusic();
+    }
+
+    aboutToDisappear(): void {
+        console.log(`SearchPage Disappear`)
     }
 
     build() {
@@ -102,12 +112,18 @@ struct SearchPage {
                                             }
                                             .justifyContent(FlexAlign.Start)
                                         } // ListItem
+                                        .backgroundColor(this.currentMusic.equals(song) ? $r('app.color.selected') : Color.Transparent)
                                     })
                                 } // List
+                                .onReachEnd(() => {
+                                    promptAction.showToast({ message: '正在加载' });
+                                    this.viewModel.loadMore().then((ok) => {
+                                        promptAction.showToast({
+                                            message: ok ? '加载成功' : this.viewModel.getStateText()
+                                        });
+                                    });
+                                })
 
-                                // TODO 为什么加载一次后就不显示了
-                                if (this.viewModel.hasMore)
-                                    this.LoadMore()
                             }
                         }
                         .width('100%')
@@ -152,10 +168,15 @@ struct SearchPage {
                                         } // ListItem
                                     })
                                 } // List
+                                .onReachEnd(() => {
+                                    promptAction.showToast({ message: '正在加载' });
+                                    this.viewModel.loadMore().then((ok) => {
+                                        promptAction.showToast({
+                                            message: ok ? '加载成功' : this.viewModel.getStateText()
+                                        });
+                                    });
+                                })
 
-                                // TODO 为什么加载一次后就不显示了
-                                if (this.viewModel.hasMore)
-                                    this.LoadMore()
                             }
                         }
                         .width('100%')
@@ -191,36 +212,6 @@ struct SearchPage {
         .backgroundImageSize(ImageSize.Cover)
         .backgroundBlurStyle(BlurStyle.Regular)
     } // build
-
-    @Builder
-    LoadMore() {
-        Row() {
-            Line()
-                .width(100)
-                .height(1)
-                .backgroundColor(Color.Gray)
-
-            Text('载入更多')
-                .fontColor('#007DFF')
-                .fontSize('14fp')
-                .fontWeight(FontWeight.Medium)
-                .margin({ left: 10, right: 10 })
-                .onClick(() => {
-                    promptAction.showToast({ message: '正在加载' });
-                    this.viewModel.loadMore().then((ok) => {
-                        promptAction.showToast({ message: ok ? '加载成功' : this.viewModel.getStateText() });
-                        promptAction.showToast({ message: this.viewModel.hasMore ? '还有更多' : '已加载全部' });
-                    });
-                })
-
-            Line()
-                .width(100)
-                .height(1)
-                .backgroundColor(Color.Gray)
-
-        }
-        .justifyContent(FlexAlign.SpaceBetween)
-    }
 
     @Builder
     TabBuilder(index: number, name: string, image: Resource) {

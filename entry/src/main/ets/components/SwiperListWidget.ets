@@ -10,6 +10,7 @@ export struct SwiperListWidget {
     @Link viewModel: BaseNetEasePlayListViewModel;
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
+    @State currentMusic: MusicInfo = new MusicInfo();
     @State playButtonState: boolean = false;
     media: MediaService = MediaService.getInstance();
 
@@ -22,6 +23,9 @@ export struct SwiperListWidget {
 
     onPlayStateChanged() {
         this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.playState === PlayerState.PLAY;
+        if (this.playerPlaylistType === this.viewModel.playlistType) {
+            this.currentMusic = this.media.getCurrentMusic();
+        }
     }
 
     aboutToAppear() {
@@ -99,7 +103,9 @@ export struct SwiperListWidget {
                                 .onClick(() => {
                                     this.media.playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
                                 })
-
+                            .backgroundColor(this.playerPlaylistType === this.viewModel.playlistType && this.currentMusic.equals(item)
+                                ? $r('app.color.selected')
+                                : Color.Transparent)
                         })
                     }
                 }, (_, index) => `page_${index}`) // 使用页码作为唯一键

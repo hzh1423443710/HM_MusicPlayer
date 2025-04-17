@@ -129,13 +129,15 @@ export class MediaService {
 
     public debugPlaylist(type: PlaylistType) {
         const playlist = this.playlistMap.get(type);
-        playlist.forEach((item, index) => {
-            console.log(`播放列表${enumToString(PlaylistType, type)}:[${index}] ${item}`);
-        });
+        if (playlist) {
+            playlist.forEach((item, index) => {
+                console.log(`播放列表${enumToString(PlaylistType, type)}:[${index}] ${item}`);
+            });
+        }
     }
 
     public debugState() {
-        console.log(TAG, `当前状态: ${enumToString(PlaylistType, this.getCurrentPlaylistType())}, ${enumToString(PlayerState, this.getPlayState())}, ${enumToString(PlayerState, this.getPlayState())}, url=${this.avPlayer.url}`);
+        console.log(TAG, `当前状态: ${enumToString(PlaylistType, this.getCurrentPlaylistType())}, ${enumToString(PlayerState, this.getPlayState())}, url=${this.avPlayer.url}, isFirst=${this.isFirst}`);
     }
 
     // ================================== 播放队列管理 =================================

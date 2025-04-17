@@ -12,6 +12,7 @@ export struct NetEaseTopWidget {
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
     @State playButtonState: boolean = false;
+    @State currentMusic: MusicInfo = new MusicInfo();
     media: MediaService = MediaService.getInstance();
 
     /**
@@ -26,6 +27,9 @@ export struct NetEaseTopWidget {
      */
     onPlayStateChanged() {
         this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.playState === PlayerState.PLAY;
+        if (this.playerPlaylistType === this.viewModel.playlistType) {
+            this.currentMusic = this.media.getCurrentMusic();
+        }
     }
 
     aboutToAppear() {
@@ -97,14 +101,16 @@ export struct NetEaseTopWidget {
                                 Text(`${index + 1}`)
                                     .textAlign(TextAlign.Center)
                                     .width(50)
-                                MusicItem({ song: item, showCover: !(index >= 3) })
-                                    // .layoutWeight(1)
+                                MusicItem({ song: item, showCover: !(index >= 3) })// .layoutWeight(1)
                                     .onClick(() => {
                                         this.media.playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
                                     })
                             }
                             .justifyContent(FlexAlign.Start)
                         } // ListItem
+                        .backgroundColor(this.playerPlaylistType === this.viewModel.playlistType && this.currentMusic.equals(item)
+                            ? $r('app.color.selected')
+                            : Color.Transparent)
                     })
                 } // List
                 .scrollBar(BarState.Off)
