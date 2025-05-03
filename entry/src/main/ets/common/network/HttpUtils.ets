@@ -1,5 +1,4 @@
 import http from '@ohos.net.http';
-import hilog from '@ohos.hilog';
 import { MusicFrom, MusicInfo } from '../../model/MusicData';
 import ConnectionUtil from './ConnectionUtils'
 import { SingerInfo } from '../../model/SingerData';
@@ -32,7 +31,7 @@ export class HttpUtils {
      */
     async getRandMusic(): Promise<MusicInfo> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getRandMusic.name}: 网络不可用`)
+            console.error(TAG, `${this.getRandMusic.name}: 网络不可用`)
             return null;
         }
 
@@ -42,7 +41,7 @@ export class HttpUtils {
         await this.httpReq.request(api_url)
             .then((data: http.HttpResponse) => {
                 // 访问QBS限制 Token购买
-                // hilog.error(0x0000, TAG, `${this.getRandMusic.name}: ${data.result as string}`);
+                // console.error(TAG, `${this.getRandMusic.name}: ${data.result as string}`);
                 let resultObj = JSON.parse(data.result as string);
 
 
@@ -57,11 +56,11 @@ export class HttpUtils {
                     music_info.where = MusicFrom.NetEase;
 
                 } else {
-                    hilog.error(0x0000, TAG, `${this.getRandMusic.name}: ${data.responseCode}`);
+                    console.error(TAG, `${this.getRandMusic.name}: ${data.responseCode}`);
                 }
             })
             .catch((err) => {
-                hilog.error(0x0000, TAG, `${this.getRandMusic.name}: ${err}`);
+                console.error(TAG, `${this.getRandMusic.name}: ${err}`);
             })
 
         return music_info;
@@ -74,7 +73,7 @@ export class HttpUtils {
      */
     async getNetEaseListSongs(id: NetEasePlaylistId): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getNetEaseListSongs.name}: 网络不可用`)
+            console.error(TAG, `${this.getNetEaseListSongs.name}: 网络不可用`)
             return null;
         }
 
@@ -108,11 +107,11 @@ export class HttpUtils {
                     });
 
                 } else {
-                    hilog.error(0x0000, TAG, `${this.getNetEaseListSongs.name}: ${data.responseCode} ${resultObj.code}, ${id}`)
+                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEaseListSongs.name} ${api_url}`);
                 }
             })
             .catch((e) => {
-                hilog.error(0x0000, TAG, `${this.getNetEaseListSongs.name}: ${e}`);
+                console.error(TAG, `${this.getNetEaseListSongs.name}: ${e}`);
             });
 
         return songs;
@@ -124,7 +123,7 @@ export class HttpUtils {
      */
     async getNetEaseMusic(id: string, quality: NetEaseQuality = NetEaseQuality.SQ): Promise<MusicInfo> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getNetEaseMusic.name}: 网络不可用`);
+            console.error(TAG, `${this.getNetEaseMusic.name}: 网络不可用`);
             return null;
         }
 
@@ -145,12 +144,13 @@ export class HttpUtils {
                 song.pay = false;
                 song.where = MusicFrom.NetEase;
 
+                console.log(TAG, `${this.getNetEaseMusic.name} ${api_url}`);
             } else {
-                hilog.error(0x0000, TAG, `${this.getNetEaseMusic.name}: ${data.responseCode} ${resultObj["code"]}`);
+                console.error(TAG, `${this.getNetEaseMusic.name} ${api_url} ${data.responseCode} ${resultObj.code}`);
                 song = null;
             }
         }).catch((err) => {
-            hilog.error(0x0000, TAG, `${this.getNetEaseMusic.name}: ${err}`);
+            console.error(TAG, `${this.getNetEaseMusic.name}: ${err}`);
         })
 
         return song;
@@ -159,17 +159,20 @@ export class HttpUtils {
     /**
      * 网易云 歌曲搜素
      * @param keyword 查询信息
-     * @param page 第一页(每页最多10首)
+     * @param page 每页10首
      * @returns 搜索到的歌曲数组
      */
     public async getSongsByNetEase(keyword: string, page: number = 1): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getSongsByNetEase.name}: 网络不可用`)
+            console.error(TAG, `${this.getSongsByNetEase.name}: 网络不可用`)
             return null;
         }
 
+        const limit = 10;
+        const offset: number = (page - 1) * limit + 1;
+
         let api_url = NetEaseAPI.SEARCH_OR_PLAY_URL;
-        api_url += `?word=${encodeURIComponent(keyword)}&page=${page}`;
+        api_url += `?word=${encodeURIComponent(keyword)}&page=${offset}`;
 
         let musics: MusicInfo[] = [];
 
@@ -177,7 +180,7 @@ export class HttpUtils {
             await this.httpReq.request(api_url)
                 .then((data: http.HttpResponse) => {
                     if (data.responseCode !== 200) {
-                        hilog.error(0x0000, TAG, `${this.getSongsByNetEase.name}: HTTP错误 ${data.responseCode}`);
+                        console.error(TAG, `${this.getSongsByNetEase.name}: HTTP错误 ${data.responseCode}`);
                         return;
                     }
 
@@ -187,31 +190,31 @@ export class HttpUtils {
                     if (resultObj.code === 200 && resultObj.data && Array.isArray(resultObj.data)) {
                         // 遍历搜索结果
                         resultObj.data.forEach((item) => {
-                            let music = new MusicInfo();
-                            music.id = item.id;
-                            music.name = item.song;
-                            music.singer = item.singer;
-                            music.pic = item.cover;
-                            music.where = MusicFrom.NetEase;
-                            music.pay = false;
-                            music.lrc = '';
-                            music.url = `http://music.163.com/song/media/outer/url?id=${item.id}`;
+                            let song = new MusicInfo();
+                            song.id = item.id;
+                            song.name = item.song;
+                            song.singer = item.singer;
+                            song.pic = item.cover;
+                            song.where = MusicFrom.NetEase;
+                            song.pay = false;
+                            song.lrc = '';
+                            song.url = `http://music.163.com/song/media/outer/url?id=${item.id}`;
 
-                            musics.push(music);
+                            musics.push(song);
                         });
 
-                        hilog.info(0x0000, TAG, `${this.getSongsByNetEase.name}: 成功获取搜索结果 ${musics.length} 条`);
+                        console.log(TAG, `${this.getSongsByNetEase.name} 成功获取搜索结果 ${musics.length} 条 ${api_url}`);
                     } else {
-                        hilog.error(0x0000, TAG, `${this.getSongsByNetEase.name}: API错误 ${resultObj.code}`);
+                        console.error(TAG, `${this.getSongsByNetEase.name} ${api_url} ${resultObj.code}`);
                     }
                 })
                 .catch((err) => {
-                    hilog.error(0x0000, TAG, `${this.getSongsByNetEase.name}: ${err}`);
+                    console.error(TAG, `${this.getSongsByNetEase.name}: ${err}`);
                 });
 
             return musics;
         } catch (error) {
-            hilog.error(0x0000, TAG, `${this.getSongsByNetEase.name} 异常: ${error}`);
+            console.error(TAG, `${this.getSongsByNetEase.name} 异常: ${error}`);
             return null;
         }
     }
@@ -224,7 +227,7 @@ export class HttpUtils {
      */
     public async getSingersByNetEase(keyword: string, page: number = 1): Promise<SingerInfo[]> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getSingersByNetEase.name}: 网络不可用`)
+            console.error(TAG, `${this.getSingersByNetEase.name}: 网络不可用`)
             return null;
         }
 
@@ -239,7 +242,7 @@ export class HttpUtils {
         try {
             await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
                 if (data.responseCode !== 200) {
-                    hilog.error(0x0000, TAG, `${this.getSingersByNetEase.name}: HTTP错误 ${data.responseCode}`);
+                    console.error(TAG, `${this.getSingersByNetEase.name}: HTTP错误 ${data.responseCode}`);
                     return;
                 }
 
@@ -257,17 +260,17 @@ export class HttpUtils {
                         singers.push(singer);
                     });
 
-                    hilog.info(0x0000, TAG, `${this.getSingersByNetEase.name}: 成功获取搜索结果 ${singers.length} 条`);
+                    console.info(TAG, `${this.getSingersByNetEase.name}: 成功获取搜索结果 ${singers.length} 条`);
                 } else {
-                    hilog.error(0x0000, TAG, `${this.getSingersByNetEase.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${this.getSingersByNetEase.name}: API错误 ${resultObj.code}`);
                 }
             }).catch((err) => {
-                hilog.error(0x0000, TAG, `${this.getSingersByNetEase.name}: ${err}`);
+                console.error(TAG, `${this.getSingersByNetEase.name}: ${err}`);
             });
 
             return singers;
         } catch (error) {
-            hilog.error(0x0000, TAG, `${this.getSingersByNetEase.name} 异常: ${error}`);
+            console.error(TAG, `${this.getSingersByNetEase.name} 异常: ${error}`);
             return null;
         }
     }
@@ -278,7 +281,7 @@ export class HttpUtils {
      */
     public async getSingerSongsByNetEase(id: string, page: number = 1): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getSingerSongsByNetEase.name}: 网络不可用`)
+            console.error(TAG, `${this.getSingerSongsByNetEase.name}: 网络不可用`)
             return null;
         }
 
@@ -293,7 +296,7 @@ export class HttpUtils {
         try {
             await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
                 if (data.responseCode !== 200) {
-                    hilog.error(0x0000, TAG, `${this.getSingerSongsByNetEase.name}: HTTP错误 ${data.responseCode}`);
+                    console.error(TAG, `${this.getSingerSongsByNetEase.name}: HTTP错误 ${data.responseCode}`);
                     return;
                 }
 
@@ -311,17 +314,17 @@ export class HttpUtils {
                         songs.push(music);
                     });
 
-                    hilog.info(0x0000, TAG, `${this.getSingerSongsByNetEase.name}: 成功获取搜索结果 ${songs.length} 条`);
+                    console.info(TAG, `${this.getSingerSongsByNetEase.name}: 成功获取搜索结果 ${songs.length} 条`);
                 } else {
-                    hilog.error(0x0000, TAG, `${this.getSingerSongsByNetEase.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${this.getSingerSongsByNetEase.name}: API错误 ${resultObj.code}`);
                 }
             }).catch((err) => {
-                hilog.error(0x0000, TAG, `${this.getSingerSongsByNetEase.name}: ${err}`);
+                console.error(TAG, `${this.getSingerSongsByNetEase.name}: ${err}`);
             });
 
             return songs;
         } catch (error) {
-            hilog.error(0x0000, TAG, `${this.getSingerSongsByNetEase.name} 异常: ${error}`);
+            console.error(TAG, `${this.getSingerSongsByNetEase.name} 异常: ${error}`);
             return null;
         }
     }
@@ -333,7 +336,7 @@ export class HttpUtils {
      */
     public async getNetEaseLyric(id: string): Promise<string> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getNetEaseLyric.name}: 网络不可用`)
+            console.error(TAG, `${this.getNetEaseLyric.name}: 网络不可用`)
             return null;
         }
 
@@ -345,7 +348,7 @@ export class HttpUtils {
         try {
             await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
                 if (data.responseCode !== 200) {
-                    hilog.error(0x0000, TAG, `${this.getNetEaseLyric.name}: HTTP错误 ${data.responseCode}`);
+                    console.error(TAG, `${this.getNetEaseLyric.name}: HTTP错误 ${data.responseCode}`);
                     return;
                 }
 
@@ -355,15 +358,15 @@ export class HttpUtils {
                 if (resultObj.code === 200 && resultObj.data && resultObj.data.lrc)
                     lrcText = resultObj.data.lrc;
                 else
-                    hilog.error(0x0000, TAG, `${this.getNetEaseLyric.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${this.getNetEaseLyric.name}: API错误 ${resultObj.code}`);
 
             }).catch((err) => {
-                hilog.error(0x0000, TAG, `${this.getNetEaseLyric.name}: ${err}`);
+                console.error(TAG, `${this.getNetEaseLyric.name}: ${err}`);
             });
 
             return lrcText;
         } catch (error) {
-            hilog.error(0x0000, TAG, `${this.getNetEaseLyric.name} 异常: ${error}`);
+            console.error(TAG, `${this.getNetEaseLyric.name} 异常: ${error}`);
             return null;
         }
     }
@@ -378,7 +381,7 @@ export class HttpUtils {
      */
     public async getSongsByQQ(keyword: string, page: number = 1): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getSongsByQQ.name}: 网络不可用`)
+            console.error(TAG, `${this.getSongsByQQ.name}: 网络不可用`)
             return null;
         }
 
@@ -391,7 +394,7 @@ export class HttpUtils {
         try {
             await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
                 if (data.responseCode !== 200) {
-                    hilog.error(0x0000, TAG, `${this.getSongsByQQ.name}: HTTP错误 ${data.responseCode}`);
+                    console.error(TAG, `${this.getSongsByQQ.name}: HTTP错误 ${data.responseCode}`);
                     return;
                 }
 
@@ -413,17 +416,17 @@ export class HttpUtils {
                         musics.push(music);
                     });
 
-                    hilog.info(0x0000, TAG, `${this.getSongsByQQ.name}: 成功获取搜索结果 ${musics.length} 条`);
+                    console.info(TAG, `${this.getSongsByQQ.name}: 成功获取搜索结果 ${musics.length} 条`);
                 } else {
-                    hilog.error(0x0000, TAG, `${this.getSongsByQQ.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${this.getSongsByQQ.name}: API错误 ${resultObj.code}`);
                 }
             }).catch((err) => {
-                hilog.error(0x0000, TAG, `${this.getSongsByQQ.name}: ${err}`);
+                console.error(TAG, `${this.getSongsByQQ.name}: ${err}`);
             });
 
             return musics;
         } catch (error) {
-            hilog.error(0x0000, TAG, `${this.getSongsByQQ.name} 异常: ${error}`);
+            console.error(TAG, `${this.getSongsByQQ.name} 异常: ${error}`);
             return null;
         }
     }
@@ -436,7 +439,7 @@ export class HttpUtils {
      */
     public async getSingersByQQ(keyword: string, page: number = 1): Promise<SingerInfo[]> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getSingersByQQ.name}: 网络不可用`)
+            console.error(TAG, `${this.getSingersByQQ.name}: 网络不可用`)
             return null;
         }
 
@@ -448,7 +451,7 @@ export class HttpUtils {
         try {
             await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
                 if (data.responseCode !== 200) {
-                    hilog.error(0x0000, TAG, `${this.getSingersByQQ.name}: HTTP错误 ${data.responseCode}`);
+                    console.error(TAG, `${this.getSingersByQQ.name}: HTTP错误 ${data.responseCode}`);
                     return;
                 }
 
@@ -468,17 +471,17 @@ export class HttpUtils {
                         singers.push(singer);
                     });
 
-                    hilog.info(0x0000, TAG, `${this.getSingersByQQ.name}: 成功获取搜索结果 ${singers.length} 条`);
+                    console.info(TAG, `${this.getSingersByQQ.name}: 成功获取搜索结果 ${singers.length} 条`);
                 } else {
-                    hilog.error(0x0000, TAG, `${this.getSingersByQQ.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${this.getSingersByQQ.name}: API错误 ${resultObj.code}`);
                 }
             }).catch((err) => {
-                hilog.error(0x0000, TAG, `${this.getSingersByQQ.name}: ${err}`);
+                console.error(TAG, `${this.getSingersByQQ.name}: ${err}`);
             });
 
             return singers;
         } catch (error) {
-            hilog.error(0x0000, TAG, `${this.getSingersByQQ.name} 异常: ${error}`);
+            console.error(TAG, `${this.getSingersByQQ.name} 异常: ${error}`);
             return null;
         }
     }
@@ -489,7 +492,7 @@ export class HttpUtils {
      */
     async getQQMusic(id: string, quality: QQMusicQuality = QQMusicQuality.HQ): Promise<MusicInfo> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getQQMusic.name}: 网络不可用`);
+            console.error(TAG, `${this.getQQMusic.name}: 网络不可用`);
             return null;
         }
 
@@ -513,10 +516,10 @@ export class HttpUtils {
                 });
 
             } else {
-                hilog.error(0x0000, TAG, `${this.getQQMusic.name}: ${data.responseCode} ${resultObj["code"]}`);
+                console.error(TAG, `${this.getQQMusic.name}: ${data.responseCode} ${resultObj["code"]}`);
             }
         }).catch((err) => {
-            hilog.error(0x0000, TAG, `${this.getQQMusic.name}: ${err}`);
+            console.error(TAG, `${this.getQQMusic.name}: ${err}`);
         })
 
         return music_info;
@@ -531,7 +534,7 @@ export class HttpUtils {
      */
     public async getSingerSongsByQQ(id: string, page: number = 1): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) {
-            hilog.error(0x0000, TAG, `${this.getSingerSongsByQQ.name}: 网络不可用`)
+            console.error(TAG, `${this.getSingerSongsByQQ.name}: 网络不可用`)
             return null;
         }
 
@@ -543,7 +546,7 @@ export class HttpUtils {
         try {
             await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
                 if (data.responseCode !== 200) {
-                    hilog.error(0x0000, TAG, `${this.getSingerSongsByQQ.name}: HTTP错误 ${data.responseCode}`);
+                    console.error(TAG, `${this.getSingerSongsByQQ.name}: HTTP错误 ${data.responseCode}`);
                     return;
                 }
 
@@ -562,17 +565,17 @@ export class HttpUtils {
                         songs.push(music);
                     });
 
-                    hilog.info(0x0000, TAG, `${this.getSingerSongsByQQ.name}: 成功获取搜索结果 ${songs.length} 条`);
+                    console.info(TAG, `${this.getSingerSongsByQQ.name}: 成功获取搜索结果 ${songs.length} 条`);
                 } else {
-                    hilog.error(0x0000, TAG, `${this.getSingerSongsByQQ.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${this.getSingerSongsByQQ.name}: API错误 ${resultObj.code}`);
                 }
             }).catch((err) => {
-                hilog.error(0x0000, TAG, `${this.getSingerSongsByQQ.name}: ${err}`);
+                console.error(TAG, `${this.getSingerSongsByQQ.name}: ${err}`);
             });
 
             return songs;
         } catch (error) {
-            hilog.error(0x0000, TAG, `${this.getSingerSongsByQQ.name} 异常: ${error}`);
+            console.error(TAG, `${this.getSingerSongsByQQ.name} 异常: ${error}`);
             return null;
         }
     }

@@ -3,6 +3,8 @@ import common from '@ohos.app.ability.common';
 import { enumToString, MusicInfo, PlaylistType } from '../model/MusicData';
 import { MediaTools } from '../common/MediaTools'
 import { BackgroundUtil } from '../common/BackgroundUtil'
+import { HttpUtils } from './network/HttpUtils';
+import { NetEaseQuality } from './constants/NetEaseAPI';
 
 const TAG = 'MediaService';
 
@@ -45,6 +47,7 @@ export enum PlayerState {
 export class MediaService {
     private context: common.UIAbilityContext | undefined = AppStorage.Get('context');
     public avPlayer: media.AVPlayer | null = null;
+    private http: HttpUtils = new HttpUtils();
     /**
      * 播放顺序
      */
@@ -308,6 +311,16 @@ export class MediaService {
         });
     }
 
+    private async setUrl(id: string, quality: NetEaseQuality = NetEaseQuality.SQ) {
+        let music: MusicInfo = null;
+        while (true) {
+            music = await this.http.getNetEaseMusic(id, quality)
+            if (music)
+                break;
+        }
+        this.avPlayer.url = music.url;
+    }
+
     /**
      * 监听播放状态
      */
@@ -347,12 +360,7 @@ export class MediaService {
                 // url:只允许在idle状态下设置 -> initialized 状态
                     this.setPlayState(PlayerState.IDLE);
                     if (!this.currentPlayQueue[this.currentMusicIndex].pay) {
-                        const url = this.currentPlayQueue[this.currentMusicIndex].url;
-                        if (url === '') {
-                            console.error(TAG, `currentPlayQueue[${this.currentMusicIndex}] url is empty`);
-                            return;
-                        }
-                        this.avPlayer.url = url;
+                        this.setUrl(this.currentPlayQueue[this.currentMusicIndex].id);
                     }
                     break;
 
@@ -411,7 +419,7 @@ export class MediaService {
         if (this.currentPlayQueue[this.currentMusicIndex].pay)
             return false;
 
-        this.avPlayer.url = this.currentPlayQueue[this.currentMusicIndex].url;
+        this.setUrl(this.currentPlayQueue[this.currentMusicIndex].id);
         return true;
     }
 
@@ -435,7 +443,7 @@ export class MediaService {
         // 第一次播放 手动更新状态
         if (this.isFirst) {
             this.isFirst = false;
-            this.avPlayer.url = this.currentPlayQueue[this.currentMusicIndex].url;
+            this.setUrl(this.currentPlayQueue[this.currentMusicIndex].id);
         } else {
             await this.avPlayer.stop();
         }
@@ -651,6 +659,8 @@ export class MediaService {
 
         if (this.context)
             BackgroundUtil.stopContinuousTask(this.context);
+
+        this.http.destroy();
     }
 
     /**
