@@ -24,12 +24,17 @@ export class BreakpointType<T> {
  */
 export class BreakpointSystem {
     private currentBreakpoint: string = BreakpointConstants.BREAKPOINT_SM;
+    // small
     private smListener: mediaQuery.MediaQueryListener;
+    // medium
     private mdListener: mediaQuery.MediaQueryListener;
+    // large
     private lgListener: mediaQuery.MediaQueryListener;
-    private orientationListener: mediaQuery.MediaQueryListener;
-    private portraitListener: mediaQuery.MediaQueryListener;
 
+    /**
+     * 更新当前断点
+     * @param breakpoint
+     */
     private updateCurrentBreakpoint(breakpoint: string): void {
         if (this.currentBreakpoint !== breakpoint) {
             this.currentBreakpoint = breakpoint;
@@ -37,58 +42,38 @@ export class BreakpointSystem {
         }
     }
 
-    private isBreakpointSM = (mediaQueryResult: mediaQuery.MediaQueryResult): void => {
-        if (mediaQueryResult.matches) {
-            // console.log(`small`);
-            this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_SM);
-        }
-    }
-    private isBreakpointMD = (mediaQueryResult: mediaQuery.MediaQueryResult): void => {
-        if (mediaQueryResult.matches) {
-            // console.log(`medium`);
-            this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_MD);
-        }
-    }
-    private isBreakpointLG = (mediaQueryResult: mediaQuery.MediaQueryResult): void => {
-        if (mediaQueryResult.matches) {
-            // console.log(`large`);
-            this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_LG);
-        }
-    }
-
+    /**
+     * 注册事件
+     */
     public register(): void {
         this.smListener = mediaQuery.matchMediaSync(BreakpointConstants.RANGE_SM);
-        this.smListener.on('change', this.isBreakpointSM);
-
-        this.mdListener = mediaQuery.matchMediaSync(BreakpointConstants.RANGE_MD);
-        this.mdListener.on('change', this.isBreakpointMD);
-
-        this.lgListener = mediaQuery.matchMediaSync(BreakpointConstants.RANGE_LG);
-        this.lgListener.on('change', this.isBreakpointLG);
-
-        this.orientationListener = mediaQuery.matchMediaSync(BreakpointConstants.ORIENTATION);
-
-        // 横屏
-        this.orientationListener.on('change', (result: mediaQuery.MediaQueryResult) => {
+        this.smListener.on('change', (result: mediaQuery.MediaQueryResult) => {
             if (result.matches) {
-                // console.log('横屏');
+                console.log(`small`);
+                this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_SM);
             }
         });
 
-        // 竖屏
-        this.portraitListener = mediaQuery.matchMediaSync(BreakpointConstants.PORTRAIT);
-        this.portraitListener.on('change', (result: mediaQuery.MediaQueryResult) => {
+        this.mdListener = mediaQuery.matchMediaSync(BreakpointConstants.RANGE_MD);
+        this.mdListener.on('change', (result: mediaQuery.MediaQueryResult) => {
             if (result.matches) {
-                // console.log('竖屏');
+                console.log(`medium`);
+                this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_MD);
+            }
+        });
+
+        this.lgListener = mediaQuery.matchMediaSync(BreakpointConstants.RANGE_LG);
+        this.lgListener.on('change', (mediaQueryResult: mediaQuery.MediaQueryResult) => {
+            if (mediaQueryResult.matches) {
+                console.log(`large`);
+                this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_LG);
             }
         });
     }
 
     public unregister(): void {
-        this.smListener.off('change', this.isBreakpointSM);
-        this.mdListener.off('change', this.isBreakpointMD);
-        this.lgListener.off('change', this.isBreakpointLG);
-        this.orientationListener.off('change');
-        this.portraitListener.off('change');
+        this.smListener.off('change');
+        this.mdListener.off('change');
+        this.lgListener.off('change');
     }
 }
