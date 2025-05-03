@@ -51,12 +51,11 @@ export class HttpUtils {
                     music_info.singer = resultObj.data.singer;
                     music_info.url = resultObj.data.Music;
                     music_info.pic = resultObj.data.cover;
-                    music_info.lrc = resultObj.data.lrc || '';
                     music_info.pay = false;
                     music_info.where = MusicFrom.NetEase;
 
                 } else {
-                    console.error(TAG, `${this.getRandMusic.name}: ${data.responseCode}`);
+                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getRandMusic.name} ${api_url}`);
                 }
             })
             .catch((err) => {
@@ -100,7 +99,6 @@ export class HttpUtils {
                         // 某些VIP歌曲不能试听
                         song.url = `http://music.163.com/song/media/outer/url?id=${item.id}`
                         song.pic = item.al.picUrl;
-                        song.lrc = '';
                         song.pay = false;
                         song.where = MusicFrom.NetEase;
                         songs.push(song);
@@ -140,13 +138,12 @@ export class HttpUtils {
                 song.singer = resultObj.data.singer;
                 song.url = resultObj.data.url;
                 song.pic = resultObj.data.cover;
-                song.lrc = resultObj.data.lrc || '';
                 song.pay = false;
                 song.where = MusicFrom.NetEase;
 
                 console.log(TAG, `${this.getNetEaseMusic.name} ${api_url}`);
             } else {
-                console.error(TAG, `${this.getNetEaseMusic.name} ${api_url} ${data.responseCode} ${resultObj.code}`);
+                console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEaseMusic.name} ${api_url}`);
                 song = null;
             }
         }).catch((err) => {
@@ -197,15 +194,13 @@ export class HttpUtils {
                             song.pic = item.cover;
                             song.where = MusicFrom.NetEase;
                             song.pay = false;
-                            song.lrc = '';
                             song.url = `http://music.163.com/song/media/outer/url?id=${item.id}`;
 
                             musics.push(song);
                         });
 
-                        console.log(TAG, `${this.getSongsByNetEase.name} 成功获取搜索结果 ${musics.length} 条 ${api_url}`);
                     } else {
-                        console.error(TAG, `${this.getSongsByNetEase.name} ${api_url} ${resultObj.code}`);
+                        console.error(TAG, `${resultObj.code} ${this.getSongsByNetEase.name} ${api_url}`);
                     }
                 })
                 .catch((err) => {
@@ -260,9 +255,8 @@ export class HttpUtils {
                         singers.push(singer);
                     });
 
-                    console.info(TAG, `${this.getSingersByNetEase.name}: 成功获取搜索结果 ${singers.length} 条`);
                 } else {
-                    console.error(TAG, `${this.getSingersByNetEase.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${resultObj.code} ${this.getSingersByNetEase.name} ${api_url}`);
                 }
             }).catch((err) => {
                 console.error(TAG, `${this.getSingersByNetEase.name}: ${err}`);
@@ -314,9 +308,8 @@ export class HttpUtils {
                         songs.push(music);
                     });
 
-                    console.info(TAG, `${this.getSingerSongsByNetEase.name}: 成功获取搜索结果 ${songs.length} 条`);
                 } else {
-                    console.error(TAG, `${this.getSingerSongsByNetEase.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${resultObj.code} ${this.getSingerSongsByNetEase.name} ${api_url}`);
                 }
             }).catch((err) => {
                 console.error(TAG, `${this.getSingerSongsByNetEase.name}: ${err}`);
@@ -358,7 +351,7 @@ export class HttpUtils {
                 if (resultObj.code === 200 && resultObj.data && resultObj.data.lrc)
                     lrcText = resultObj.data.lrc;
                 else
-                    console.error(TAG, `${this.getNetEaseLyric.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${resultObj.code} ${this.getNetEaseLyric.name} ${api_url}`);
 
             }).catch((err) => {
                 console.error(TAG, `${this.getNetEaseLyric.name}: ${err}`);
@@ -411,14 +404,12 @@ export class HttpUtils {
                         music.pic = item.cover;
                         music.where = MusicFrom.QQ;
                         music.pay = (item.pay === "付费");
-                        music.lrc = '';
 
                         musics.push(music);
                     });
 
-                    console.info(TAG, `${this.getSongsByQQ.name}: 成功获取搜索结果 ${musics.length} 条`);
                 } else {
-                    console.error(TAG, `${this.getSongsByQQ.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${resultObj.code} ${this.getSongsByQQ.name} ${api_url}`);
                 }
             }).catch((err) => {
                 console.error(TAG, `${this.getSongsByQQ.name}: ${err}`);
@@ -471,9 +462,8 @@ export class HttpUtils {
                         singers.push(singer);
                     });
 
-                    console.info(TAG, `${this.getSingersByQQ.name}: 成功获取搜索结果 ${singers.length} 条`);
                 } else {
-                    console.error(TAG, `${this.getSingersByQQ.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${resultObj.code} ${this.getSingersByQQ.name} ${api_url}`);
                 }
             }).catch((err) => {
                 console.error(TAG, `${this.getSingersByQQ.name}: ${err}`);
@@ -503,23 +493,21 @@ export class HttpUtils {
         await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
             let resultObj = JSON.parse(data.result as string);
 
-            if (data.responseCode === 200 && resultObj["code"] === 200) {
-                resultObj.data.forEach((item) => {
-                    music_info.id = item.id;
-                    music_info.name = item.song;
-                    music_info.singer = item.singer;
-                    music_info.url = item.url;
-                    music_info.pic = item.cover;
-                    music_info.lrc = item.lrc || '';
-                    music_info.pay = item.pay === '付费';
-                    music_info.where = MusicFrom.QQ;
-                });
+            if (data.responseCode === 200 && resultObj.code === 200) {
+                music_info.id = resultObj.data.id;
+                music_info.name = resultObj.data.song;
+                music_info.singer = resultObj.data.singer;
+                music_info.url = resultObj.data.url;
+                music_info.pic = resultObj.data.cover;
+                music_info.pay = resultObj.data.pay === '付费';
+                music_info.where = MusicFrom.QQ;
 
+                console.log(TAG, `${this.getQQMusic.name} ${api_url}`);
             } else {
-                console.error(TAG, `${this.getQQMusic.name}: ${data.responseCode} ${resultObj["code"]}`);
+                console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getQQMusic.name} ${api_url}`);
             }
         }).catch((err) => {
-            console.error(TAG, `${this.getQQMusic.name}: ${err}`);
+            console.error(TAG, `${this.getQQMusic.name} ${api_url} ${err}`);
         })
 
         return music_info;
@@ -565,9 +553,8 @@ export class HttpUtils {
                         songs.push(music);
                     });
 
-                    console.info(TAG, `${this.getSingerSongsByQQ.name}: 成功获取搜索结果 ${songs.length} 条`);
                 } else {
-                    console.error(TAG, `${this.getSingerSongsByQQ.name}: API错误 ${resultObj.code}`);
+                    console.error(TAG, `${resultObj.code} ${this.getSingerSongsByQQ.name} ${api_url}`);
                 }
             }).catch((err) => {
                 console.error(TAG, `${this.getSingerSongsByQQ.name}: ${err}`);

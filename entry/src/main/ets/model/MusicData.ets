@@ -38,8 +38,6 @@ export class MusicInfo {
     url?: string = '';
     // 封面 pic
     pic?: string = '';
-    // 歌词链接
-    lrc?: string = '';
     // 是否收费
     pay?: boolean = false;
     // 来自
@@ -49,14 +47,13 @@ export class MusicInfo {
     // 用户喜欢
     love?: boolean = false;
 
-    constructor(index: number = 0, id: string = '', name = '', singer = '', url = '', pic = '', lrc = '', pay = false, where = MusicFrom.NetEase) {
+    constructor(index: number = 0, id: string = '', name = '', singer = '', url = '', pic = '', pay = false, where = MusicFrom.NetEase) {
         this.index = index;
         this.id = id;
         this.name = name;
         this.singer = singer;
         this.url = url;
         this.pic = pic;
-        this.lrc = lrc;
         this.pay = pay;
         this.where = where;
     }
@@ -71,6 +68,6 @@ export class MusicInfo {
     }
 
     toString(): string {
-        return `id: ${this.id}, name: ${this.name}, singer: ${this.singer}, url: ${this.url}, cover_url: ${this.pic}, lrc_url: ${this.lrc}, pay: ${this.pay}, where: ${this.where}`;
+        return `id: ${this.id}, name: ${this.name}, singer: ${this.singer}, url: ${this.url}, cover_url: ${this.pic}, pay: ${this.pay}, where: ${this.where}`;
     }
 }
