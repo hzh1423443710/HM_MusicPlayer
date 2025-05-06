@@ -90,7 +90,7 @@ struct SearchPage {
                     TabContent() {
                         Column() {
                             if (this.viewModel.searchState === SearchState.SEARCHING && this.viewModel.songDataSource.totalCount() === 0) {
-                                Text('搜索中')
+                                Text(this.viewModel.getStateText())
                                 LoadingProgress()
                                     .width(30)
                                     .height(30)
@@ -137,7 +137,7 @@ struct SearchPage {
                     TabContent() {
                         Column() {
                             if (this.viewModel.searchState === SearchState.SEARCHING && this.viewModel.singerDataSource.totalCount() === 0) {
-                                Text('搜索中')
+                                Text(this.viewModel.getStateText())
                                 LoadingProgress()
                                     .width(30)
                                     .height(30)

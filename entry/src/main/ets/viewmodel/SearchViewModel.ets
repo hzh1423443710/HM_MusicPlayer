@@ -280,7 +280,7 @@ export class SearchViewModel {
 
             case SearchState.SUCCESS:
             default:
-                return '';
+                return '加载完毕';
         }
 
     }

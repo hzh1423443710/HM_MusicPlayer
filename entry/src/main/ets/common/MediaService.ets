@@ -11,7 +11,7 @@ const TAG = 'MediaService';
 /**
  * 播放模式
  */
-enum MusicPlayMode {
+export enum MusicPlayMode {
     // 单曲循环
     SINGLE_CYCLE = 0,
     // 顺序播放
@@ -315,13 +315,16 @@ export class MediaService {
         let music: MusicInfo = null;
         const song = this.currentPlayQueue[this.currentMusicIndex];
 
-        while (true) {
+        let try_cnt = 5;
+
+        while (try_cnt--) {
             if (song.where === MusicFrom.NetEase)
                 music = await this.http.getNetEaseMusic(song.id)
             else
                 music = await this.http.getQQMusic(song.id)
 
             if (music) break;
+            setTimeout('', 500);
         }
         this.avPlayer.url = music.url;
 
