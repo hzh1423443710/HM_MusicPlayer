@@ -17,6 +17,7 @@ struct SearchPage {
     @State viewModel: SearchViewModel = searchViewModel;
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @State currentMusic: MusicInfo = new MusicInfo();
+    media: MediaService = MediaService.getInstance();
 
     aboutToAppear(): void {
         console.log(`SearchPage appear`)
@@ -25,7 +26,7 @@ struct SearchPage {
     }
 
     onPlayStateChanged() {
-        this.currentMusic = MediaService.getInstance().getCurrentMusic();
+        this.currentMusic = this.media.getCurrentMusic();
     }
 
     aboutToDisappear(): void {
@@ -103,8 +104,7 @@ struct SearchPage {
                                             Row() {
                                                 MusicItem({ index: index + 1, song: song, showCover: false })
                                                     .onClick(() => {
-                                                        MediaService.getInstance()
-                                                            .playOne(song, this.viewModel.songDataSource.items, PlaylistType.SEARCH);
+                                                        this.media.playOne(song, this.viewModel.songDataSource.items, PlaylistType.SEARCH);
                                                     })
                                             }
                                             .justifyContent(FlexAlign.Start)

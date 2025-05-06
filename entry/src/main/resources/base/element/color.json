@@ -27,6 +27,10 @@
         {
             "name": "tab_font_selected_color",
             "value": "#007DFF"
+        },
+        {
+            "name": "selected",
+            "value": "#ccd3d3d3"
         }
     ]
 }

@@ -4,7 +4,7 @@ import { enumToString, MusicFrom, MusicInfo, PlaylistType } from '../model/Music
 import { MediaTools } from '../common/MediaTools'
 import { BackgroundUtil } from '../common/BackgroundUtil'
 import { HttpUtils } from './network/HttpUtils';
-import { NetEaseQuality } from './constants/NetEaseAPI';
+import promptAction from '@ohos.promptAction';
 
 const TAG = 'MediaService';
 
@@ -80,10 +80,6 @@ export class MediaService {
      * seek & timeUpdate 播放进度控制
      */
     private isCurrent: boolean = true;
-    /**
-     * 是否第一次播放
-     */
-    private isFirst: boolean = true;
 
     constructor() {
         this.initAudioPlayer();
@@ -140,7 +136,7 @@ export class MediaService {
     }
 
     public debugState() {
-        console.log(TAG, `当前状态: ${enumToString(PlaylistType, this.getCurrentPlaylistType())}, ${enumToString(PlayerState, this.getPlayState())}, url=${this.avPlayer.url}, isFirst=${this.isFirst}`);
+        console.log(TAG, `播放列表: ${enumToString(PlaylistType, this.getCurrentPlaylistType())}, 播放状态:${enumToString(PlayerState, this.getPlayState())}, index[${this.currentMusicIndex}] Music:${this.currentPlayQueue[this.currentMusicIndex]}`);
     }
 
     // ================================== 播放队列管理 =================================
@@ -311,9 +307,13 @@ export class MediaService {
         });
     }
 
-    private async setUrl() {
+    /**
+     * 设置播放链接 url
+     * @param musicIndex
+     */
+    private async setUrl(musicIndex: number = this.currentMusicIndex) {
         let music: MusicInfo = null;
-        const song = this.currentPlayQueue[this.currentMusicIndex];
+        const song = this.currentPlayQueue[musicIndex];
 
         let try_cnt = 5;
 
@@ -326,10 +326,16 @@ export class MediaService {
             if (music) break;
             setTimeout('', 500);
         }
-        this.avPlayer.url = music.url;
 
+        if (music.pay) {
+            promptAction.showToast({ message: '付费音乐，无法播放' });
+            return;
+        }
+
+        this.avPlayer.url = music.url;
+        // 更新当前播放索引
+        this.updateCurrentMusicIndex(musicIndex);
         this.debugState();
-        console.log(TAG, `index[${this.currentMusicIndex}] ${enumToString(PlaylistType, this.currentPlaylistType)} ${this.currentPlayQueue[this.currentMusicIndex]}`);
     }
 
     /**
@@ -350,7 +356,6 @@ export class MediaService {
             console.error(TAG, `AVPlayer onError: code is ${err.code}, message is ${err.message}`);
             if (this.avPlayer) {
                 this.avPlayer.reset();
-                this.isFirst = true;
                 this.currentPlayQueue[this.currentMusicIndex].pay = true;
             }
         });
@@ -370,9 +375,7 @@ export class MediaService {
                 case 'idle':
                 // url:只允许在idle状态下设置 -> initialized 状态
                     this.setPlayState(PlayerState.IDLE);
-                    if (!this.currentPlayQueue[this.currentMusicIndex].pay) {
-                        this.setUrl();
-                    }
+                    this.setUrl();
                     break;
 
                 case 'initialized':
@@ -423,18 +426,6 @@ export class MediaService {
     }
 
     /**
-     * 重新播放
-     * @returns 付费=播放失败
-     */
-    async rePlay() {
-        if (this.currentPlayQueue[this.currentMusicIndex].pay)
-            return false;
-
-        this.setUrl();
-        return true;
-    }
-
-    /**
      * 更新音乐索引 并加载
      * @param musicIndex
      */
@@ -446,16 +437,7 @@ export class MediaService {
 
         // TODO bug
         BackgroundUtil.startContinuousTask(this.context);
-
-        this.updateCurrentMusicIndex(musicIndex);
-
-        // 第一次播放 手动更新状态
-        if (this.isFirst) {
-            this.isFirst = false;
-            this.setUrl();
-        } else {
-            await this.avPlayer.stop();
-        }
+        this.setUrl(musicIndex);
     }
 
     /**

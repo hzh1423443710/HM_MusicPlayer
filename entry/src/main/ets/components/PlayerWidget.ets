@@ -1,14 +1,15 @@
 import { MusicInfo, PlaylistType } from '../model/MusicData'
-import { PlayerConstants } from '../common/constants/PlayerConstants'
 import router from '@ohos.router';
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
 import { PlayerState, MediaService } from '../common/MediaService';
 import promptAction from '@ohos.promptAction';
 import pasteboard from '@ohos.pasteboard';
+import { BreakpointConstants } from '../common/constants/BreakpointConstants';
 
 @Preview
 @Component
 export struct PlayerWidget {
+    @StorageProp('currentBreakpoint') currentBreakpoint: string = 'sm';
     @State music: MusicInfo = null;
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @State imageRotate: number = 0;
@@ -27,11 +28,6 @@ export struct PlayerWidget {
         if (!new_song.equals(this.music))
             this.music = new_song;
 
-        if (this.music.pay) {
-            promptAction.showToast({ message: '播放失败' });
-            return;
-        }
-
         switch (this.playState) {
             case PlayerState.INITIALIZED:
                 promptAction.showToast({ message: '加载中' });
@@ -49,7 +45,7 @@ export struct PlayerWidget {
     rotateCover() {
         // 封面旋转动画
         this.imageRotate = 0;
-        this.imageRotate = this.playState === PlayerState.PLAY ? PlayerConstants.ROTATE : 0;
+        this.imageRotate = this.playState === PlayerState.PLAY ? 360 : 0;
     }
 
     build() {
@@ -65,8 +61,8 @@ export struct PlayerWidget {
                     .margin({ right: $r('app.float.music_list_cover_margin') })
                     .rotate({ angle: this.imageRotate })
                     .animation({
-                        duration: PlayerConstants.ANIMATION_DURATION,
-                        iterations: PlayerConstants.ITERATIONS,
+                        duration: 3000,
+                        iterations: -1,
                         curve: Curve.Linear
                     })
                     .onAppear(() => {
@@ -106,7 +102,7 @@ export struct PlayerWidget {
                 .alignItems(HorizontalAlign.Start)
 
             } // Row
-            .layoutWeight(PlayerConstants.LAYOUT_WEIGHT_PLAYER_CONTROL)
+            .layoutWeight(1)
             .onClick(() => {
                 router.pushUrl({
                     url: RouterUrlConstants.PLAY
@@ -124,57 +120,46 @@ export struct PlayerWidget {
 
             // 播放控制
             Row() {
-                Image($r('app.media.ic_public_play_last'))
-                    .fillColor($r('app.color.control_icon_color'))
-                    .width($r('app.float.control_icon_width'))
-                    .height($r('app.float.control_icon_height'))
-                    .displayPriority(PlayerConstants.DISPLAY_PRIORITY_TWO)
-                    .onClick(() => {
-                        this.media.playPrevious();
-                    })
+                if (this.currentBreakpoint != BreakpointConstants.BREAKPOINT_SM) {
+                    Image($r('app.media.ic_public_play_last'))
+                        .fillColor($r('app.color.control_icon_color'))
+                        .width($r('app.float.control_icon_width'))
+                        .height($r('app.float.control_icon_height'))
+                        .onClick(() => {
+                            this.media.playPrevious();
+                        })
+                }
+
                 Image(this.playState === PlayerState.PLAY ? $r('app.media.ic_public_pause') : $r('app.media.ic_public_play'))
                     .fillColor($r('app.color.control_icon_color'))
                     .width($r('app.float.control_icon_width'))
                     .height($r('app.float.control_icon_height'))
                     .margin({ left: $r('app.float.control_icon_margin'), right: $r('app.float.control_icon_margin') })
-                    .displayPriority(PlayerConstants.DISPLAY_PRIORITY_THREE)
                     .onClick(() => {
-                        this.media.debugState();
-
                         if (this.media.getCurrentPlaylistType() === PlaylistType.NONE) {
                             promptAction.showToast({ message: '播放队列为空' })
                             return;
                         }
 
-                        if (this.media.getCurrentMusic().pay) {
-                            promptAction.showToast({ message: 'VIP歌曲无法播放' });
-                            return;
-                        }
-
-                        // 遇到不能试听的VIP歌曲 -> idle
-                        if (this.playState === PlayerState.IDLE) {
-                            this.media.rePlay();
-                            return;
-                        }
-
                         this.playState === PlayerState.PLAY ? this.media.pause() : this.media.play();
                     })
-                Image($r('app.media.ic_public_play_next'))
-                    .fillColor($r('app.color.control_icon_color'))
-                    .width($r('app.float.control_icon_width'))
-                    .height($r('app.float.control_icon_height'))
-                    .margin({ right: $r('app.float.control_icon_margin') })
-                    .displayPriority(PlayerConstants.DISPLAY_PRIORITY_TWO)
-                    .onClick(() => {
-                        this.media.playNextAuto(true);
-                    })
+
+                if (this.currentBreakpoint != BreakpointConstants.BREAKPOINT_SM) {
+                    Image($r('app.media.ic_public_play_next'))
+                        .fillColor($r('app.color.control_icon_color'))
+                        .width($r('app.float.control_icon_width'))
+                        .height($r('app.float.control_icon_height'))
+                        .margin({ right: $r('app.float.control_icon_margin') })
+                        .onClick(() => {
+                            this.media.playNextAuto(true);
+                        })
+                }
 
                 // 播放队列
                 Image($r('app.media.ic_music_list'))
                     .fillColor($r('app.color.control_icon_color'))
                     .width($r('app.float.control_icon_width'))
                     .height($r('app.float.control_icon_height'))
-                    .displayPriority(PlayerConstants.DISPLAY_PRIORITY_ONE)
                     .onClick(() => {
                         // debug
                         this.media.debugPlayQueue();

@@ -53,6 +53,7 @@ export struct MusicItem {
                 .fillColor(this.song.love ? Color.Red : Color.Gray)
                 .height(30)
                 .width(30)
+                .margin({ right: 10 })
                 .onClick(() => {
                     if (!AppStorage.Get<boolean>('isLogged')) {
                         promptAction.showToast({ message: '请先登录' });

@@ -54,6 +54,7 @@ export class HttpUtils {
                     music_info.pay = false;
                     music_info.where = MusicFrom.NetEase;
 
+                    console.log(TAG, `${this.getRandMusic.name} ${api_url}`);
                 } else {
                     console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getRandMusic.name} ${api_url}`);
                 }
@@ -104,6 +105,7 @@ export class HttpUtils {
                         songs.push(song);
                     });
 
+                    console.log(TAG, `${this.getNetEaseListSongs.name} ${api_url}`);
                 } else {
                     console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEaseListSongs.name} ${api_url}`);
                 }
@@ -199,6 +201,7 @@ export class HttpUtils {
                             musics.push(song);
                         });
 
+                        console.log(TAG, `${this.getSongsByNetEase.name} ${api_url}`);
                     } else {
                         console.error(TAG, `${resultObj.code} ${this.getSongsByNetEase.name} ${api_url}`);
                     }
@@ -255,6 +258,7 @@ export class HttpUtils {
                         singers.push(singer);
                     });
 
+                    console.log(TAG, `${this.getSingersByNetEase.name} ${api_url}`);
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSingersByNetEase.name} ${api_url}`);
                 }
@@ -308,6 +312,7 @@ export class HttpUtils {
                         songs.push(music);
                     });
 
+                    console.log(TAG, `${this.getSingerSongsByNetEase.name} ${api_url}`);
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSingerSongsByNetEase.name} ${api_url}`);
                 }
@@ -348,8 +353,10 @@ export class HttpUtils {
                 // 解析JSON响应
                 let resultObj = JSON.parse(data.result as string);
 
-                if (resultObj.code === 200 && resultObj.data && resultObj.data.lrc)
+                if (resultObj.code === 200 && resultObj.data && resultObj.data.lrc) {
                     lrcText = resultObj.data.lrc;
+                    console.log(TAG, `${this.getNetEaseLyric.name} ${api_url}`);
+                }
                 else
                     console.error(TAG, `${resultObj.code} ${this.getNetEaseLyric.name} ${api_url}`);
 
@@ -403,11 +410,12 @@ export class HttpUtils {
                         music.singer = item.singer;
                         music.pic = item.cover;
                         music.where = MusicFrom.QQ;
-                        music.pay = (item.pay === "付费");
+                        music.pay = (item.quality === "音乐试听");
 
                         musics.push(music);
                     });
 
+                    console.log(TAG, `${this.getSongsByQQ.name} ${api_url}`);
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSongsByQQ.name} ${api_url}`);
                 }
@@ -462,6 +470,7 @@ export class HttpUtils {
                         singers.push(singer);
                     });
 
+                    console.log(TAG, `${this.getSingersByQQ.name} ${api_url}`);
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSingersByQQ.name} ${api_url}`);
                 }
@@ -499,7 +508,7 @@ export class HttpUtils {
                 music_info.singer = resultObj.data.singer;
                 music_info.url = resultObj.data.url;
                 music_info.pic = resultObj.data.cover;
-                music_info.pay = resultObj.data.pay === '付费';
+                music_info.pay = resultObj.data.quality === '音乐试听';
                 music_info.where = MusicFrom.QQ;
 
                 console.log(TAG, `${this.getQQMusic.name} ${api_url}`);
@@ -547,12 +556,13 @@ export class HttpUtils {
                         music.id = item.id;
                         music.name = item.song;
                         music.pic = item.cover;
-                        music.url = null; // 无该字段
-                        music.pay = item.pay === '付费';
+                        music.url = null;
+                        music.pay = item.quality === '音乐试听';
 
                         songs.push(music);
                     });
 
+                    console.log(TAG, `${this.getSingerSongsByQQ.name} ${api_url}`);
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSingerSongsByQQ.name} ${api_url}`);
                 }
