@@ -101,10 +101,7 @@ struct SearchPage {
                                     LazyForEach(this.viewModel.songDataSource, (song: MusicInfo, index: number) => {
                                         ListItem() {
                                             Row() {
-                                                Text(`${index + 1}`)
-                                                    .textAlign(TextAlign.Center)
-                                                    .width(50)
-                                                MusicItem({ song: song, showCover: false })
+                                                MusicItem({ index: index + 1, song: song, showCover: false })
                                                     .onClick(() => {
                                                         MediaService.getInstance()
                                                             .playOne(song, this.viewModel.songDataSource.items, PlaylistType.SEARCH);
@@ -149,10 +146,7 @@ struct SearchPage {
                                         ListItem() {
                                             Column() {
                                                 Row() {
-                                                    Text(`${index + 1}`)
-                                                        .textAlign(TextAlign.Center)
-                                                        .width(50)
-                                                    SingerItem({ singer: singer })
+                                                    SingerItem({ index: index + 1, singer: singer })
                                                         .onClick(() => {
                                                             // 歌手歌曲页面
                                                         })

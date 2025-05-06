@@ -3,10 +3,12 @@ import { MusicItem } from './MusicItem';
 import { BaseNetEaseLongListViewModel } from '../viewmodel/BaseNetEaseLongListViewModel'
 import promptAction from '@ohos.promptAction';
 import { MediaService, PlayerState } from '../common/MediaService';
+import { BreakpointConstants } from '../common/constants/BreakpointConstants';
 
 @Preview
 @Component
 export struct NetEaseTopWidget {
+    @StorageProp('currentBreakpoint') currentBreakpoint: string = 'sm';
     @Link viewModel: BaseNetEaseLongListViewModel;
     @State isRefreshing: boolean = false;
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
@@ -98,10 +100,7 @@ export struct NetEaseTopWidget {
                     LazyForEach(this.viewModel.songDataSource, (item: MusicInfo, index: number) => {
                         ListItem() {
                             Row() {
-                                Text(`${index + 1}`)
-                                    .textAlign(TextAlign.Center)
-                                    .width(50)
-                                MusicItem({ song: item, showCover: !(index >= 3) })// .layoutWeight(1)
+                                MusicItem({ index: index + 1, song: item, showCover: !(index >= 3) })// .layoutWeight(1)
                                     .onClick(() => {
                                         this.media.playOne(item, this.viewModel.musicList, this.viewModel.playlistType);
                                     })
@@ -117,6 +116,7 @@ export struct NetEaseTopWidget {
                 .edgeEffect(EdgeEffect.Spring)
                 .width('100%')
                 .cachedCount(10)
+                .lanes(this.currentBreakpoint === BreakpointConstants.BREAKPOINT_LG ? 2 : 1)
                 .onReachEnd(() => {
                     // 触底动态加载
                     let cnt: number = this.viewModel.loadMusicNonFirst();
