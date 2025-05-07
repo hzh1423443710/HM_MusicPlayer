@@ -9,7 +9,7 @@ export default class EntryAbility extends UIAbility {
     onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
 
-        // TODO
+        // 应用启动时 存储上下文
         AppStorage.SetOrCreate('context', this.context);
     }
 

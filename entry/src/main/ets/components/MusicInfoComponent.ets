@@ -1,13 +1,20 @@
 import { BreakpointType } from '../common/BreakpointSystem';
 import { PlayConstants } from '../common/constants/PlayConstants';
-import { MusicInfo } from '../model/MusicData';
+import { MusicFrom, MusicInfo } from '../model/MusicData';
 import promptAction from '@ohos.promptAction';
+import { HttpUtils } from '../common/network/HttpUtils';
+import { downloadAudio, getPickerURI } from '../common/DownloadUtil';
 
 @Preview
 @Component
 export struct MusicInfoComponent {
     @StorageProp('currentBreakpoint') currentBreakpoint: string = 'sm';
     @Prop music: MusicInfo;
+    http: HttpUtils = new HttpUtils();
+
+    aboutToDisappear(): void {
+        this.http.destroy();
+    }
 
     build() {
         Column() {
@@ -137,8 +144,20 @@ export struct MusicInfoComponent {
                     lg: 30
                 }).getValue(this.currentBreakpoint))
                 .objectFit(ImageFit.Contain)
-                .onClick(() => {
-                    promptAction.showToast({ message: '下载' })
+                .onClick(async () => {
+                    let url: string;
+                    if (this.music.where === MusicFrom.NetEase)
+                        await this.http.getNetEaseMusic(this.music.id).then((music) => {
+                            url = music.url;
+                        });
+                    else
+                        await this.http.getQQMusic(this.music.id).then((music) => {
+                            url = music.url;
+                        });
+
+                    getPickerURI(this.music.name).then((savePath: string) => {
+                        downloadAudio(url, savePath);
+                    });
                 })
 
             // 喜欢
