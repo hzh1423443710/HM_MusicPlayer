@@ -703,4 +703,12 @@ export class MediaService {
         if (this.currentMusicIndex != musicIndex)
             this.currentMusicIndex = musicIndex;
     }
+
+    /**
+     * 设置倍速:0.75/1.0/1.25/1.75/2.0
+     * @param speed
+     */
+    public setPlaySpeed(speed: media.PlaybackSpeed) {
+        this.avPlayer.setSpeed(speed);
+    }
 }

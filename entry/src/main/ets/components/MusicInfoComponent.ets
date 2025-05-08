@@ -4,13 +4,21 @@ import { MusicFrom, MusicInfo } from '../model/MusicData';
 import promptAction from '@ohos.promptAction';
 import { HttpUtils } from '../common/network/HttpUtils';
 import { downloadAudio, getPickerURI } from '../common/DownloadUtil';
+import { MediaService } from '../common/MediaService';
 
+/**
+ * 音乐信息(封面 歌名 歌手 操作按钮)
+ */
 @Preview
 @Component
 export struct MusicInfoComponent {
     @StorageProp('currentBreakpoint') currentBreakpoint: string = 'sm';
     @Prop music: MusicInfo;
     http: HttpUtils = new HttpUtils();
+    speeds: number[] = [0.75, 1.0, 1.25, 1.75, 2.0];
+    currentSpeedIndex: number = 1;
+    media: MediaService = MediaService.getInstance();
+    @State currentSpeed: string = '1.00x';
 
     aboutToDisappear(): void {
         this.http.destroy();
@@ -171,6 +179,20 @@ export struct MusicInfoComponent {
                 .objectFit(ImageFit.Contain)
                 .onClick(() => {
                     promptAction.showToast({ message: '喜欢' })
+                })
+
+            // 倍速
+            Text(this.currentSpeed)
+                .fontSize(new BreakpointType({
+                    sm: 16,
+                    md: 16,
+                    lg: 24
+                }).getValue(this.currentBreakpoint))
+                .fontColor('#376668')
+                .onClick(() => {
+                    this.currentSpeedIndex = (this.currentSpeedIndex + 1) % this.speeds.length;
+                    this.media.setPlaySpeed(this.currentSpeedIndex);
+                    this.currentSpeed = `${this.speeds[this.currentSpeedIndex].toFixed(2)}x`;
                 })
 
             // 更多 - 添加到歌单
