@@ -89,6 +89,15 @@ export class MediaService {
         this.playlistMap.set(PlaylistType.NETEASE_RANDOM_SONG, []);
     }
 
+
+    get playQueue(): MusicInfo[] {
+        return this.currentPlayQueue;
+    }
+
+    get playlistType(): PlaylistType {
+        return this.currentPlaylistType;
+    }
+
     // ================================== 播放状态管理 ==================================
     public setPlayState(state: PlayerState) {
         AppStorage.SetOrCreate('playState', state);
@@ -111,7 +120,7 @@ export class MediaService {
      * 通知更新 随机一曲 组件
      */
     private notifyUpdateRandWidget() {
-        if (this.getCurrentPlaylistType() === PlaylistType.NETEASE_RANDOM_SONG) {
+        if (this.playlistType === PlaylistType.NETEASE_RANDOM_SONG) {
             // 更新一组 随机一曲
             if (this.currentMusicIndex === this.currentPlayQueue.length - 2) {
                 AppStorage.SetOrCreate('needAppend', Date.now());
@@ -136,7 +145,7 @@ export class MediaService {
     }
 
     public debugState() {
-        console.log(TAG, `播放列表: ${enumToString(PlaylistType, this.getCurrentPlaylistType())}, 播放状态:${enumToString(PlayerState, this.getPlayState())}, index[${this.currentMusicIndex}] Music:${this.currentPlayQueue[this.currentMusicIndex]}`);
+        console.log(TAG, `播放列表: ${enumToString(PlaylistType, this.playlistType)}, 播放状态:${enumToString(PlayerState, this.getPlayState())}, index[${this.currentMusicIndex}] Music:${this.currentPlayQueue[this.currentMusicIndex]}`);
     }
 
     // ================================== 播放队列管理 =================================
@@ -176,7 +185,7 @@ export class MediaService {
             });
 
             // 正在播放
-            if (this.getCurrentPlaylistType() === PlaylistType.NETEASE_RANDOM_SONG) {
+            if (this.playlistType === PlaylistType.NETEASE_RANDOM_SONG) {
                 // 更新播放队列
                 this.setPlayQueue(playlist, PlaylistType.NETEASE_RANDOM_SONG);
                 this.currentMusicIndex = this.currentPlayQueue.findIndex(item => item.id === curSong.id);
@@ -246,17 +255,19 @@ export class MediaService {
             this.loadAssent(this.currentPlayQueue.findIndex(item => item.id === song.id && item.where === song.where));
         } else {
             // 搜索结果 && 当前播放队列为空
-            if (this.getCurrentPlaylistType() === PlaylistType.NONE) {
+            if (this.playlistType === PlaylistType.NONE) {
                 this.playlistMap.set(type, songs);
                 this.setPlayQueue(this.playlistMap.get(type), type);
+                const index = this.currentPlayQueue.findIndex(item => item.id === song.id && item.where === song.where);
 
-                this.loadAssent(0);
+                this.loadAssent(index);
             } else {
                 // 当前队列不为NONE, 插入到当前播放队列
                 this.currentPlayQueue.splice(this.currentMusicIndex + 1, 0, song);
                 this.currentPlayQueue.forEach((item, index) => {
                     item.index = index;
                 });
+
                 this.loadAssent(this.currentMusicIndex + 1);
             }
         }
@@ -285,10 +296,6 @@ export class MediaService {
         this.currentPlayQueue.forEach((item, index) => {
             item.index = index;
         });
-    }
-
-    public getCurrentPlaylistType(): PlaylistType {
-        return this.currentPlaylistType;
     }
 
     // ================================== 播放控制管理 =================================

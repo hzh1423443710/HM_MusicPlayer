@@ -72,7 +72,7 @@ export struct NetEaseTopWidget {
                     .width($r('app.float.control_icon_width'))
                     .height($r('app.float.control_icon_height'))
                     .onClick(() => {
-                        if (this.media.getCurrentPlaylistType() !== this.viewModel.playlistType) {
+                        if (this.media.playlistType !== this.viewModel.playlistType) {
                             this.media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
                             return;
                         }

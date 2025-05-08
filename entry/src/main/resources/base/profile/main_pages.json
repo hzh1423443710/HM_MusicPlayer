@@ -3,6 +3,7 @@
         "pages/AboutPage",
         "pages/ExportPlayListPage",
         "pages/HomePage",
+        "pages/PlayQueuePage",
         "pages/LoginPage",
         "pages/PlayPage",
         "pages/ProfilePage",

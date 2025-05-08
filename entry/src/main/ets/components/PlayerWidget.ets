@@ -136,7 +136,7 @@ export struct PlayerWidget {
                     .height($r('app.float.control_icon_height'))
                     .margin({ left: $r('app.float.control_icon_margin'), right: $r('app.float.control_icon_margin') })
                     .onClick(() => {
-                        if (this.media.getCurrentPlaylistType() === PlaylistType.NONE) {
+                        if (this.media.playlistType === PlaylistType.NONE) {
                             promptAction.showToast({ message: '播放队列为空' })
                             return;
                         }
@@ -161,10 +161,9 @@ export struct PlayerWidget {
                     .width($r('app.float.control_icon_width'))
                     .height($r('app.float.control_icon_height'))
                     .onClick(() => {
-                        // debug
-                        this.media.debugPlayQueue();
-                        this.media.debugPlaylist(this.media.getCurrentPlaylistType());
-
+                        router.pushUrl({
+                            url: RouterUrlConstants.PLAY_QUEUE
+                        });
                     })
             } // Row
             .justifyContent(FlexAlign.SpaceBetween)

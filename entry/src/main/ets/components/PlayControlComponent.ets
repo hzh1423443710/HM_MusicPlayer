@@ -4,6 +4,8 @@ import { PlayControlConstants } from '../common/constants/PlayControlConstants';
 import { MediaService, MusicPlayMode, PlayerState } from '../common/MediaService';
 import { PlayControlModel } from '../model/PlayControlModel'
 import promptAction from '@ohos.promptAction';
+import router from '@ohos.router';
+import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
 
 /**
  * 播放控制子组件
@@ -82,7 +84,9 @@ export struct PlayControlComponent {
                 break;
 
             case PlayControlConstants.PLAY_LIST:
-            // 播放列表
+                router.pushUrl({
+                    url: RouterUrlConstants.PLAY_QUEUE
+                });
                 break;
             default:
                 break;
@@ -115,6 +119,5 @@ export struct PlayControlComponent {
             default:
                 break;
         }
-
     }
 }

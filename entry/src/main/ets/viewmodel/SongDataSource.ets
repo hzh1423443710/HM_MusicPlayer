@@ -20,6 +20,15 @@ export class DataSource<T> implements IDataSource {
         return this.items.length;
     }
 
+    getAllData() {
+        return this.items;
+    }
+
+    setData(newItems: T[]) {
+        this.items = [...newItems];
+        this.notifyDataReload();
+    }
+
     getData(index: number): T {
         return this.items[index];
     }

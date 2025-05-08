@@ -49,7 +49,7 @@ export class BreakpointSystem {
         this.smListener = mediaQuery.matchMediaSync(BreakpointConstants.RANGE_SM);
         this.smListener.on('change', (result: mediaQuery.MediaQueryResult) => {
             if (result.matches) {
-                console.log(`small`);
+                // console.log(`small`);
                 this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_SM);
             }
         });
@@ -57,7 +57,7 @@ export class BreakpointSystem {
         this.mdListener = mediaQuery.matchMediaSync(BreakpointConstants.RANGE_MD);
         this.mdListener.on('change', (result: mediaQuery.MediaQueryResult) => {
             if (result.matches) {
-                console.log(`medium`);
+                // console.log(`medium`);
                 this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_MD);
             }
         });
@@ -65,7 +65,7 @@ export class BreakpointSystem {
         this.lgListener = mediaQuery.matchMediaSync(BreakpointConstants.RANGE_LG);
         this.lgListener.on('change', (mediaQueryResult: mediaQuery.MediaQueryResult) => {
             if (mediaQueryResult.matches) {
-                console.log(`large`);
+                // console.log(`large`);
                 this.updateCurrentBreakpoint(BreakpointConstants.BREAKPOINT_LG);
             }
         });

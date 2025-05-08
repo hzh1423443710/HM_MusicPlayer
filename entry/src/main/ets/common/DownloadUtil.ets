@@ -3,7 +3,7 @@ import request from '@ohos.request';
 import fs from '@ohos.file.fs';
 import promptAction from '@ohos.promptAction';
 
-const TAG = 'Download';
+const TAG = 'DownloadUtil';
 
 /**
  * 替换文件名中的特殊字符
@@ -12,20 +12,6 @@ const TAG = 'Download';
  */
 function getSafeFileName(name: string): string {
     return name.replace(/[\\/:*?"<>|]/g, '_');
-}
-
-async function selectAudio() {
-    try {
-        let AudioSelectOptions = new picker.AudioSelectOptions();
-        let audioPicker = new picker.AudioViewPicker();
-        audioPicker.select(AudioSelectOptions).then((AudioSelectResult) => {
-            console.log(TAG, 'AudioViewPicker.select successfully, AudioSelectResult uri: ' + JSON.stringify(AudioSelectResult));
-        }).catch((err) => {
-            console.error(TAG, 'AudioViewPicker.select failed with err: ' + err);
-        });
-    } catch (err) {
-        console.error(TAG, 'AudioViewPicker failed with err: ' + err);
-    }
 }
 
 /**
@@ -96,10 +82,9 @@ function downloadAudio(url: string, saveURI: string) {
                     fs.writeSync(file_dst.fd, buffer);
                     fs.closeSync(file_dst);
 
-
                     promptAction.showToast({ message: '下载成功' });
                 } catch (e) {
-                    console.log(TAG, `${e}`)
+                    console.log(TAG, `complete: ${e}`)
                 }
             });
 

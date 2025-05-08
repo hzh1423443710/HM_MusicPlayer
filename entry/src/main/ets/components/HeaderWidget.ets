@@ -4,7 +4,7 @@ import { RouterUrlConstants } from '../common/constants/RouterUrlConstants';
 @Preview
 @Component
 export struct HeaderWidget {
-    title: ResourceStr = 'title';
+    title?: ResourceStr;
     setting: boolean = false;
     backButton: boolean = false;
     titleAlign: TextAlign = TextAlign.Start;
