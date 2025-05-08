@@ -2,7 +2,6 @@ import media from '@ohos.multimedia.media'
 import common from '@ohos.app.ability.common';
 import { enumToString, MusicFrom, MusicInfo, PlaylistType } from '../model/MusicData';
 import { MediaTools } from '../common/MediaTools'
-import { BackgroundUtil } from '../common/BackgroundUtil'
 import { HttpUtils } from './network/HttpUtils';
 import promptAction from '@ohos.promptAction';
 
@@ -45,7 +44,6 @@ export enum PlayerState {
  * 网易云/QQ 音乐 统一 播放时再根据id获取其外链
  */
 export class MediaService {
-    private context: common.UIAbilityContext | undefined = AppStorage.Get('context');
     public avPlayer: media.AVPlayer | null = null;
     private http: HttpUtils = new HttpUtils();
     /**
@@ -476,8 +474,6 @@ export class MediaService {
             return;
         }
 
-        // TODO bug
-        BackgroundUtil.startContinuousTask(this.context);
         this.setUrl(musicIndex);
     }
 
@@ -639,8 +635,6 @@ export class MediaService {
      * Play music.
      */
     public async play() {
-        BackgroundUtil.startContinuousTask(this.context);
-
         if (this.isPrepared && this.avPlayer) {
             this.avPlayer.play().then(() => {
                 this.seek(this.getCurrentTime());
@@ -688,10 +682,6 @@ export class MediaService {
             this.avPlayer.release();
 
         this.setPlayState(PlayerState.IDLE);
-
-        if (this.context)
-            BackgroundUtil.stopContinuousTask(this.context);
-
         this.http.destroy();
     }
 
