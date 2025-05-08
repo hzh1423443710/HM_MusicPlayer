@@ -296,35 +296,13 @@ export class MediaService {
             return;
         }
 
-        // 无播放队列, 使用最近播放播放列表作为播放队列
-        if (this.playlistType === PlaylistType.NONE) {
+        if (this.playlistType !== type) {
             this.setPlayQueue(recentPlaylist, type);
-
             this.loadAssent(songIndex);
-        } else if (this.playlistType !== type) {
-            // 插入到当前播放队列 并播放
-            const insertIndex = this.currentMusicIndex + 1;
-            const existIndex = this.currentPlayQueue.findIndex(item => item.id === song.id
-                && item.where === song.where);
-
-            // 已存在, 直接播放
-            if (existIndex !== -1)  {
-                this.loadAssent(existIndex);
-                return;
-            }
-
-            // 不存在, 插入并重新索引 并播放
-            this.currentPlayQueue.splice(insertIndex, 0, song);
-            this.currentPlayQueue.forEach((item, index) => {
-                item.index = index;
-            });
-
-            this.loadAssent(insertIndex);
         } else {
             // 直接播放
             const playIndex = this.currentPlayQueue.findIndex(item => item.id === song.id
                 && item.where === song.where);
-
             this.loadAssent(playIndex);
         }
     }
@@ -346,8 +324,8 @@ export class MediaService {
      * @param type
      */
     private setPlayQueue(songs: MusicInfo[], type: PlaylistType) {
-        this.currentPlayQueue = songs;
-        // this.currentPlayQueue = [...songs];
+        // this.currentPlayQueue = songs;// 引用
+        this.currentPlayQueue = [...songs]; //拷贝
         this.updateQueuePlaylistType(type);
         this.currentPlayQueue.forEach((item, index) => {
             item.index = index;
