@@ -6,6 +6,7 @@ export class RouterUrlConstants {
     static readonly LOGIN = "pages/LoginPage";
     static readonly PLAY = "pages/PlayPage";
     static readonly PROFILE = "pages/ProfilePage";
+    static readonly RECENT = "pages/RecentPlayPage"
     static readonly REGISTER = "pages/RegisterPage";
     static readonly RETRIEVE_PASSWD = "pages/RetrievePasswdPage";
     static readonly SEARCH = "pages/SearchPage";

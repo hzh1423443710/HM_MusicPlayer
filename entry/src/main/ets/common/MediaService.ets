@@ -98,6 +98,10 @@ export class MediaService {
         return this.currentPlaylistType;
     }
 
+    getPlaylist(playlistType: PlaylistType) {
+        return this.playlistMap.get(playlistType);
+    }
+
     // ================================== 播放状态管理 ==================================
     public setPlayState(state: PlayerState) {
         AppStorage.SetOrCreate('playState', state);
@@ -203,6 +207,9 @@ export class MediaService {
      * 添加当前音乐到播放历史
      */
     private addToHistory() {
+        // 最近播放列表 不参与
+        if (this.playlistType === PlaylistType.RECENT) return;
+
         const curSong = this.getCurrentMusic();
         let playlistRecent = this.playlistMap.get(PlaylistType.RECENT);
         const existingIndex = playlistRecent.findIndex(item => item.id === curSong.id && item.where === curSong.where);
@@ -270,6 +277,55 @@ export class MediaService {
 
                 this.loadAssent(this.currentMusicIndex + 1);
             }
+        }
+    }
+
+    /**
+     * 插入到当前 播放队列 并播放
+     * @param song 必须是最近音乐列表中的音乐
+     */
+    playOneRecent(song: MusicInfo) {
+        const type = PlaylistType.RECENT;
+        const recentPlaylist = this.playlistMap.get(type);
+
+        const songIndex = recentPlaylist ? recentPlaylist.findIndex(item => item.id === song.id
+            && item.where === song.where) : -1;
+
+        if (songIndex === -1) {
+            console.error(TAG, `不在最近播放列表 ${song}`);
+            return;
+        }
+
+        // 无播放队列, 使用最近播放播放列表作为播放队列
+        if (this.playlistType === PlaylistType.NONE) {
+            this.setPlayQueue(recentPlaylist, type);
+
+            this.loadAssent(songIndex);
+        } else if (this.playlistType !== type) {
+            // 插入到当前播放队列 并播放
+            const insertIndex = this.currentMusicIndex + 1;
+            const existIndex = this.currentPlayQueue.findIndex(item => item.id === song.id
+                && item.where === song.where);
+
+            // 已存在, 直接播放
+            if (existIndex !== -1)  {
+                this.loadAssent(existIndex);
+                return;
+            }
+
+            // 不存在, 插入并重新索引 并播放
+            this.currentPlayQueue.splice(insertIndex, 0, song);
+            this.currentPlayQueue.forEach((item, index) => {
+                item.index = index;
+            });
+
+            this.loadAssent(insertIndex);
+        } else {
+            // 直接播放
+            const playIndex = this.currentPlayQueue.findIndex(item => item.id === song.id
+                && item.where === song.where);
+
+            this.loadAssent(playIndex);
         }
     }
 

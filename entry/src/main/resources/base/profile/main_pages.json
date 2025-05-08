@@ -7,6 +7,7 @@
         "pages/LoginPage",
         "pages/PlayPage",
         "pages/ProfilePage",
+        "pages/RecentPlayPage",
         "pages/RegisterPage",
         "pages/RetrievePasswdPage",
         "pages/SearchPage",

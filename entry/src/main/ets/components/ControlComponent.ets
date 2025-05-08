@@ -6,6 +6,9 @@ import { playControl } from '../viewmodel/PlayData'
 import { PlayControlComponent } from './PlayControlComponent';
 
 
+/**
+ * 播放进度 + 播放顺序 上一首 下一首 播放列表
+ */
 @Preview
 @Component
 export struct ControlComponent {

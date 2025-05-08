@@ -1,26 +1,35 @@
 import { MediaService, PlayerState } from '../common/MediaService';
 import { MusicInfo, PlaylistType } from '../model/MusicData';
-import { localMusicModel, PlayQueueViewModel } from '../viewmodel/PlayQueueViewModel'
-import promptAction from '@ohos.promptAction';
+import { RecentPlayViewModel, recentPlayViewModel } from '../viewmodel/RecentPlayViewModel'
 import { MusicItem } from '../components/MusicItem';
 import { HeaderWidget } from '../components/HeaderWidget';
 
 @Entry
 @Component
 struct RecentPlayPage {
-    viewModel: PlayQueueViewModel = localMusicModel;
+    viewModel: RecentPlayViewModel = recentPlayViewModel;
     @State playButtonState: boolean = false;
+    @State currentMusic: MusicInfo = new MusicInfo();
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
     media: MediaService = MediaService.getInstance();
 
     /**
      * 播放状态发生变化
      */
     onPlayStateChanged() {
-        this.playButtonState = this.playState === PlayerState.PLAY;
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.playState === PlayerState.PLAY;
+        this.currentMusic = this.media.getCurrentMusic();
+    }
+
+    onQueuePlaylistChanged() {
+        this.playButtonState = (this.playerPlaylistType === this.viewModel.playlistType) && this.playState === PlayerState.PLAY;
     }
 
     aboutToAppear() {
+        this.currentMusic = this.media.getCurrentMusic();
+        this.onPlayStateChanged();
+        this.viewModel.refreshQueue();
     }
 
     build() {
@@ -34,7 +43,7 @@ struct RecentPlayPage {
                     .objectFit(ImageFit.Cover)
                     .margin({ right: 10 })
                     .onClick(() => {
-                        if (this.media.playlistType() !== this.viewModel.playlistType) {
+                        if (this.media.playlistType !== this.viewModel.playlistType) {
                             this.media.playAll(this.viewModel.musicList, this.viewModel.playlistType);
                             return;
                         }
@@ -47,6 +56,11 @@ struct RecentPlayPage {
                     .fontWeight(FontWeight.Bold)
 
                 Blank()
+
+                Text(this.viewModel.brief)
+                    .fontSize(24)
+                    .fontWeight(FontWeight.Bold)
+
             } // Row 顶部栏
             .width('100%')
             .justifyContent(FlexAlign.SpaceAround)
@@ -60,13 +74,12 @@ struct RecentPlayPage {
             List() {
                 LazyForEach(this.viewModel.songDataSource, (item: MusicInfo, index: number) => {
                     ListItem() {
-                        MusicItem({ showCover: false, song: item })
+                        MusicItem({ index: index + 1, showCover: false, song: item })
                             .onClick(() => {
-                                this.media.loadAssent(index);
+                                this.media.playOneRecent(item);
                             })
                     }
-                    .backgroundColor(this.media.getCurrentMusic()
-                        .equals(item) ? $r('app.color.selected') : Color.Transparent)
+                    .backgroundColor(this.currentMusic.equals(item) ? $r('app.color.selected') : Color.Transparent)
                 })
             }
             .width('100%')

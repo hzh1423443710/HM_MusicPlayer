@@ -2,19 +2,23 @@ import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { DataSource } from './SongDataSource';
 import { MediaService } from '../common/MediaService';
 
-const TAG = 'PlayQueueModel';
+const TAG = 'RecentPlayViewModel';
 
 @Observed
-export class PlayQueueViewModel {
+export class RecentPlayViewModel {
     songDataSource: DataSource<MusicInfo> = new DataSource<MusicInfo>();
-    playlistType: PlaylistType = PlaylistType.NONE;
-    title: string = '播放队列';
+    playlistType: PlaylistType = PlaylistType.RECENT;
+    title: string = '最近播放';
     brief: string = '0首';
-    media: MediaService = MediaService.getInstance();
-    isLoading: boolean = false;
+    private media: MediaService = MediaService.getInstance();
+    private isLoading: boolean = false;
 
     get musicList(): MusicInfo[] {
         return this.songDataSource.items;
+    }
+
+    get Length(): number {
+        return this.songDataSource.items.length;
     }
 
     public refreshQueue() {
@@ -22,14 +26,11 @@ export class PlayQueueViewModel {
             if (this.isLoading) return;
 
             this.isLoading = true
-            const queue = this.media.playQueue;
-            const playlistType = this.media.playlistType;
-            this.playlistType = playlistType;
-
-            this.brief = queue.length + '首';
+            const playlist = this.media.getPlaylist(this.playlistType);
+            this.brief = playlist.length + '首';
 
             this.songDataSource.clearData();
-            this.songDataSource.setData(queue);
+            this.songDataSource.setData(playlist);
         } catch (e) {
             console.error(TAG, `${this.refreshQueue.name} ${e}`)
         } finally {
@@ -38,4 +39,4 @@ export class PlayQueueViewModel {
     }
 }
 
-export const localMusicModel = new PlayQueueViewModel();
+export const recentPlayViewModel = new RecentPlayViewModel();
