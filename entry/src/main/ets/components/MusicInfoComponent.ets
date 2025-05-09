@@ -5,6 +5,7 @@ import promptAction from '@ohos.promptAction';
 import { HttpUtils } from '../common/network/HttpUtils';
 import { downloadAudio, getPickerURI } from '../common/DownloadUtil';
 import { MediaService } from '../common/MediaService';
+import pasteboard from '@ohos.pasteboard';
 
 /**
  * 音乐信息(封面 歌名 歌手 操作按钮)
@@ -125,12 +126,30 @@ export struct MusicInfoComponent {
                 .fontSize(24)
                 .fontColor('#376668')
                 .width('100%')
+                .gesture(LongPressGesture().onAction((event: GestureEvent) => {
+                    const sysBoard = pasteboard.getSystemPasteboard();
+                    const data = pasteboard.createData('text/plain', this.music.name);
+                    sysBoard.setData(data).then(() => {
+                        promptAction.showToast({ message: '复制歌名成功', bottom: 400 })
+                    }).catch((error) => {
+                        console.error('copy error: ' + error);
+                    });
+                }))
 
             Text(this.music.singer)
                 .fontSize(14)
                 .fontColor('#99376668')
                 .margin({ top: 6 })
                 .width('100%')
+                .gesture(LongPressGesture().onAction((event: GestureEvent) => {
+                    const sysBoard = pasteboard.getSystemPasteboard();
+                    const data = pasteboard.createData('text/plain', this.music.singer);
+                    sysBoard.setData(data).then(() => {
+                        promptAction.showToast({ message: '复制歌手成功', bottom: 400 })
+                    }).catch((error) => {
+                        console.error('copy error: ' + error);
+                    });
+                }))
         }
         .alignItems(HorizontalAlign.Start)
         .width('100%')
@@ -164,7 +183,7 @@ export struct MusicInfoComponent {
                         });
 
                     getPickerURI(this.music.name).then((savePath: string) => {
-                        downloadAudio(url, savePath);
+                        downloadAudio(getContext(this), url, savePath);
                     });
                 })
 

@@ -82,7 +82,7 @@ export struct PlayerWidget {
                             sysBoard.setData(data).then(() => {
                                 promptAction.showToast({ message: '复制成功', bottom: 400 })
                             }).catch((error) => {
-                                console.log('copy error: ' + error);
+                                console.error('copy error: ' + error);
                             });
                         }))
                     // 歌手

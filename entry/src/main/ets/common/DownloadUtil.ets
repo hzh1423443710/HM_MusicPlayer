@@ -43,9 +43,8 @@ async function getPickerURI(name: string) {
  * @param url
  * @param saveURI
  */
-function downloadAudio(url: string, saveURI: string) {
+function downloadAudio(context: Context, url: string, saveURI: string) {
     try {
-        const context = AppStorage.Get<Context>('context');
         // 临时文件
         let tmpPath = context.cacheDir + '/music.mp3';
 

@@ -268,6 +268,12 @@ export class MediaService {
                 this.loadAssent(index);
             } else {
                 // 当前队列不为NONE, 插入到当前播放队列
+                const existIndex = this.currentPlayQueue.findIndex(item => item.id === song.id && item.where === song.where);
+                if (existIndex !== -1) {
+                    this.loadAssent(existIndex);
+                    return;
+                }
+
                 this.currentPlayQueue.splice(this.currentMusicIndex + 1, 0, song);
                 this.currentPlayQueue.forEach((item, index) => {
                     item.index = index;
@@ -371,7 +377,14 @@ export class MediaService {
             return;
         }
 
-        this.avPlayer.url = music.url;
+        if (this.getPlayState() !== PlayerState.IDLE) {
+            this.reset().then(() => {
+                this.avPlayer.url = music.url;
+            })
+        } else {
+            this.avPlayer.url = music.url;
+        }
+
         // 更新当前播放索引
         this.updateCurrentMusicIndex(musicIndex);
         this.debugState();
@@ -414,7 +427,6 @@ export class MediaService {
                 case 'idle':
                 // url:只允许在idle状态下设置 -> initialized 状态
                     this.setPlayState(PlayerState.IDLE);
-                    this.setUrl();
                     break;
 
                 case 'initialized':

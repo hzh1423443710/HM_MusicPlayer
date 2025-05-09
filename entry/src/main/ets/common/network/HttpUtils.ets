@@ -40,7 +40,7 @@ export class HttpUtils {
 
         await this.httpReq.request(api_url)
             .then((data: http.HttpResponse) => {
-                // 访问QBS限制 Token购买
+                // 每2秒最多4次 携带Token可无视限制
                 // console.error(TAG, `${this.getRandMusic.name}: ${data.result as string}`);
                 let resultObj = JSON.parse(data.result as string);
 
@@ -328,25 +328,27 @@ export class HttpUtils {
     }
 
     /**
-     * 获取 网易云音乐 歌词
+     * 获取 网易云音乐、QQ音乐 歌词
      * @param id 网易云音乐id
      * @returns 字符串形式的lrc歌词
      */
-    public async getNetEaseLyric(id: string): Promise<string> {
+    public async getMusicLyric(id: string, where: MusicFrom): Promise<string> {
         if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getNetEaseLyric.name}: 网络不可用`)
+            console.error(TAG, `${this.getMusicLyric.name}: 网络不可用`)
             return null;
         }
 
         let api_url = "https://api.vkeys.cn/v2/music/netease/lyric";
+        if (where === MusicFrom.QQ)
+            api_url = "https://api.vkeys.cn/v2/music/tencent/lyric";
         api_url += `?id=${id}`;
 
-        let lrcText = null;
+        let lrcText: string = null;
 
         try {
             await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
                 if (data.responseCode !== 200) {
-                    console.error(TAG, `${this.getNetEaseLyric.name}: HTTP错误 ${data.responseCode}`);
+                    console.error(TAG, `${this.getMusicLyric.name}: HTTP错误 ${data.responseCode}`);
                     return;
                 }
 
@@ -355,18 +357,18 @@ export class HttpUtils {
 
                 if (resultObj.code === 200 && resultObj.data && resultObj.data.lrc) {
                     lrcText = resultObj.data.lrc;
-                    console.log(TAG, `${this.getNetEaseLyric.name} ${api_url}`);
+                    console.log(TAG, `${this.getMusicLyric.name} ${api_url}`);
                 }
                 else
-                    console.error(TAG, `${resultObj.code} ${this.getNetEaseLyric.name} ${api_url}`);
+                    console.log(TAG, `${resultObj.code} ${this.getMusicLyric.name} ${api_url}`);
 
             }).catch((err) => {
-                console.error(TAG, `${this.getNetEaseLyric.name}: ${err}`);
+                console.error(TAG, `${this.getMusicLyric.name}: ${err}`);
             });
 
             return lrcText;
         } catch (error) {
-            console.error(TAG, `${this.getNetEaseLyric.name} 异常: ${error}`);
+            console.error(TAG, `${this.getMusicLyric.name} 异常: ${error}`);
             return null;
         }
     }

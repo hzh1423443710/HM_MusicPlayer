@@ -188,11 +188,17 @@ export class SearchViewModel {
      */
     async searchSongs(): Promise<boolean> {
         let results: MusicInfo[] = [];
-        if (this.platform === MusicPlatform.NETEASE)
-            results = await this.http.getSongsByNetEase(this.keyword, this.currentPage);
-        // results = await this.http.getSongsByNetEase(this.keyword, (this.currentPage - 1) * this.pageSize);
-        else
-            results = await this.http.getSongsByQQ(this.keyword, this.currentPage);
+        if (this.platform === MusicPlatform.NETEASE) {
+            while (results.length === 0) {
+                results = await this.http.getSongsByNetEase(this.keyword, this.currentPage);
+            }
+            // results = await this.http.getSongsByNetEase(this.keyword, (this.currentPage - 1) * this.pageSize);
+        }
+        else {
+            while (results.length === 0) {
+                results = await this.http.getSongsByQQ(this.keyword, this.currentPage);
+            }
+        }
 
         // results.forEach((item, index) => {
         //     console.log(`${index}-${item}`);
