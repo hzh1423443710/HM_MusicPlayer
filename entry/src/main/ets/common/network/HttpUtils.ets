@@ -4,8 +4,12 @@ import ConnectionUtil from './ConnectionUtils'
 import { SingerInfo } from '../../model/SingerData';
 import { QQMusicQuality } from '../constants/QQMusicAPI';
 import { NetEaseAPI, NetEasePlaylistId, NetEaseQuality } from '../constants/NetEaseAPI';
+import util from '@ohos.util';
+import { User } from '../../model/User';
+import { globalUser } from '../../viewmodel/UserViewModel'
 
 const TAG: string = 'HttpUtils';
+const HOST = "119.3.185.203:5000";
 
 export class HttpUtils {
     httpReq: http.HttpRequest = null;
@@ -30,10 +34,7 @@ export class HttpUtils {
      * @returns
      */
     async getRandMusic(): Promise<MusicInfo> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getRandMusic.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         let music_info = new MusicInfo();
         let api_url = NetEaseAPI.RAND_SONG;
@@ -72,13 +73,11 @@ export class HttpUtils {
      * @returns
      */
     async getNetEaseListSongs(id: NetEasePlaylistId): Promise<MusicInfo[]> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getNetEaseListSongs.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
+
 
         let api_url = NetEaseAPI.PLAYLIST_ALL;
-        api_url += `?id=${id}`;
+        // api_url += `?id=${id}`;
 
         const songs: MusicInfo[] = [];
 
@@ -122,10 +121,8 @@ export class HttpUtils {
      * @returns 失败返回null
      */
     async getNetEaseMusic(id: string, quality: NetEaseQuality = NetEaseQuality.SQ): Promise<MusicInfo> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getNetEaseMusic.name}: 网络不可用`);
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
+
 
         let song = new MusicInfo();
         let api_url = NetEaseAPI.SEARCH_OR_PLAY_URL;
@@ -162,10 +159,7 @@ export class HttpUtils {
      * @returns 搜索到的歌曲数组
      */
     public async getSongsByNetEase(keyword: string, page: number = 1): Promise<MusicInfo[]> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getSongsByNetEase.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         const limit = 10;
         const offset: number = (page - 1) * limit + 1;
@@ -224,10 +218,7 @@ export class HttpUtils {
      * @returns
      */
     public async getSingersByNetEase(keyword: string, page: number = 1): Promise<SingerInfo[]> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getSingersByNetEase.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         const limit = 10;
         const offset = (page - 1) * limit;
@@ -278,10 +269,7 @@ export class HttpUtils {
      * @param id 歌手id
      */
     public async getSingerSongsByNetEase(id: string, page: number = 1): Promise<MusicInfo[]> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getSingerSongsByNetEase.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         const limit = 10;
         const offset = (page - 1) * limit;
@@ -333,10 +321,7 @@ export class HttpUtils {
      * @returns 字符串形式的lrc歌词
      */
     public async getMusicLyric(id: string, where: MusicFrom): Promise<string> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getMusicLyric.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         let api_url = "https://api.vkeys.cn/v2/music/netease/lyric";
         if (where === MusicFrom.QQ)
@@ -382,10 +367,7 @@ export class HttpUtils {
      * @returns 搜索到的歌曲数组
      */
     public async getSongsByQQ(keyword: string, page: number = 1): Promise<MusicInfo[]> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getSongsByQQ.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         let api_url = "https://api.vkeys.cn/v2/music/tencent";
 
@@ -439,10 +421,7 @@ export class HttpUtils {
      * @returns
      */
     public async getSingersByQQ(keyword: string, page: number = 1): Promise<SingerInfo[]> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getSingersByQQ.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         let api_url = "https://api.vkeys.cn/v2/music/tencent/search/singer";
         api_url += `?word=${encodeURIComponent(keyword)}&page=${page}`;
@@ -492,10 +471,7 @@ export class HttpUtils {
      * @returns
      */
     async getQQMusic(id: string, quality: QQMusicQuality = QQMusicQuality.HQ): Promise<MusicInfo> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getQQMusic.name}: 网络不可用`);
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         let music_info = new MusicInfo();
         let api_url = "https://api.vkeys.cn/v2/music/tencent";
@@ -532,10 +508,7 @@ export class HttpUtils {
      * @returns
      */
     public async getSingerSongsByQQ(id: string, page: number = 1): Promise<MusicInfo[]> {
-        if (!await this.netAvailable()) {
-            console.error(TAG, `${this.getSingerSongsByQQ.name}: 网络不可用`)
-            return null;
-        }
+        if (!await this.netAvailable()) return null;
 
         let api_url = "https://api.vkeys.cn/v2/music/tencent/singer/songlist";
         api_url += `?mid=${id}&page=${page}`;
@@ -577,5 +550,176 @@ export class HttpUtils {
             console.error(TAG, `${this.getSingerSongsByQQ.name} 异常: ${error}`);
             return null;
         }
+    }
+
+    /****************************************** 后端接口 ******************************************/
+    // 获取验证码
+    public async getVerifyCode(email: string, action: string) {
+        if (!await this.netAvailable()) return null;
+
+        let api_url = `${HOST}/users/verify_code`;
+
+        await this.httpReq.request(api_url, {
+            header: {
+                'Connection': "close"
+            },
+            method: http.RequestMethod.POST,
+            extraData: {
+                "email": email,
+                "action": action
+            },
+        }).then((data: http.HttpResponse) => {
+            let resultObj = JSON.parse(data.result as string);
+
+            if (data.responseCode === 200 && resultObj.code === 200) {
+                console.log(TAG, `${this.getVerifyCode.name} ${api_url}`);
+                return true;
+            } else {
+                console.error(TAG, `${data.responseCode} ${this.getVerifyCode.name} ${api_url}`);
+                return false;
+            }
+        }).catch((err) => {
+            console.error(TAG, `${this.getVerifyCode.name}: ${err}`);
+            return false;
+        })
+    }
+
+    // 注册
+    public async register(username: string, passwd: string, email: string, verify_code: string) {
+        if (!await this.netAvailable()) return null;
+
+        let api_url = `${HOST}/users/register`;
+
+        await this.httpReq.request(api_url, {
+            header: {
+                'Connection': "close"
+            },
+            method: http.RequestMethod.POST,
+            extraData: {
+                "username": username,
+                "password": passwd,
+                "email": email,
+                "verify_code": verify_code
+            },
+        }).then((data: http.HttpResponse) => {
+            let resultObj = JSON.parse(data.result as string);
+
+            if (data.responseCode === 200 && resultObj.code === 200) {
+                console.log(TAG, `${this.register.name} ${api_url}`);
+                return resultObj.user_id;
+            } else {
+                console.error(TAG, `${data.responseCode} ${this.register.name} ${api_url}`);
+                return null;
+            }
+        }).catch((err) => {
+            console.error(TAG, `${this.register.name}: ${err}`);
+            return null;
+        })
+    }
+
+    // 登录
+    public async login(username: string, passwd: string) {
+        if (!await this.netAvailable()) return null;
+
+        let api_url = `${HOST}/users/login`;
+        let user: User = new User();
+
+        await this.httpReq.request(api_url, {
+            header: {
+                'Connection': "close"
+            },
+            method: http.RequestMethod.POST,
+            extraData: {
+                "username": username,
+                "password": passwd
+            },
+        }).then((data: http.HttpResponse) => {
+            let resultObj = JSON.parse(data.result as string);
+            let header = JSON.parse(JSON.stringify(data.header));
+
+            if (data.responseCode === 200 && resultObj.code === 200) {
+                user.id = resultObj.user.id;
+                user.username = resultObj.user.username;
+                user.qq_id = resultObj.user.qq_id;
+                user.netease_id = resultObj.user.netease_id;
+                user.email = resultObj.user.email;
+                user.create_at = resultObj.user.create_at;
+                user.authorization = header.authorization;
+
+                console.log(TAG, `${this.login.name} ${api_url}`);
+            } else {
+                user = null;
+                console.error(TAG, `${data.responseCode} ${this.login.name} ${api_url} ${resultObj.message}`);
+            }
+        }).catch((err) => {
+            console.error(TAG, `${this.login.name}: ${err}`);
+        })
+
+        return user;
+    }
+
+    // 修改密码
+    public async modifyPasswd(email: string, newPasswd: string, verify_code: string) {
+        if (!await this.netAvailable()) return null;
+
+        let api_url = `${HOST}/users/password`;
+
+        await this.httpReq.request(api_url, {
+            header: {
+                'Connection': "close",
+                'Authorization': globalUser.user.authorization
+            },
+            method: http.RequestMethod.POST,
+            extraData: {
+                "new_password": newPasswd,
+                "email": email,
+                "verify_code": verify_code
+            },
+        }).then((data: http.HttpResponse) => {
+            let resultObj = JSON.parse(data.result as string);
+
+            if (data.responseCode === 200 && resultObj.code === 200) {
+                console.log(TAG, `${this.modifyPasswd.name} ${api_url}`);
+                return true;
+            } else {
+                console.error(TAG, `${data.responseCode} ${this.modifyPasswd.name} ${api_url}`);
+                return false;
+            }
+        }).catch((err) => {
+            console.error(TAG, `${this.modifyPasswd.name}: ${err}`);
+            return false;
+        })
+    }
+
+    // 绑定平台id
+    public async bindPlatform(platform: string, platformId: string) {
+        if (!await this.netAvailable()) return null;
+
+        let api_url = `${HOST}/users/bind`;
+
+        await this.httpReq.request(api_url, {
+            header: {
+                'Connection': "close",
+                'Authorization': globalUser.user.authorization
+            },
+            method: http.RequestMethod.POST,
+            extraData: {
+                "platform": platform,
+                "platform_id": platformId
+            },
+        }).then((data: http.HttpResponse) => {
+            let resultObj = JSON.parse(data.result as string);
+
+            if (data.responseCode === 200 && resultObj.code === 200) {
+                console.log(TAG, `${this.bindPlatform.name} ${api_url}`);
+                return true;
+            } else {
+                console.error(TAG, `${data.responseCode} ${this.bindPlatform.name} ${api_url}`);
+                return false;
+            }
+        }).catch((err) => {
+            console.error(TAG, `${this.bindPlatform.name}: ${err}`);
+            return false;
+        })
     }
 }

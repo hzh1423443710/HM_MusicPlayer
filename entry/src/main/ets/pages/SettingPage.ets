@@ -1,8 +1,7 @@
 import { HeaderWidget } from '../components/HeaderWidget'
 import { SettingCell } from '../components/SettingCell'
-import promptAction from '@ohos.promptAction'
 import router from '@ohos.router'
-import { RouterUrlConstants } from '../common/constants/RouterUrlConstants'
+import { globalUser } from '../viewmodel/UserViewModel'
 
 @Builder
 function smallTitle(text: string) {
@@ -58,7 +57,7 @@ struct SettingPage {
 
             Button('退出登录')
                 .onClick((event: ClickEvent) => {
-                    AppStorage.SetOrCreate<boolean>('isLogged', false);
+                    globalUser.isLogged = false;
                     router.back();
                 })
                 .fontSize(20)
