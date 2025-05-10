@@ -659,7 +659,7 @@ export class HttpUtils {
     }
 
     // 修改密码
-    public async modifyPasswd(email: string, newPasswd: string, verify_code: string) {
+    public async modifyPasswd(username: string, email: string, newPasswd: string, verify_code: string) {
         if (!await this.netAvailable()) return null;
 
         let api_url = `${HOST}/users/password`;
@@ -667,10 +667,10 @@ export class HttpUtils {
         await this.httpReq.request(api_url, {
             header: {
                 'Connection': "close",
-                'Authorization': globalUser.user.authorization
             },
             method: http.RequestMethod.POST,
             extraData: {
+                "username": username,
                 "new_password": newPasswd,
                 "email": email,
                 "verify_code": verify_code
