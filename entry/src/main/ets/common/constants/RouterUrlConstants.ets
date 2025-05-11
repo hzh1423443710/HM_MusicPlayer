@@ -1,6 +1,5 @@
 export class RouterUrlConstants {
     static readonly ABOUT = "pages/AboutPage";
-    static readonly EXPORT_PLAYLIST = "pages/ExportPlayListPage";
     static readonly HOME = "pages/HomePage";
     static readonly PLAY_QUEUE = "pages/PlayQueuePage";
     static readonly LOGIN = "pages/LoginPage";

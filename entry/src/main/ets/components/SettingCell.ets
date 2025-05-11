@@ -1,5 +1,6 @@
 import router from '@ohos.router';
-import { Size } from '@ohos/hypium';
+import { globalUser } from '../viewmodel/UserViewModel'
+import promptAction from '@ohos.promptAction';
 
 @Preview
 @Component
@@ -8,6 +9,7 @@ export struct SettingCell {
     imgSize?: SizeOptions;
     text: string;
     pushUrl: string;
+    needLogin: boolean = false;
 
     build() {
         Row() {
@@ -46,11 +48,12 @@ export struct SettingCell {
             }
         })
         .onClick(() => {
-            if (this.pushUrl) {
-                router.pushUrl({
-                    url: this.pushUrl
-                })
+            if (this.needLogin && !globalUser.isLogged) {
+                promptAction.showToast({ message: '请先登录', duration: 2000 })
+                return;
             }
+
+            if (this.pushUrl) router.pushUrl({ url: this.pushUrl });
         })
     }
 }

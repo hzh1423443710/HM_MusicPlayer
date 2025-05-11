@@ -2,16 +2,14 @@ import { HeaderWidget } from '../components/HeaderWidget'
 import { SettingCell } from '../components/SettingCell'
 import router from '@ohos.router'
 import { globalUser } from '../viewmodel/UserViewModel'
+import { RouterUrlConstants } from '../common/constants/RouterUrlConstants'
 
 @Builder
 function smallTitle(text: string) {
     Row() {
         Text(text)
     }
-    .width('100%')
-    .justifyContent(FlexAlign.Start)
-    .alignItems(VerticalAlign.Center)
-    .margin({ top: 10, left: 20 })
+    .width('100%').justifyContent(FlexAlign.Start).alignItems(VerticalAlign.Center).margin({ top: 10, left: 20 })
 }
 
 /**
@@ -22,9 +20,7 @@ function smallTitle(text: string) {
 struct SettingPage {
     @Styles
     buttonStyle() {
-        .stateStyles({
-            normal: Color.Orange
-        })
+        .stateStyles({ normal: Color.Orange })
     }
 
     build() {
@@ -34,20 +30,9 @@ struct SettingPage {
             // 账号
             smallTitle('账号')
             Column() {
-                SettingCell({ text: '个人资料', pushUrl: 'pages/ProfilePage' })
-                Divider()
-                    .strokeWidth(2)
-                    .width('90%')
-                SettingCell({ text: '导入外部歌单', pushUrl: 'pages/ExportPlayListPage' })
+                SettingCell({ text: '个人资料', pushUrl: RouterUrlConstants.PROFILE, needLogin: true })
             }
-            .width('100%')
-            .backgroundColor(Color.Transparent)
-            .opacity(0.80)
-            .borderRadius(20)
-
-
-            // 播放与下载
-            smallTitle('播放与下载')
+            .width('100%').backgroundColor(Color.Transparent).opacity(0.80).borderRadius(20)
 
             Blank()
 
@@ -56,14 +41,15 @@ struct SettingPage {
             SettingCell({ text: '关于', pushUrl: 'pages/AboutPage' })
 
             Button('退出登录')
+                .fontSize(20)
+                .fontColor(Color.Black)
+                .width("60%")
+                .margin({ top: 10, bottom: 10 })
                 .onClick((event: ClickEvent) => {
                     globalUser.isLogged = false;
                     router.back();
                 })
-                .fontSize(20)
-                .fontColor(Color.Black)
-                .width("80%")
-                .margin({ top: 10, bottom: 10 })
+
         } // Column
         .width('100%')
         .height('100%')

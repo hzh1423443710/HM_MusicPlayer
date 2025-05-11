@@ -15,14 +15,15 @@ export struct MyContent {
             Row() {
                 // 用户信息
                 if (this.viewModel.isLogged) {
-                    Image("https://api.52vmy.cn/api/avath/qq?qq=1423443710")
-                        .width(48)
-                        .height(48)
-                        .borderRadius(24)
+                    Image(this.viewModel.avatar_base64)
+                        .alt($r('app.media.default_singer'))
+                        .width(64)
+                        .height(64)
+                        .borderRadius(32)
                     Column() {
-                        Text(this.viewModel.user.username)
+                        Text(this.viewModel.username)
                             .fontSize(28)
-                        Text(this.viewModel.user.email)
+                        Text(this.viewModel.email)
                             .fontSize(18)
                             .margin({ top: 4 })
                     }

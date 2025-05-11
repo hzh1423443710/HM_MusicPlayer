@@ -1,7 +1,6 @@
 import router from '@ohos.router'
 import promptAction from '@ohos.promptAction'
 import { RouterUrlConstants } from '../common/constants/RouterUrlConstants'
-import { HttpUtils } from '../common/network/HttpUtils'
 import { globalUser } from '../viewmodel/UserViewModel'
 
 /**
@@ -14,11 +13,6 @@ struct LoginPage {
     password: string = '';
     @State isLoading: boolean = false;
     @State errors: Record<string, string> = {};
-    http: HttpUtils = new HttpUtils();
-
-    aboutToDisappear(): void {
-        this.http.destroy();
-    }
 
     // 表单验证
     validateForm(): boolean {
@@ -44,15 +38,15 @@ struct LoginPage {
 
         this.isLoading = true;
         try {
-            const user = await this.http.login(this.username, this.password);
-            if (user) {
-                globalUser.isLogged = true;
-                globalUser.user = user;
-                promptAction.showToast({ message: '登录成功' });
-                router.back();
-            } else {
-                this.errors.common = '账号或密码错误';
-            }
+            globalUser.login(this.username, this.password)
+                .then(ok => {
+                    if (ok) {
+                        promptAction.showToast({ message: '登录成功' });
+                        router.back();
+                    } else {
+                        this.errors.common = '账号或密码错误';
+                    }
+                });
         } catch (error) {
             this.errors.common = `登录失败: ${error.message || '请稍后再试'}`;
             promptAction.showToast({ message: this.errors.common });
@@ -95,10 +89,7 @@ struct LoginPage {
         Column() {
             // 顶部图标和标题
             Row() {
-                Image($r('app.media.favicon'))
-                    .width(80)
-                    .height(80)
-                    .objectFit(ImageFit.Contain)
+                Image($r('app.media.favicon')).width(80).height(80).objectFit(ImageFit.Contain)
             }
             .margin({ top: 80, bottom: 20 })
 
@@ -109,30 +100,14 @@ struct LoginPage {
                 .margin({ bottom: 10 })
                 .fontColor(Color.Black)
 
-            Text('登录账号以使用更多服务')
-                .fontSize(16)
-                .fontColor(Color.Black)
-                .margin({ bottom: 40 })
+            Text('登录账号以使用更多服务').fontSize(16).fontColor(Color.Black).margin({ bottom: 40 })
 
             // 表单区域
             Column() {
                 // 使用可重用构建器创建用户名和密码输入框
-                this.InputField(
-                    '用户名',
-                    '请输入用户名',
-                    'username',
-                    this.username,
-                    (value) => this.username = value
-                )
+                this.InputField('用户名', '请输入用户名', 'username', this.username, (value) => this.username = value)
 
-                this.InputField(
-                    '密码',
-                    '请输入密码',
-                    'password',
-                    this.password,
-                    (value) => this.password = value,
-                    InputType.Password
-                )
+                this.InputField('密码', '请输入密码', 'password', this.password, (value) => this.password = value, InputType.Password)
 
                 // 通用错误信息
                 if (this.errors.common) {
@@ -158,24 +133,16 @@ struct LoginPage {
 
                 // 底部链接
                 Row() {
-                    Text('没有账号？')
-                        .fontSize(14)
-                        .fontColor('rgba(0, 0, 255, 0.7)')
+                    Text('没有账号？').fontSize(14).fontColor('rgba(0, 0, 255, 0.7)')
 
-                    Text('立即注册')
-                        .fontSize(14)
-                        .fontColor('#376668')
-                        .fontWeight(FontWeight.Bold)
+                    Text('立即注册').fontSize(14).fontColor('#376668').fontWeight(FontWeight.Bold)
                         .onClick(() => {
                             router.pushUrl({ url: RouterUrlConstants.REGISTER });
                         })
                 }
                 .margin({ bottom: 20 })
 
-                Text('忘记密码')
-                    .fontSize(14)
-                    .fontColor('#376668')
-                    .fontWeight(FontWeight.Bold)
+                Text('忘记密码').fontSize(14).fontColor('#376668').fontWeight(FontWeight.Bold)
                     .onClick(() => {
                         router.pushUrl({ url: RouterUrlConstants.RETRIEVE_PASSWD })
                     })

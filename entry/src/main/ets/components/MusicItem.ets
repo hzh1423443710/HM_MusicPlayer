@@ -1,5 +1,6 @@
 import { MusicInfo } from '../model/MusicData'
 import promptAction from '@ohos.promptAction';
+import { globalUser } from '../viewmodel/UserViewModel'
 
 // 一首音乐 cover + name + singer + Like
 @Preview
@@ -55,14 +56,12 @@ export struct MusicItem {
                 .width(30)
                 .margin({ right: 10 })
                 .onClick(() => {
-                    if (!AppStorage.Get<boolean>('isLogged')) {
+                    if (!globalUser.isLogged) {
                         promptAction.showToast({ message: '请先登录' });
                         return;
                     }
-
                     this.song.love = !this.song.love;
                 })
-
         } // Row
         .width('100%')
         .justifyContent(FlexAlign.SpaceEvenly)

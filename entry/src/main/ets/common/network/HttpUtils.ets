@@ -4,8 +4,6 @@ import ConnectionUtil from './ConnectionUtils'
 import { SingerInfo } from '../../model/SingerData';
 import { QQMusicQuality } from '../constants/QQMusicAPI';
 import { NetEaseAPI, NetEasePlaylistId, NetEaseQuality } from '../constants/NetEaseAPI';
-import util from '@ohos.util';
-import { User } from '../../model/User';
 import { globalUser } from '../../viewmodel/UserViewModel'
 
 const TAG: string = 'HttpUtils';
@@ -27,7 +25,6 @@ export class HttpUtils {
     }
 
     /****************************************** 网易云音乐API ******************************************/
-
     /**
      * 随机获取一首网易云音乐
      * @param url
@@ -35,17 +32,13 @@ export class HttpUtils {
      */
     async getRandMusic(): Promise<MusicInfo> {
         if (!await this.netAvailable()) return null;
-
-        let music_info = new MusicInfo();
         let api_url = NetEaseAPI.RAND_SONG;
+        let music_info = new MusicInfo();
 
         await this.httpReq.request(api_url)
             .then((data: http.HttpResponse) => {
                 // 每2秒最多4次 携带Token可无视限制
-                // console.error(TAG, `${this.getRandMusic.name}: ${data.result as string}`);
                 let resultObj = JSON.parse(data.result as string);
-
-
                 if (data.responseCode === 200 && resultObj.code === 200) {
                     music_info.id = resultObj.data.id;
                     music_info.name = resultObj.data.song;
@@ -67,17 +60,51 @@ export class HttpUtils {
         return music_info;
     }
 
+    /** TODO
+     * 获取网易云账号下的自建歌单
+     * @param uid 网易云id
+     */
+    async getNetEasePlaylists(uid: string) {
+        if (!await this.netAvailable()) return null;
+        let api_url = NetEaseAPI.USER_PLAYLISTS;
+        api_url += `?uid=${uid}`;
+
+        let playlist: {
+            name: string,
+            id: string
+        }[] = [];
+
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
+                let resultObj = JSON.parse(data.result as string);
+
+                if (data.responseCode == 200 && resultObj.code == 200) {
+                    resultObj.playlist.forEach(item => {
+                        playlist.push({ name: item.name, id: item.id });
+                        console.log(`${item.name} ${item.id}`)
+                    });
+
+                    console.log(TAG, `${this.getNetEasePlaylists.name} ${api_url}`);
+                } else {
+                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEasePlaylists.name} ${api_url}`);
+                }
+            })
+            .catch((e) => {
+                console.error(TAG, `${this.getNetEasePlaylists.name}: ${e}`);
+            });
+
+        return playlist;
+    }
+
     /**
      * 获取歌单所有歌曲
      * @param id
      * @returns
      */
-    async getNetEaseListSongs(id: NetEasePlaylistId): Promise<MusicInfo[]> {
+    async getNetEaseListSongs(id: NetEasePlaylistId | string): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) return null;
-
-
         let api_url = NetEaseAPI.PLAYLIST_ALL;
-        // api_url += `?id=${id}`;
+        api_url += `?id=${id}`;
 
         const songs: MusicInfo[] = [];
 
@@ -96,8 +123,7 @@ export class HttpUtils {
                             else
                                 song.singer += singer.name;
                         });
-                        // 某些VIP歌曲不能试听
-                        song.url = `http://music.163.com/song/media/outer/url?id=${item.id}`
+                        song.url = null;
                         song.pic = item.al.picUrl;
                         song.pay = false;
                         song.where = MusicFrom.NetEase;
@@ -122,32 +148,33 @@ export class HttpUtils {
      */
     async getNetEaseMusic(id: string, quality: NetEaseQuality = NetEaseQuality.SQ): Promise<MusicInfo> {
         if (!await this.netAvailable()) return null;
-
-
-        let song = new MusicInfo();
         let api_url = NetEaseAPI.SEARCH_OR_PLAY_URL;
         api_url += `?id=${id}&quality=${quality}`;
 
-        await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-            let resultObj = JSON.parse(data.result as string);
+        let song: MusicInfo = null;
 
-            if (data.responseCode === 200 && resultObj.code === 200) {
-                song.id = resultObj.data.id;
-                song.name = resultObj.data.song;
-                song.singer = resultObj.data.singer;
-                song.url = resultObj.data.url;
-                song.pic = resultObj.data.cover;
-                song.pay = false;
-                song.where = MusicFrom.NetEase;
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
+                let resultObj = JSON.parse(data.result as string);
 
-                console.log(TAG, `${this.getNetEaseMusic.name} ${api_url}`);
-            } else {
-                console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEaseMusic.name} ${api_url}`);
-                song = null;
-            }
-        }).catch((err) => {
-            console.error(TAG, `${this.getNetEaseMusic.name}: ${err}`);
-        })
+                if (data.responseCode === 200 && resultObj.code === 200) {
+                    song = new MusicInfo();
+                    song.id = resultObj.data.id;
+                    song.name = resultObj.data.song;
+                    song.singer = resultObj.data.singer;
+                    song.url = resultObj.data.url;
+                    song.pic = resultObj.data.cover;
+                    song.pay = false;
+                    song.where = MusicFrom.NetEase;
+
+                    console.log(TAG, `${this.getNetEaseMusic.name} ${api_url}`);
+                } else {
+                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEaseMusic.name} ${api_url}`);
+                }
+            })
+            .catch((err) => {
+                console.error(TAG, `${this.getNetEaseMusic.name}: ${err}`);
+            })
 
         return song;
     }
@@ -160,7 +187,6 @@ export class HttpUtils {
      */
     public async getSongsByNetEase(keyword: string, page: number = 1): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) return null;
-
         const limit = 10;
         const offset: number = (page - 1) * limit + 1;
 
@@ -169,46 +195,33 @@ export class HttpUtils {
 
         let musics: MusicInfo[] = [];
 
-        try {
-            await this.httpReq.request(api_url)
-                .then((data: http.HttpResponse) => {
-                    if (data.responseCode !== 200) {
-                        console.error(TAG, `${this.getSongsByNetEase.name}: HTTP错误 ${data.responseCode}`);
-                        return;
-                    }
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
+                let resultObj = JSON.parse(data.result as string);
+                if (data.responseCode === 2000 && resultObj.code === 200) {
+                    resultObj.data.forEach((item) => {
+                        let song = new MusicInfo();
+                        song.id = item.id;
+                        song.name = item.song;
+                        song.singer = item.singer;
+                        song.pic = item.cover;
+                        song.where = MusicFrom.NetEase;
+                        song.pay = false;
+                        song.url = `http://music.163.com/song/media/outer/url?id=${item.id}`;
 
-                    // 解析JSON响应
-                    let resultObj = JSON.parse(data.result as string);
+                        musics.push(song);
+                    });
 
-                    if (resultObj.code === 200 && resultObj.data && Array.isArray(resultObj.data)) {
-                        // 遍历搜索结果
-                        resultObj.data.forEach((item) => {
-                            let song = new MusicInfo();
-                            song.id = item.id;
-                            song.name = item.song;
-                            song.singer = item.singer;
-                            song.pic = item.cover;
-                            song.where = MusicFrom.NetEase;
-                            song.pay = false;
-                            song.url = `http://music.163.com/song/media/outer/url?id=${item.id}`;
+                    console.log(TAG, `${this.getSongsByNetEase.name} ${api_url}`);
+                } else {
+                    console.error(TAG, `${resultObj.code} ${this.getSongsByNetEase.name} ${api_url}`);
+                }
+            })
+            .catch((err) => {
+                console.error(TAG, `${this.getSongsByNetEase.name}: ${err}`);
+            });
 
-                            musics.push(song);
-                        });
-
-                        console.log(TAG, `${this.getSongsByNetEase.name} ${api_url}`);
-                    } else {
-                        console.error(TAG, `${resultObj.code} ${this.getSongsByNetEase.name} ${api_url}`);
-                    }
-                })
-                .catch((err) => {
-                    console.error(TAG, `${this.getSongsByNetEase.name}: ${err}`);
-                });
-
-            return musics;
-        } catch (error) {
-            console.error(TAG, `${this.getSongsByNetEase.name} 异常: ${error}`);
-            return null;
-        }
+        return musics;
     }
 
     /**
@@ -219,7 +232,6 @@ export class HttpUtils {
      */
     public async getSingersByNetEase(keyword: string, page: number = 1): Promise<SingerInfo[]> {
         if (!await this.netAvailable()) return null;
-
         const limit = 10;
         const offset = (page - 1) * limit;
 
@@ -228,17 +240,10 @@ export class HttpUtils {
 
         let singers: SingerInfo[] = [];
 
-        try {
-            await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-                if (data.responseCode !== 200) {
-                    console.error(TAG, `${this.getSingersByNetEase.name}: HTTP错误 ${data.responseCode}`);
-                    return;
-                }
-
-                // 解析JSON响应
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
                 let resultObj = JSON.parse(data.result as string);
-
-                if (resultObj.code === 200) {
+                if (data.responseCode === 200 && resultObj.code === 200) {
                     resultObj.result.artists.forEach((item) => {
                         let singer = new SingerInfo();
                         singer.id = item.id;
@@ -253,24 +258,20 @@ export class HttpUtils {
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSingersByNetEase.name} ${api_url}`);
                 }
-            }).catch((err) => {
+            })
+            .catch((err) => {
                 console.error(TAG, `${this.getSingersByNetEase.name}: ${err}`);
             });
 
-            return singers;
-        } catch (error) {
-            console.error(TAG, `${this.getSingersByNetEase.name} 异常: ${error}`);
-            return null;
-        }
+        return singers;
     }
 
-    /**
+    /** TODO
      * 获取歌手所有歌曲
      * @param id 歌手id
      */
     public async getSingerSongsByNetEase(id: string, page: number = 1): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) return null;
-
         const limit = 10;
         const offset = (page - 1) * limit;
 
@@ -279,17 +280,10 @@ export class HttpUtils {
 
         let songs: MusicInfo[] = [];
 
-        try {
-            await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-                if (data.responseCode !== 200) {
-                    console.error(TAG, `${this.getSingerSongsByNetEase.name}: HTTP错误 ${data.responseCode}`);
-                    return;
-                }
-
-                // 解析JSON响应
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
                 let resultObj = JSON.parse(data.result as string);
-
-                if (resultObj.code === 200) {
+                if (data.responseCode === 200 && resultObj.code === 200) {
                     resultObj.songs.forEach((item) => {
                         let music = new MusicInfo();
                         music.id = item.id;
@@ -304,15 +298,12 @@ export class HttpUtils {
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSingerSongsByNetEase.name} ${api_url}`);
                 }
-            }).catch((err) => {
+            })
+            .catch((err) => {
                 console.error(TAG, `${this.getSingerSongsByNetEase.name}: ${err}`);
             });
 
-            return songs;
-        } catch (error) {
-            console.error(TAG, `${this.getSingerSongsByNetEase.name} 异常: ${error}`);
-            return null;
-        }
+        return songs;
     }
 
     /**
@@ -323,39 +314,28 @@ export class HttpUtils {
     public async getMusicLyric(id: string, where: MusicFrom): Promise<string> {
         if (!await this.netAvailable()) return null;
 
-        let api_url = "https://api.vkeys.cn/v2/music/netease/lyric";
+        let api_url = `https://api.vkeys.cn/v2/music/netease/lyric?id=${id}`;
         if (where === MusicFrom.QQ)
-            api_url = "https://api.vkeys.cn/v2/music/tencent/lyric";
-        api_url += `?id=${id}`;
+            api_url = `https://api.vkeys.cn/v2/music/tencent/lyric?id=${id}`;
 
         let lrcText: string = null;
 
-        try {
-            await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-                if (data.responseCode !== 200) {
-                    console.error(TAG, `${this.getMusicLyric.name}: HTTP错误 ${data.responseCode}`);
-                    return;
-                }
-
-                // 解析JSON响应
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
                 let resultObj = JSON.parse(data.result as string);
-
-                if (resultObj.code === 200 && resultObj.data && resultObj.data.lrc) {
+                if (data.responseCode === 200 && resultObj.code === 200 && resultObj.data && resultObj.data.lrc) {
                     lrcText = resultObj.data.lrc;
                     console.log(TAG, `${this.getMusicLyric.name} ${api_url}`);
                 }
                 else
                     console.log(TAG, `${resultObj.code} ${this.getMusicLyric.name} ${api_url}`);
 
-            }).catch((err) => {
+            })
+            .catch((err) => {
                 console.error(TAG, `${this.getMusicLyric.name}: ${err}`);
             });
 
-            return lrcText;
-        } catch (error) {
-            console.error(TAG, `${this.getMusicLyric.name} 异常: ${error}`);
-            return null;
-        }
+        return lrcText;
     }
 
     /****************************************** QQ音乐API ******************************************/
@@ -369,25 +349,14 @@ export class HttpUtils {
     public async getSongsByQQ(keyword: string, page: number = 1): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) return null;
 
-        let api_url = "https://api.vkeys.cn/v2/music/tencent";
-
-        api_url += `?word=${encodeURIComponent(keyword)}&page=${page}`;
-
+        let api_url = `https://api.vkeys.cn/v2/music/tencent?word=${encodeURIComponent(keyword)}&page=${page}`;
         let musics: MusicInfo[] = [];
 
-        try {
-            await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-                if (data.responseCode !== 200) {
-                    console.error(TAG, `${this.getSongsByQQ.name}: HTTP错误 ${data.responseCode}`);
-                    return;
-                }
-
-                // 解析JSON响应
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
                 let resultObj = JSON.parse(data.result as string);
-
-                if (resultObj.code === 200 && resultObj.data && Array.isArray(resultObj.data)) {
-                    // 遍历搜索结果
-                    resultObj.data.forEach((item, index) => {
+                if (data.responseCode === 200 && resultObj.code === 200) {
+                    resultObj.data.forEach(item => {
                         let music = new MusicInfo();
                         music.id = item.id;
                         music.name = item.song;
@@ -403,15 +372,12 @@ export class HttpUtils {
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSongsByQQ.name} ${api_url}`);
                 }
-            }).catch((err) => {
+            })
+            .catch((err) => {
                 console.error(TAG, `${this.getSongsByQQ.name}: ${err}`);
             });
 
-            return musics;
-        } catch (error) {
-            console.error(TAG, `${this.getSongsByQQ.name} 异常: ${error}`);
-            return null;
-        }
+        return musics;
     }
 
     /**
@@ -423,26 +389,15 @@ export class HttpUtils {
     public async getSingersByQQ(keyword: string, page: number = 1): Promise<SingerInfo[]> {
         if (!await this.netAvailable()) return null;
 
-        let api_url = "https://api.vkeys.cn/v2/music/tencent/search/singer";
-        api_url += `?word=${encodeURIComponent(keyword)}&page=${page}`;
-
+        let api_url = `https://api.vkeys.cn/v2/music/tencent/search/singer?word=${encodeURIComponent(keyword)}&page=${page}`;
         let singers: SingerInfo[] = [];
 
-        try {
-            await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-                if (data.responseCode !== 200) {
-                    console.error(TAG, `${this.getSingersByQQ.name}: HTTP错误 ${data.responseCode}`);
-                    return;
-                }
-
-                // 解析JSON响应
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
                 let resultObj = JSON.parse(data.result as string);
-
-                if (resultObj.code === 200 && resultObj.data && Array.isArray(resultObj.data)) {
-                    // 遍历搜索结果
+                if (data.responseCode === 200 && resultObj.code === 200) {
                     resultObj.data.forEach((item) => {
                         let singer = new SingerInfo();
-                        // singer.id = item.singerID;
                         singer.id = item.singerMID;
                         singer.name = item.singerName;
                         singer.pic = item.singerPic;
@@ -455,15 +410,12 @@ export class HttpUtils {
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSingersByQQ.name} ${api_url}`);
                 }
-            }).catch((err) => {
+            })
+            .catch((err) => {
                 console.error(TAG, `${this.getSingersByQQ.name}: ${err}`);
             });
 
-            return singers;
-        } catch (error) {
-            console.error(TAG, `${this.getSingersByQQ.name} 异常: ${error}`);
-            return null;
-        }
+        return singers;
     }
 
     /**
@@ -474,32 +426,31 @@ export class HttpUtils {
         if (!await this.netAvailable()) return null;
 
         let music_info = new MusicInfo();
-        let api_url = "https://api.vkeys.cn/v2/music/tencent";
-        api_url += `?id=${id}&quality=${quality}`;
+        let api_url = `https://api.vkeys.cn/v2/music/tencent?id=${id}&quality=${quality}`;
 
-        await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-            let resultObj = JSON.parse(data.result as string);
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
+                let resultObj = JSON.parse(data.result as string);
+                if (data.responseCode === 200 && resultObj.code === 200) {
+                    music_info.id = resultObj.data.id;
+                    music_info.name = resultObj.data.song;
+                    music_info.singer = resultObj.data.singer;
+                    music_info.url = resultObj.data.url;
+                    music_info.pic = resultObj.data.cover;
+                    music_info.pay = resultObj.data.quality === '音乐试听';
+                    music_info.where = MusicFrom.QQ;
 
-            if (data.responseCode === 200 && resultObj.code === 200) {
-                music_info.id = resultObj.data.id;
-                music_info.name = resultObj.data.song;
-                music_info.singer = resultObj.data.singer;
-                music_info.url = resultObj.data.url;
-                music_info.pic = resultObj.data.cover;
-                music_info.pay = resultObj.data.quality === '音乐试听';
-                music_info.where = MusicFrom.QQ;
-
-                console.log(TAG, `${this.getQQMusic.name} ${api_url}`);
-            } else {
-                console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getQQMusic.name} ${api_url}`);
-            }
-        }).catch((err) => {
-            console.error(TAG, `${this.getQQMusic.name} ${api_url} ${err}`);
-        })
+                    console.log(TAG, `${this.getQQMusic.name} ${api_url}`);
+                } else {
+                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getQQMusic.name} ${api_url}`);
+                }
+            })
+            .catch((err) => {
+                console.error(TAG, `${this.getQQMusic.name} ${api_url} ${err}`);
+            })
 
         return music_info;
     }
-
 
     /**
      * QQ音乐 歌手歌曲搜索
@@ -509,24 +460,14 @@ export class HttpUtils {
      */
     public async getSingerSongsByQQ(id: string, page: number = 1): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) return null;
-
-        let api_url = "https://api.vkeys.cn/v2/music/tencent/singer/songlist";
-        api_url += `?mid=${id}&page=${page}`;
-
+        let api_url = `https://api.vkeys.cn/v2/music/tencent/singer/songlist?mid=${id}&page=${page}`;
         let songs: MusicInfo[] = [];
 
-        try {
-            await this.httpReq.request(api_url).then((data: http.HttpResponse) => {
-                if (data.responseCode !== 200) {
-                    console.error(TAG, `${this.getSingerSongsByQQ.name}: HTTP错误 ${data.responseCode}`);
-                    return;
-                }
-
-                // 解析JSON响应
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
                 let resultObj = JSON.parse(data.result as string);
-
-                if (resultObj.code === 200) {
-                    resultObj.data.forEach((item) => {
+                if (data.responseCode === 200 && resultObj.code === 200) {
+                    resultObj.data.forEach(item => {
                         let music = new MusicInfo();
                         music.id = item.id;
                         music.name = item.song;
@@ -541,23 +482,97 @@ export class HttpUtils {
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getSingerSongsByQQ.name} ${api_url}`);
                 }
-            }).catch((err) => {
+            })
+            .catch((err) => {
                 console.error(TAG, `${this.getSingerSongsByQQ.name}: ${err}`);
             });
 
-            return songs;
-        } catch (error) {
-            console.error(TAG, `${this.getSingerSongsByQQ.name} 异常: ${error}`);
-            return null;
-        }
+        return songs;
+    }
+
+    /** TODO
+     * 获取QQ账号歌单
+     * @param uin
+     */
+    public async getQQPlaylists(uin: string) {
+        if (!await this.netAvailable()) return null;
+        let api_url = `https://api.timelessq.com/music/tencent/cdList?uid=${uin}`;
+        // `https://api.vkeys.cn/v2/music/tencent/info?uin=1423443710`
+
+        let playlists: {
+            name: string,
+            id: string,
+            cover?: string
+        }[] = [];
+
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
+                let resultObj = JSON.parse(data.result as string);
+                if (data.responseCode === 200) {
+                    resultObj.data.lists.forEach(item => {
+                        playlists.push({ name: item.name, id: item.tid, cover: item.cover });
+                    });
+                } else {
+                    console.error(TAG, `${resultObj.code} ${this.getSingerSongsByQQ.name} ${api_url}`);
+                }
+            })
+            .catch((err) => {
+                console.error(TAG, `${this.getSingerSongsByQQ.name}: ${err}`);
+            });
+
+        return playlists;
+    }
+
+    /** TODO
+     * 获取QQ音乐 歌单所有歌曲
+     * @param id
+     * @returns
+     */
+    async getQQListSongs(id: string): Promise<MusicInfo[]> {
+        if (!await this.netAvailable()) return null;
+        let api_url = `https://api.vkeys.cn/v2/music/tencent/dissinfo?id=${id}`;
+
+        const songs: MusicInfo[] = [];
+
+        await this.httpReq.request(api_url)
+            .then((data: http.HttpResponse) => {
+                let resultObj = JSON.parse(data.result as string);
+                if (data.responseCode == 200 && resultObj.code == 200) {
+                    resultObj.data.list.forEach(item => {
+                        let song = new MusicInfo();
+                        song.id = item.id;
+                        song.name = item.song;
+                        item.singer_list.forEach((singer, index) => {
+                            if (index > 0)
+                                song.singer += '/' + singer.name;
+                            else
+                                song.singer += singer.name;
+                        });
+                        song.url = null;
+                        song.pic = item.cover;
+                        song.pay = item.pay === '付费';
+                        song.where = MusicFrom.QQ;
+                        songs.push(song);
+                    });
+
+                    console.log(TAG, `${this.getQQListSongs.name} ${api_url}`);
+                } else {
+                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getQQListSongs.name} ${api_url}`);
+                }
+            })
+            .catch((e) => {
+                console.error(TAG, `${this.getQQListSongs.name}: ${e}`);
+            });
+
+        return songs;
     }
 
     /****************************************** 后端接口 ******************************************/
     // 获取验证码
     public async getVerifyCode(email: string, action: string) {
         if (!await this.netAvailable()) return null;
-
         let api_url = `${HOST}/users/verify_code`;
+        let success = false;
 
         await this.httpReq.request(api_url, {
             header: {
@@ -573,22 +588,22 @@ export class HttpUtils {
 
             if (data.responseCode === 200 && resultObj.code === 200) {
                 console.log(TAG, `${this.getVerifyCode.name} ${api_url}`);
-                return true;
+                success = true;
             } else {
                 console.error(TAG, `${data.responseCode} ${this.getVerifyCode.name} ${api_url}`);
-                return false;
             }
         }).catch((err) => {
             console.error(TAG, `${this.getVerifyCode.name}: ${err}`);
-            return false;
         })
+
+        return success;
     }
 
     // 注册
     public async register(username: string, passwd: string, email: string, verify_code: string) {
         if (!await this.netAvailable()) return null;
-
         let api_url = `${HOST}/users/register`;
+        let success = false;
 
         await this.httpReq.request(api_url, {
             header: {
@@ -606,23 +621,22 @@ export class HttpUtils {
 
             if (data.responseCode === 200 && resultObj.code === 200) {
                 console.log(TAG, `${this.register.name} ${api_url}`);
-                return resultObj.user_id;
+                success = true;
             } else {
                 console.error(TAG, `${data.responseCode} ${this.register.name} ${api_url}`);
-                return null;
             }
         }).catch((err) => {
             console.error(TAG, `${this.register.name}: ${err}`);
-            return null;
-        })
+        });
+
+        return success;
     }
 
     // 登录
     public async login(username: string, passwd: string) {
         if (!await this.netAvailable()) return null;
-
         let api_url = `${HOST}/users/login`;
-        let user: User = new User();
+        let success = false;
 
         await this.httpReq.request(api_url, {
             header: {
@@ -638,31 +652,31 @@ export class HttpUtils {
             let header = JSON.parse(JSON.stringify(data.header));
 
             if (data.responseCode === 200 && resultObj.code === 200) {
-                user.id = resultObj.user.id;
-                user.username = resultObj.user.username;
-                user.qq_id = resultObj.user.qq_id;
-                user.netease_id = resultObj.user.netease_id;
-                user.email = resultObj.user.email;
-                user.create_at = resultObj.user.create_at;
-                user.authorization = header.authorization;
+                globalUser.id = resultObj.user.id;
+                globalUser.username = resultObj.user.username;
+                globalUser.qq_id = resultObj.user.qq_id;
+                globalUser.netease_id = resultObj.user.netease_id;
+                globalUser.email = resultObj.user.email;
+                globalUser.create_at = resultObj.user.create_at;
+                globalUser.authorization = header.authorization;
 
                 console.log(TAG, `${this.login.name} ${api_url}`);
+                success = true;
             } else {
-                user = null;
                 console.error(TAG, `${data.responseCode} ${this.login.name} ${api_url} ${resultObj.message}`);
             }
         }).catch((err) => {
-            console.error(TAG, `${this.login.name}: ${err}`);
+            console.error(TAG, `${this.login.name} ${err}`);
         })
 
-        return user;
+        return success;
     }
 
     // 修改密码
     public async modifyPasswd(username: string, email: string, newPasswd: string, verify_code: string) {
         if (!await this.netAvailable()) return null;
-
         let api_url = `${HOST}/users/password`;
+        let success = false;
 
         await this.httpReq.request(api_url, {
             header: {
@@ -680,46 +694,109 @@ export class HttpUtils {
 
             if (data.responseCode === 200 && resultObj.code === 200) {
                 console.log(TAG, `${this.modifyPasswd.name} ${api_url}`);
-                return true;
+                success = true;
             } else {
                 console.error(TAG, `${data.responseCode} ${this.modifyPasswd.name} ${api_url}`);
-                return false;
             }
         }).catch((err) => {
             console.error(TAG, `${this.modifyPasswd.name}: ${err}`);
-            return false;
-        })
+        });
+
+        return success;
     }
 
     // 绑定平台id
     public async bindPlatform(platform: string, platformId: string) {
         if (!await this.netAvailable()) return null;
-
         let api_url = `${HOST}/users/bind`;
+        let success = false;
 
         await this.httpReq.request(api_url, {
             header: {
                 'Connection': "close",
-                'Authorization': globalUser.user.authorization
+                'Authorization': globalUser.authorization
             },
             method: http.RequestMethod.POST,
             extraData: {
                 "platform": platform,
                 "platform_id": platformId
-            },
+            }
         }).then((data: http.HttpResponse) => {
             let resultObj = JSON.parse(data.result as string);
 
             if (data.responseCode === 200 && resultObj.code === 200) {
                 console.log(TAG, `${this.bindPlatform.name} ${api_url}`);
-                return true;
+                if (platform === 'qq')
+                    globalUser.qq_id = platformId;
+                else
+                    globalUser.netease_id = platformId;
+                success = true;
             } else {
                 console.error(TAG, `${data.responseCode} ${this.bindPlatform.name} ${api_url}`);
-                return false;
             }
         }).catch((err) => {
             console.error(TAG, `${this.bindPlatform.name}: ${err}`);
-            return false;
+        });
+
+        return success;
+    }
+
+    // 更新头像
+    public async updateAvatar(base64: string) {
+        if (!await this.netAvailable()) return null;
+        let api_url = `${HOST}/users/avatar`;
+        let success = false;
+
+        await this.httpReq.request(api_url, {
+            header: {
+                'Connection': "close",
+                'Authorization': globalUser.authorization
+            },
+            method: http.RequestMethod.POST,
+            extraData: {
+                "avatar_data": base64
+            }
+        }).then((data: http.HttpResponse) => {
+            let resultObj = JSON.parse(data.result as string);
+
+            if (data.responseCode === 200 && resultObj.code === 200) {
+                console.log(TAG, `${this.updateAvatar.name} ${api_url}`);
+                success = true;
+            } else {
+                console.error(TAG, `${data.responseCode} ${this.updateAvatar.name} ${api_url}`);
+            }
+        }).catch((err) => {
+            console.error(TAG, `${this.updateAvatar.name}: ${err}`);
+        });
+
+        return success;
+    }
+
+    // 获取头像
+    public async getAvatar() {
+        if (!await this.netAvailable()) return null;
+        let api_url = `${HOST}/users/avatar`;
+        let base64: string = null;
+
+        await this.httpReq.request(api_url, {
+            header: {
+                'Connection': "close",
+                'Authorization': globalUser.authorization
+            },
+            method: http.RequestMethod.GET
+        }).then((data: http.HttpResponse) => {
+            let resultObj = JSON.parse(data.result as string);
+
+            if (data.responseCode === 200 && resultObj.code === 200) {
+                console.log(TAG, `${this.getAvatar.name} ${api_url}`);
+                base64 = resultObj.avatar_data;
+            } else {
+                console.error(TAG, `${data.responseCode} ${this.getAvatar.name} ${api_url}`);
+            }
+        }).catch((err) => {
+            console.error(TAG, `${this.getAvatar.name}: ${err}`);
         })
+
+        return base64;
     }
 }
