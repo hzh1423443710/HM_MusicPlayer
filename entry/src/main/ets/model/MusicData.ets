@@ -68,6 +68,6 @@ export class MusicInfo {
     }
 
     toString(): string {
-        return `id: ${this.id}, name: ${this.name}, singer: ${this.singer}, url: ${this.url}, cover_url: ${this.pic}, pay: ${this.pay}, where: ${this.where}`;
+        return `id: ${this.id}, name: ${this.name}, singer: ${this.singer}, pay: ${this.pay}, where: ${this.where} ${this.pic}`;
     }
 }

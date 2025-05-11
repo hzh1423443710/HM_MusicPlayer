@@ -198,7 +198,7 @@ export class HttpUtils {
         await this.httpReq.request(api_url)
             .then((data: http.HttpResponse) => {
                 let resultObj = JSON.parse(data.result as string);
-                if (data.responseCode === 2000 && resultObj.code === 200) {
+                if (data.responseCode === 200 && resultObj.code === 200) {
                     resultObj.data.forEach((item) => {
                         let song = new MusicInfo();
                         song.id = item.id;

@@ -1,5 +1,4 @@
 import media from '@ohos.multimedia.media'
-import common from '@ohos.app.ability.common';
 import { enumToString, MusicFrom, MusicInfo, PlaylistType } from '../model/MusicData';
 import { MediaTools } from '../common/MediaTools'
 import { HttpUtils } from './network/HttpUtils';
@@ -147,7 +146,7 @@ export class MediaService {
     }
 
     public debugState() {
-        console.log(TAG, `播放列表: ${enumToString(PlaylistType, this.playlistType)}, 播放状态:${enumToString(PlayerState, this.getPlayState())}, index[${this.currentMusicIndex}] Music:${this.currentPlayQueue[this.currentMusicIndex]}`);
+        console.log(TAG, ` ${enumToString(PlaylistType, this.playlistType)}[${this.currentMusicIndex}] ${enumToString(PlayerState, this.getPlayState())} ${this.currentPlayQueue[this.currentMusicIndex]}`);
     }
 
     // ================================== 播放队列管理 =================================
@@ -378,12 +377,13 @@ export class MediaService {
         }
 
         if (this.getPlayState() !== PlayerState.IDLE) {
-            this.reset().then(() => {
+            await this.reset().then(() => {
                 this.avPlayer.url = music.url;
             })
         } else {
             this.avPlayer.url = music.url;
         }
+        console.log(`设置URL ${this.avPlayer.url}`);
 
         // 更新当前播放索引
         this.updateCurrentMusicIndex(musicIndex);
@@ -401,11 +401,11 @@ export class MediaService {
 
         this.avPlayer.on('seekDone', (seekDoneTime: number) => {
             this.isCurrent = true;
-            console.info(TAG, `AVPlayer onSeekDone: seek time is ${seekDoneTime}`);
+            console.info(TAG, `onSeekDone ${seekDoneTime}`);
         });
 
         this.avPlayer.on('error', (err) => {
-            console.error(TAG, `AVPlayer onError: code is ${err.code}, message is ${err.message}`);
+            console.error(TAG, `onError: ${err.code} ${err.message}`);
             if (this.avPlayer) {
                 this.avPlayer.reset();
                 this.currentPlayQueue[this.currentMusicIndex].pay = true;
