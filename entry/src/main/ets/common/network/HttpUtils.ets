@@ -5,9 +5,11 @@ import { SingerInfo } from '../../model/SingerData';
 import { QQMusicQuality } from '../constants/QQMusicAPI';
 import { NetEaseAPI, NetEasePlaylistId, NetEaseQuality } from '../constants/NetEaseAPI';
 import { globalUser } from '../../viewmodel/UserViewModel'
+import File from '@system.file';
 
 const TAG: string = 'HttpUtils';
-const HOST = "119.3.185.203:5000";
+
+export const BACK_END_HOST = "119.3.185.203:5000";
 
 export class HttpUtils {
     httpReq: http.HttpRequest = null;
@@ -53,9 +55,9 @@ export class HttpUtils {
                     console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getRandMusic.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getRandMusic.name}: ${err}`);
-            })
+            .catch(err => {
+                console.error(TAG, this.getRandMusic.name, err.message);
+            });
 
         return music_info;
     }
@@ -89,8 +91,8 @@ export class HttpUtils {
                     console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEasePlaylists.name} ${api_url}`);
                 }
             })
-            .catch((e) => {
-                console.error(TAG, `${this.getNetEasePlaylists.name}: ${e}`);
+            .catch(err => {
+                console.error(TAG, this.getNetEasePlaylists.name, err.message);
             });
 
         return playlist;
@@ -135,8 +137,8 @@ export class HttpUtils {
                     console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEaseListSongs.name} ${api_url}`);
                 }
             })
-            .catch((e) => {
-                console.error(TAG, `${this.getNetEaseListSongs.name}: ${e}`);
+            .catch(err => {
+                console.error(TAG, this.getNetEaseListSongs.name, err.message);
             });
 
         return songs;
@@ -172,9 +174,9 @@ export class HttpUtils {
                     console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEaseMusic.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getNetEaseMusic.name}: ${err}`);
-            })
+            .catch(err => {
+                console.error(TAG, this.getNetEaseMusic.name, err.message);
+            });
 
         return song;
     }
@@ -217,8 +219,8 @@ export class HttpUtils {
                     console.error(TAG, `${resultObj.code} ${this.getSongsByNetEase.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getSongsByNetEase.name}: ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getSongsByNetEase.name, err.message);
             });
 
         return musics;
@@ -259,8 +261,8 @@ export class HttpUtils {
                     console.error(TAG, `${resultObj.code} ${this.getSingersByNetEase.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getSingersByNetEase.name}: ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getSingersByNetEase.name, err.message);
             });
 
         return singers;
@@ -299,8 +301,8 @@ export class HttpUtils {
                     console.error(TAG, `${resultObj.code} ${this.getSingerSongsByNetEase.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getSingerSongsByNetEase.name}: ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getSingerSongsByNetEase.name, err.message);
             });
 
         return songs;
@@ -331,8 +333,8 @@ export class HttpUtils {
                     console.log(TAG, `${resultObj.code} ${this.getMusicLyric.name} ${api_url}`);
 
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getMusicLyric.name}: ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getMusicLyric.name, err.message);
             });
 
         return lrcText;
@@ -373,8 +375,8 @@ export class HttpUtils {
                     console.error(TAG, `${resultObj.code} ${this.getSongsByQQ.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getSongsByQQ.name}: ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getSongsByQQ.name, err.message);
             });
 
         return musics;
@@ -411,8 +413,8 @@ export class HttpUtils {
                     console.error(TAG, `${resultObj.code} ${this.getSingersByQQ.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getSingersByQQ.name}: ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getSingersByQQ.name, err.message);
             });
 
         return singers;
@@ -445,8 +447,8 @@ export class HttpUtils {
                     console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getQQMusic.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getQQMusic.name} ${api_url} ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getQQMusic.name, err.message);
             })
 
         return music_info;
@@ -483,8 +485,8 @@ export class HttpUtils {
                     console.error(TAG, `${resultObj.code} ${this.getSingerSongsByQQ.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getSingerSongsByQQ.name}: ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getSingerSongsByQQ.name, err.message);
             });
 
         return songs;
@@ -513,11 +515,11 @@ export class HttpUtils {
                         playlists.push({ name: item.name, id: item.tid, cover: item.cover });
                     });
                 } else {
-                    console.error(TAG, `${resultObj.code} ${this.getSingerSongsByQQ.name} ${api_url}`);
+                    console.error(TAG, `${resultObj.code} ${this.getQQPlaylists.name} ${api_url}`);
                 }
             })
-            .catch((err) => {
-                console.error(TAG, `${this.getSingerSongsByQQ.name}: ${err}`);
+            .catch(err => {
+                console.error(TAG, this.getQQPlaylists.name, err.message);
             });
 
         return playlists;
@@ -560,8 +562,8 @@ export class HttpUtils {
                     console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getQQListSongs.name} ${api_url}`);
                 }
             })
-            .catch((e) => {
-                console.error(TAG, `${this.getQQListSongs.name}: ${e}`);
+            .catch(err => {
+                console.error(TAG, this.getQQListSongs.name, err.message);
             });
 
         return songs;
@@ -569,9 +571,9 @@ export class HttpUtils {
 
     /****************************************** 后端接口 ******************************************/
     // 获取验证码
-    public async getVerifyCode(email: string, action: string) {
+    public async getVerifyCode(email: string) {
         if (!await this.netAvailable()) return null;
-        let api_url = `${HOST}/users/verify_code`;
+        let api_url = `${BACK_END_HOST}/user/verify_code`;
         let success = false;
 
         await this.httpReq.request(api_url, {
@@ -580,20 +582,18 @@ export class HttpUtils {
             },
             method: http.RequestMethod.POST,
             extraData: {
-                "email": email,
-                "action": action
+                "email": email
             },
         }).then((data: http.HttpResponse) => {
             let resultObj = JSON.parse(data.result as string);
-
             if (data.responseCode === 200 && resultObj.code === 200) {
                 console.log(TAG, `${this.getVerifyCode.name} ${api_url}`);
                 success = true;
             } else {
                 console.error(TAG, `${data.responseCode} ${this.getVerifyCode.name} ${api_url}`);
             }
-        }).catch((err) => {
-            console.error(TAG, `${this.getVerifyCode.name}: ${err}`);
+        }).catch(err => {
+            console.error(TAG, this.getVerifyCode.name, api_url, err.message);
         })
 
         return success;
@@ -602,7 +602,7 @@ export class HttpUtils {
     // 注册
     public async register(username: string, passwd: string, email: string, verify_code: string) {
         if (!await this.netAvailable()) return null;
-        let api_url = `${HOST}/users/register`;
+        let api_url = `${BACK_END_HOST}/user/register`;
         let success = false;
 
         await this.httpReq.request(api_url, {
@@ -625,8 +625,8 @@ export class HttpUtils {
             } else {
                 console.error(TAG, `${data.responseCode} ${this.register.name} ${api_url}`);
             }
-        }).catch((err) => {
-            console.error(TAG, `${this.register.name}: ${err}`);
+        }).catch(err => {
+            console.error(TAG, this.register.name, api_url, err.message);
         });
 
         return success;
@@ -635,7 +635,7 @@ export class HttpUtils {
     // 登录
     public async login(username: string, passwd: string) {
         if (!await this.netAvailable()) return null;
-        let api_url = `${HOST}/users/login`;
+        let api_url = `${BACK_END_HOST}/user/login`;
         let success = false;
 
         await this.httpReq.request(api_url, {
@@ -665,8 +665,8 @@ export class HttpUtils {
             } else {
                 console.error(TAG, `${data.responseCode} ${this.login.name} ${api_url} ${resultObj.message}`);
             }
-        }).catch((err) => {
-            console.error(TAG, `${this.login.name} ${err}`);
+        }).catch(err => {
+            console.error(TAG, this.login.name, api_url, err.message);
         })
 
         return success;
@@ -675,7 +675,7 @@ export class HttpUtils {
     // 修改密码
     public async modifyPasswd(username: string, email: string, newPasswd: string, verify_code: string) {
         if (!await this.netAvailable()) return null;
-        let api_url = `${HOST}/users/password`;
+        let api_url = `${BACK_END_HOST}/user/password`;
         let success = false;
 
         await this.httpReq.request(api_url, {
@@ -691,15 +691,14 @@ export class HttpUtils {
             },
         }).then((data: http.HttpResponse) => {
             let resultObj = JSON.parse(data.result as string);
-
             if (data.responseCode === 200 && resultObj.code === 200) {
                 console.log(TAG, `${this.modifyPasswd.name} ${api_url}`);
                 success = true;
             } else {
                 console.error(TAG, `${data.responseCode} ${this.modifyPasswd.name} ${api_url}`);
             }
-        }).catch((err) => {
-            console.error(TAG, `${this.modifyPasswd.name}: ${err}`);
+        }).catch(err => {
+            console.error(TAG, this.modifyPasswd.name, api_url, err.message);
         });
 
         return success;
@@ -708,7 +707,7 @@ export class HttpUtils {
     // 绑定平台id
     public async bindPlatform(platform: string, platformId: string) {
         if (!await this.netAvailable()) return null;
-        let api_url = `${HOST}/users/bind`;
+        let api_url = `${BACK_END_HOST}/user/platform`;
         let success = false;
 
         await this.httpReq.request(api_url, {
@@ -723,7 +722,6 @@ export class HttpUtils {
             }
         }).then((data: http.HttpResponse) => {
             let resultObj = JSON.parse(data.result as string);
-
             if (data.responseCode === 200 && resultObj.code === 200) {
                 console.log(TAG, `${this.bindPlatform.name} ${api_url}`);
                 if (platform === 'qq')
@@ -734,17 +732,17 @@ export class HttpUtils {
             } else {
                 console.error(TAG, `${data.responseCode} ${this.bindPlatform.name} ${api_url}`);
             }
-        }).catch((err) => {
-            console.error(TAG, `${this.bindPlatform.name}: ${err}`);
+        }).catch(err => {
+            console.error(TAG, this.bindPlatform.name, api_url, err.message);
         });
 
         return success;
     }
 
-    // 更新头像
-    public async updateAvatar(base64: string) {
+    // 更新头像 TODO
+    public async uploadAvatar(file: File) {
         if (!await this.netAvailable()) return null;
-        let api_url = `${HOST}/users/avatar`;
+        let api_url = `${BACK_END_HOST}/user/avatar`;
         let success = false;
 
         await this.httpReq.request(api_url, {
@@ -754,49 +752,20 @@ export class HttpUtils {
             },
             method: http.RequestMethod.POST,
             extraData: {
-                "avatar_data": base64
+                "avatar": file
             }
         }).then((data: http.HttpResponse) => {
             let resultObj = JSON.parse(data.result as string);
-
             if (data.responseCode === 200 && resultObj.code === 200) {
-                console.log(TAG, `${this.updateAvatar.name} ${api_url}`);
+                console.log(TAG, `${this.uploadAvatar.name} ${api_url}`);
                 success = true;
             } else {
-                console.error(TAG, `${data.responseCode} ${this.updateAvatar.name} ${api_url}`);
+                console.error(TAG, `${data.responseCode} ${this.uploadAvatar.name} ${api_url}`);
             }
-        }).catch((err) => {
-            console.error(TAG, `${this.updateAvatar.name}: ${err}`);
+        }).catch(err => {
+            console.error(TAG, this.uploadAvatar.name, api_url, err.message);
         });
 
         return success;
-    }
-
-    // 获取头像
-    public async getAvatar() {
-        if (!await this.netAvailable()) return null;
-        let api_url = `${HOST}/users/avatar`;
-        let base64: string = null;
-
-        await this.httpReq.request(api_url, {
-            header: {
-                'Connection': "close",
-                'Authorization': globalUser.authorization
-            },
-            method: http.RequestMethod.GET
-        }).then((data: http.HttpResponse) => {
-            let resultObj = JSON.parse(data.result as string);
-
-            if (data.responseCode === 200 && resultObj.code === 200) {
-                console.log(TAG, `${this.getAvatar.name} ${api_url}`);
-                base64 = resultObj.avatar_data;
-            } else {
-                console.error(TAG, `${data.responseCode} ${this.getAvatar.name} ${api_url}`);
-            }
-        }).catch((err) => {
-            console.error(TAG, `${this.getAvatar.name}: ${err}`);
-        })
-
-        return base64;
     }
 }

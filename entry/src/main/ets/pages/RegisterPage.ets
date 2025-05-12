@@ -68,9 +68,9 @@ struct RegisterPage {
         }
 
         this.isLoading = true;
-        this.http.getVerifyCode(this.email, "register")
+        this.http.getVerifyCode(this.email)
             .then(() => {
-                this.countdownSeconds = 60;
+                this.countdownSeconds = 60 * 5;
                 this.countdownInterval = setInterval(() => {
                     this.countdownSeconds--;
                     if (this.countdownSeconds <= 0) {

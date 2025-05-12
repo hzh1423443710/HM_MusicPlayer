@@ -184,7 +184,7 @@ struct UserProfilePage {
                     Column() {
                         // 头像区域
                         Column() {
-                            Image(this.viewModel.avatar_base64 || $r('app.media.default_singer'))
+                            Image(this.viewModel.avatar() || $r('app.media.default_singer'))
                                 .width(100).height(100).borderRadius(50).margin({ bottom: 16 })
                             Text(this.viewModel.username)
                                 .fontSize(22).fontWeight(FontWeight.Bold).margin({ bottom: 8 })

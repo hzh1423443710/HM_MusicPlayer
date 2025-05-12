@@ -1,4 +1,4 @@
-import { HttpUtils } from '../common/network/HttpUtils';
+import { HttpUtils, BACK_END_HOST } from '../common/network/HttpUtils';
 
 @Observed
 export class UserViewModel {
@@ -10,7 +10,10 @@ export class UserViewModel {
     email: string;
     create_at: string;
     authorization: string = '';
-    avatar_base64: string;
+
+    avatar() {
+        return `http://${BACK_END_HOST}/user/avatar/${this.id}`;
+    }
 
     // 持久化存储 Authorization 到用户首选项
     private saveAuth() {
@@ -21,7 +24,6 @@ export class UserViewModel {
         const http = new HttpUtils();
         if (await http.login(username, password)) {
             this.isLogged = true;
-            this.avatar_base64 = await http.getAvatar();
             this.saveAuth();
             http.destroy();
             return true;

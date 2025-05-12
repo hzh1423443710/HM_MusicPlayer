@@ -15,7 +15,7 @@ export struct MyContent {
             Row() {
                 // 用户信息
                 if (this.viewModel.isLogged) {
-                    Image(this.viewModel.avatar_base64)
+                    Image(this.viewModel.avatar())
                         .alt($r('app.media.default_singer'))
                         .width(64)
                         .height(64)
