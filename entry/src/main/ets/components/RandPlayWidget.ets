@@ -46,7 +46,6 @@ export struct RandPlayWidget {
     }
 
     aboutToAppear(): void {
-        console.log('RandPlayWidget aboutToAppear');
         this.loadFirst();
     }
 
@@ -60,19 +59,10 @@ export struct RandPlayWidget {
                 console.error(`${this.viewModel.name}: ${e}`);
                 promptAction.showToast({ message: e.message });
             });
-
-        // this.music = this.media.appendRandomMusics([
-        // // 可以试听的VIP歌曲
-        //     new MusicInfo(0, "2114626833", "Once Upon A Time (House Mix)", "Max Oazo", "http://music.163.com/song/media/outer/url?id=2114626833", "http://p2.music.126.net/tyMdxKFIdPdc59zPGTuXuA==/109951169237097692.jpg"),
-        //     // 不能试听的VIP歌曲
-        //     new MusicInfo(1, "2690339159", "Redline", "乐正绫", "http://music.163.com/song/media/outer/url?id=2690339159", "http://p1.music.126.net/x08erxs8P8tGxKeCqrVzlg==/109951170678036936.jpg")
-        //
-        // ]);
     }
 
     aboutToDisappear(): void {
         this.viewModel.destroy()
-        console.log('RandPlayWidget aboutToDisappear');
     }
 
     async playCurrentSong() {

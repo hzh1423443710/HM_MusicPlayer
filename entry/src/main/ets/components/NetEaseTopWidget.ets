@@ -35,7 +35,6 @@ export struct NetEaseTopWidget {
     }
 
     aboutToAppear() {
-        console.log(`NetEaseTopWidget aboutToAppear`);
         this.viewModel.loadMusicFirst()
             .catch((e: Error) => {
                 console.error(`${this.viewModel.title}: ${e}`);

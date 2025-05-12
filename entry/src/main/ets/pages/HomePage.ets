@@ -12,8 +12,7 @@ struct HomePage {
     @State currentIndex: number = 0;
     private breakpointSystem: BreakpointSystem = new BreakpointSystem();
 
-    async aboutToAppear() {
-        console.log('HomePage aboutToAppear');
+    aboutToAppear() {
         // 开启监听能力
         ConnectionUtils.openRegister();
         // 监听具体事件
@@ -23,7 +22,6 @@ struct HomePage {
     }
 
     aboutToDisappear(): void {
-        console.log('HomePage aboutToDisappear');
         // 关闭监听能力
         ConnectionUtils.closeRegister();
 

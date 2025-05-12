@@ -21,13 +21,6 @@ export struct HomePageContent {
     @State vb_every_like: EveryLikeListViewModel = everyLikeListViewModel;
     @State vb_treasure_music: TreasureMusicViewModel = treasureMusicViewModel;
 
-    aboutToAppear() {
-        console.log('HomePageContent aboutToAppear')
-    }
-
-    aboutToDisappear() {
-    }
-
     build() {
         Column({ space: 5 }) {
             // 1.标题
