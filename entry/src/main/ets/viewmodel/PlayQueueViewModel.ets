@@ -7,7 +7,7 @@ const TAG = 'PlayQueueModel';
 @Observed
 export class PlayQueueViewModel {
     songDataSource: DataSource<MusicInfo> = new DataSource<MusicInfo>();
-    playlistType: PlaylistType = PlaylistType.NONE;
+    playlistType: string = PlaylistType.NONE;
     title: string = '播放队列';
     brief: string = '0首';
     media: MediaService = MediaService.getInstance();

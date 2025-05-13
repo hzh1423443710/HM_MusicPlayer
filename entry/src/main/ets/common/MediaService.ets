@@ -38,44 +38,16 @@ export enum PlayerState {
     UNKNOWN
 }
 
-/**
- * 网易云有id 就有外链; QQ有id，得不到外链
- * 网易云/QQ 音乐 统一 播放时再根据id获取其外链
- */
 export class MediaService {
     public avPlayer: media.AVPlayer | null = null;
     private http: HttpUtils = new HttpUtils();
-    /**
-     * 播放顺序
-     */
     private playMode: MusicPlayMode = MusicPlayMode.ORDER;
-    /**
-     * 是否为prepared状态
-     */
     private isPrepared: boolean = false;
-    /**
-     * 当前音乐-在当前列表索引
-     */
     private currentMusicIndex: number = 0;
-    /**
-     * 当前播放队列
-     */
     private currentPlayQueue: MusicInfo[] = [];
-    /**
-     * 当前播放-列表类型
-     */
-    private currentPlaylistType = PlaylistType.NONE;
-    /**
-     * 播放历史 上限
-     */
+    private currentPlaylistType: string = PlaylistType.NONE;
     static readonly PLAY_HISTORY_LIMIT = 500;
-    /**
-     * 播放列表
-     */
-    private playlistMap: Map<PlaylistType, MusicInfo[]> = new Map();
-    /**
-     * seek & timeUpdate 播放进度控制
-     */
+    private playlistMap: Map<string, MusicInfo[]> = new Map();
     private isCurrent: boolean = true;
 
     constructor() {
@@ -91,11 +63,11 @@ export class MediaService {
         return this.currentPlayQueue;
     }
 
-    get playlistType(): PlaylistType {
+    get playlistType(): string {
         return this.currentPlaylistType;
     }
 
-    getPlaylist(playlistType: PlaylistType) {
+    getPlaylist(playlistType: string) {
         return this.playlistMap.get(playlistType);
     }
 
@@ -136,17 +108,17 @@ export class MediaService {
         })
     }
 
-    public debugPlaylist(type: PlaylistType) {
+    public debugPlaylist(type: string) {
         const playlist = this.playlistMap.get(type);
         if (playlist) {
             playlist.forEach((item, index) => {
-                console.log(`播放列表${enumToString(PlaylistType, type)}:[${index}] ${item}`);
+                console.log(`播放列表${type}:[${index}] ${item}`);
             });
         }
     }
 
     public debugState() {
-        console.log(TAG, ` ${enumToString(PlaylistType, this.playlistType)}[${this.currentMusicIndex}] ${enumToString(PlayerState, this.getPlayState())} ${this.currentPlayQueue[this.currentMusicIndex]}`);
+        console.log(TAG, ` ${this.playlistType} [${this.currentMusicIndex}] ${enumToString(PlayerState, this.getPlayState())} ${this.currentPlayQueue[this.currentMusicIndex]}`);
     }
 
     // ================================== 播放队列管理 =================================
@@ -250,7 +222,7 @@ export class MediaService {
      * @param songs
      * @param type
      */
-    public playOne(song: MusicInfo, songs: MusicInfo[], type: PlaylistType) {
+    public playOne(song: MusicInfo, songs: MusicInfo[], type: string) {
         // 非搜索结果 直接更新播放队列
         if (type !== PlaylistType.SEARCH) {
             this.playlistMap.set(type, songs);
@@ -315,7 +287,7 @@ export class MediaService {
      * @param songs
      * @param type
      */
-    public playAll(songs: MusicInfo[], type: PlaylistType) {
+    public playAll(songs: MusicInfo[], type: string) {
         this.playlistMap.set(type, songs);
         this.setPlayQueue(this.playlistMap.get(type), type);
         this.loadAssent(0);
@@ -326,7 +298,7 @@ export class MediaService {
      * @param songs
      * @param type
      */
-    private setPlayQueue(songs: MusicInfo[], type: PlaylistType) {
+    private setPlayQueue(songs: MusicInfo[], type: string) {
         // this.currentPlayQueue = songs;// 引用
         this.currentPlayQueue = [...songs]; //拷贝
         this.updateQueuePlaylistType(type);
@@ -510,7 +482,7 @@ export class MediaService {
      * 更新当前播放队列 类型
      * @param type
      */
-    private updateQueuePlaylistType(type: PlaylistType) {
+    private updateQueuePlaylistType(type: string) {
         this.currentPlaylistType = type;
         AppStorage.SetOrCreate('currentPlaylistType', type);
     }

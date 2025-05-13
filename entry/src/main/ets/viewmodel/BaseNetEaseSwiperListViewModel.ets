@@ -1,6 +1,6 @@
 import { NetEasePlaylistId } from '../common/constants/NetEaseAPI';
 import { HttpUtils } from '../common/network/HttpUtils';
-import { MusicInfo, PlaylistType } from '../model/MusicData'
+import { MusicInfo } from '../model/MusicData'
 import { DataSource } from './SongDataSource'
 
 @Observed
@@ -18,15 +18,15 @@ export abstract class BaseNetEasePlayListViewModel {
     // 简介
     brief: string = '';
     // http-查询参数-歌单id
-    playListId: NetEasePlaylistId;
+    playListId: string;
     // 播放列表类型
-    playlistType: PlaylistType;
+    playlistType: string;
     // 是否正在加载
     isLoading: boolean = false;
     // 每页显示的歌曲数量
     pageSize: number;
 
-    public getPlayListType(): PlaylistType {
+    public getPlayListType(): string {
         return this.playlistType;
     }
 
@@ -46,7 +46,7 @@ export abstract class BaseNetEasePlayListViewModel {
         try {
             // 清空旧数据
             this.songDataSource.clearData();
-            const songs = await this.http.getNetEaseListSongs(this.playListId);
+            const songs = await this.http.getNetEasePlaylistSongs(this.playListId);
             for (let i = 0; i < 12; ++i) {
                 this.songDataSource.pushData(songs[i]);
             }

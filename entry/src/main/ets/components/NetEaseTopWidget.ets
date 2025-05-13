@@ -12,7 +12,7 @@ export struct NetEaseTopWidget {
     @Link viewModel: BaseNetEaseLongListViewModel;
     @State isRefreshing: boolean = false;
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
-    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: string = PlaylistType.NONE;
     @State playButtonState: boolean = false;
     @State currentMusic: MusicInfo = new MusicInfo();
     media: MediaService = MediaService.getInstance();

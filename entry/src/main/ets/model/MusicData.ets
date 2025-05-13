@@ -6,20 +6,17 @@ export enum MusicFrom {
 /**
  * 播放列表类型
  */
-export enum PlaylistType {
-    NONE, // 无播放列表
-    RECENT, // 最近播放-上限500首
-    SEARCH, // 搜索结果
-    NETEASE_RANDOM_SONG, // 随机一曲
-    NETEASE_LISTEN_HOT, // 大家都爱听
-    NETEASE_NETWORK_HOT, // 网络热歌
-    NETEASE_TOP_ORIGINAL, // 原创榜
-    NETEASE_TOP_NEW, // 新歌榜
-    NETEASE_TOP_SURGE, // 飙升榜
-    NETEASE_TOP_HOT, // 热歌榜
-    USER_LOVE, // 用户收藏-歌单
-    USER_NETEASE_PLAYLIST, // 用户 网易云-歌单
-    USER_QQ_PLAYLIST, // 用户 QQ-歌单
+export class PlaylistType {
+    static readonly NONE = 'NONE'; // 无播放列表
+    static readonly RECENT = 'RECENT'; // 最近播放-上限500首
+    static readonly SEARCH = 'SEARCH'; // 搜索结果
+    static readonly NETEASE_RANDOM_SONG = 'NETEASE_RANDOM_SONG'; // 随机一曲
+    static readonly NETEASE_LISTEN_HOT = 'NETEASE_LISTEN_HOT'; // 大家都爱听
+    static readonly NETEASE_NETWORK_HOT = 'NETEASE_NETWORK_HOT'; // 网络热歌
+    static readonly NETEASE_TOP_ORIGINAL = 'NETEASE_TOP_ORIGINAL'; // 原创榜
+    static readonly NETEASE_TOP_NEW = 'NETEASE_TOP_NEW;'; // 新歌榜
+    static readonly NETEASE_TOP_SURGE = 'NETEASE_TOP_SURGE;'; // 飙升榜
+    static readonly NETEASE_TOP_HOT = 'NETEASE_TOP_HOT;'; // 热歌榜
 }
 
 export function enumToString(enumObj: any, value: number): string {

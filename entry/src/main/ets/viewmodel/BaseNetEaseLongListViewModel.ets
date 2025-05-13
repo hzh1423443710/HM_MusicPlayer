@@ -18,9 +18,9 @@ export abstract class BaseNetEaseLongListViewModel {
     // 简介
     brief: string = '';
     // http-查询参数-歌单id
-    playListId: NetEasePlaylistId
+    playListId: string;
     // 播放列表类型
-    playlistType: PlaylistType;
+    playlistType: string;
     // 是否正在加载
     isLoading: boolean = false;
     // 批处理数量
@@ -54,7 +54,7 @@ export abstract class BaseNetEaseLongListViewModel {
         try {
             // 获取音乐数据
             // const musics = await this.http.getNetEaseTop(this.playListId);
-            const songs = await this.http.getNetEaseListSongs(this.playListId);
+            const songs = await this.http.getNetEasePlaylistSongs(this.playListId);
 
             if (songs && songs.length > 0) {
                 this.brief = `${songs.length}首`;

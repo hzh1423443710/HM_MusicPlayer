@@ -40,7 +40,7 @@ export class SearchViewModel {
     songDataSource: DataSource<MusicInfo> = new DataSource<MusicInfo>();
     singerDataSource: DataSource<SingerInfo> = new DataSource<SingerInfo>();
     // 播放列表类型
-    playlistType: PlaylistType = PlaylistType.SEARCH;
+    playlistType: string = PlaylistType.SEARCH;
     // 搜索状态相关
     searchType: SearchType = SearchType.SONG;
     searchState: SearchState = SearchState.IDLE;

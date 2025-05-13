@@ -9,7 +9,7 @@ import { PlayerState, MediaService } from '../common/MediaService';
 export struct SwiperListWidget {
     @Link viewModel: BaseNetEasePlayListViewModel;
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
-    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: string = PlaylistType.NONE;
     @State currentMusic: MusicInfo = new MusicInfo();
     @State playButtonState: boolean = false;
     media: MediaService = MediaService.getInstance();

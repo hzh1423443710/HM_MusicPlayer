@@ -3,9 +3,10 @@ import { MusicFrom, MusicInfo } from '../../model/MusicData';
 import ConnectionUtil from './ConnectionUtils'
 import { SingerInfo } from '../../model/SingerData';
 import { QQMusicQuality } from '../constants/QQMusicAPI';
-import { NetEaseAPI, NetEasePlaylistId, NetEaseQuality } from '../constants/NetEaseAPI';
+import { NetEaseAPI, NetEaseQuality } from '../constants/NetEaseAPI';
 import { globalUser } from '../../viewmodel/UserViewModel'
 import File from '@system.file';
+import { PlaylistData } from '../../model/PlaylistData';
 
 const TAG: string = 'HttpUtils';
 
@@ -62,7 +63,7 @@ export class HttpUtils {
         return music_info;
     }
 
-    /** TODO
+    /**
      * 获取网易云账号下的自建歌单
      * @param uid 网易云id
      */
@@ -71,10 +72,7 @@ export class HttpUtils {
         let api_url = NetEaseAPI.USER_PLAYLISTS;
         api_url += `?uid=${uid}`;
 
-        let playlist: {
-            name: string,
-            id: string
-        }[] = [];
+        let playlist: PlaylistData[] = [];
 
         await this.httpReq.request(api_url)
             .then((data: http.HttpResponse) => {
@@ -82,8 +80,7 @@ export class HttpUtils {
 
                 if (data.responseCode == 200 && resultObj.code == 200) {
                     resultObj.playlist.forEach(item => {
-                        playlist.push({ name: item.name, id: item.id });
-                        console.log(`${item.name} ${item.id}`)
+                        playlist.push({ name: item.name, id: item.id, cover: item.coverImgUrl, count: item.playCount });
                     });
 
                     console.log(TAG, `${this.getNetEasePlaylists.name} ${api_url}`);
@@ -103,7 +100,7 @@ export class HttpUtils {
      * @param id
      * @returns
      */
-    async getNetEaseListSongs(id: NetEasePlaylistId | string): Promise<MusicInfo[]> {
+    async getNetEasePlaylistSongs(id: string): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) return null;
         let api_url = NetEaseAPI.PLAYLIST_ALL;
         api_url += `?id=${id}`;
@@ -132,13 +129,13 @@ export class HttpUtils {
                         songs.push(song);
                     });
 
-                    console.log(TAG, `${this.getNetEaseListSongs.name} ${api_url}`);
+                    console.log(TAG, `${this.getNetEasePlaylistSongs.name} ${api_url}`);
                 } else {
-                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEaseListSongs.name} ${api_url}`);
+                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getNetEasePlaylistSongs.name} ${api_url}`);
                 }
             })
             .catch(err => {
-                console.error(TAG, this.getNetEaseListSongs.name, err.message);
+                console.error(TAG, this.getNetEasePlaylistSongs.name, err.message);
             });
 
         return songs;
@@ -492,34 +489,37 @@ export class HttpUtils {
         return songs;
     }
 
-    /** TODO
+    /**
      * 获取QQ账号歌单
      * @param uin
      */
     public async getQQPlaylists(uin: string) {
         if (!await this.netAvailable()) return null;
         let api_url = `https://api.timelessq.com/music/tencent/cdList?uid=${uin}`;
-        // `https://api.vkeys.cn/v2/music/tencent/info?uin=1423443710`
 
-        let playlists: {
-            name: string,
-            id: string,
-            cover?: string
-        }[] = [];
+        let playlists: PlaylistData[] = [];
 
         await this.httpReq.request(api_url)
             .then((data: http.HttpResponse) => {
                 let resultObj = JSON.parse(data.result as string);
                 if (data.responseCode === 200) {
                     resultObj.data.lists.forEach(item => {
-                        playlists.push({ name: item.name, id: item.tid, cover: item.cover });
+                        if (item.cover)
+                            playlists.push({
+                                name: item.name,
+                                id: item.tid,
+                                cover: item.cover,
+                                count: item.songCount - 1
+                            });
                     });
+
+                    console.log(TAG, `${this.getQQPlaylists.name} ${api_url}`);
                 } else {
                     console.error(TAG, `${resultObj.code} ${this.getQQPlaylists.name} ${api_url}`);
                 }
             })
             .catch(err => {
-                console.error(TAG, this.getQQPlaylists.name, err.message);
+                console.error(TAG, this.getQQPlaylists.name, err.message, api_url);
             });
 
         return playlists;
@@ -530,7 +530,7 @@ export class HttpUtils {
      * @param id
      * @returns
      */
-    async getQQListSongs(id: string): Promise<MusicInfo[]> {
+    async getQQPlaylistSongs(id: string): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) return null;
         let api_url = `https://api.vkeys.cn/v2/music/tencent/dissinfo?id=${id}`;
 
@@ -557,13 +557,13 @@ export class HttpUtils {
                         songs.push(song);
                     });
 
-                    console.log(TAG, `${this.getQQListSongs.name} ${api_url}`);
+                    console.log(TAG, `${this.getQQPlaylistSongs.name} ${api_url}`);
                 } else {
-                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getQQListSongs.name} ${api_url}`);
+                    console.error(TAG, `${data.responseCode} ${resultObj.code} ${this.getQQPlaylistSongs.name} ${api_url}`);
                 }
             })
             .catch(err => {
-                console.error(TAG, this.getQQListSongs.name, err.message);
+                console.error(TAG, this.getQQPlaylistSongs.name, err.message);
             });
 
         return songs;

@@ -11,7 +11,7 @@ struct RecentPlayPage {
     @State playButtonState: boolean = false;
     @State currentMusic: MusicInfo = new MusicInfo();
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
-    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: string = PlaylistType.NONE;
     media: MediaService = MediaService.getInstance();
 
     /**

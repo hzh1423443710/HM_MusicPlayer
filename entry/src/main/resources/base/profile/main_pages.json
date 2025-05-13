@@ -1,15 +1,14 @@
 {
     "src": [
-        "pages/AboutPage",
         "pages/HomePage",
         "pages/PlayQueuePage",
         "pages/LoginPage",
+        "pages/PlaylistPage",
         "pages/PlayPage",
         "pages/ProfilePage",
         "pages/RecentPlayPage",
         "pages/RegisterPage",
         "pages/RetrievePasswdPage",
-        "pages/SearchPage",
-        "pages/SettingPage"
+        "pages/SearchPage"
     ]
 }

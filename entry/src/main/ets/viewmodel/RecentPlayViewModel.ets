@@ -7,7 +7,7 @@ const TAG = 'RecentPlayViewModel';
 @Observed
 export class RecentPlayViewModel {
     songDataSource: DataSource<MusicInfo> = new DataSource<MusicInfo>();
-    playlistType: PlaylistType = PlaylistType.RECENT;
+    playlistType: string = PlaylistType.RECENT;
     title: string = '最近播放';
     brief: string = '0首';
     private media: MediaService = MediaService.getInstance();

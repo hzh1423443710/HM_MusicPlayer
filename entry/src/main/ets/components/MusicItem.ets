@@ -1,12 +1,9 @@
 import { MusicInfo } from '../model/MusicData'
-import promptAction from '@ohos.promptAction';
-import { globalUser } from '../viewmodel/UserViewModel'
 
 // 一首音乐 cover + name + singer + Like
 @Preview
 @Component
 export struct MusicItem {
-    // 是否显示封面
     index?: number;
     showCover: boolean = true;
     song: MusicInfo = new MusicInfo(0, "2689031892", "谁(Live)", "廖俊涛", "http://music.163.com/song/media/outer/url?id=2689031892");
@@ -48,20 +45,6 @@ export struct MusicItem {
             .padding({ top: 5, bottom: 5 })
 
             Blank()
-
-            // Love
-            Image(this.song.love ? $r('app.media.ic_public_like_filled') : $r('app.media.ic_public_like'))
-                .fillColor(this.song.love ? Color.Red : Color.Gray)
-                .height(30)
-                .width(30)
-                .margin({ right: 10 })
-                .onClick(() => {
-                    if (!globalUser.isLogged) {
-                        promptAction.showToast({ message: '请先登录' });
-                        return;
-                    }
-                    this.song.love = !this.song.love;
-                })
         } // Row
         .width('100%')
         .justifyContent(FlexAlign.SpaceEvenly)

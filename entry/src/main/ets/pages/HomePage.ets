@@ -5,6 +5,7 @@ import { NetEaseTopContent } from '../view/NetEaseTopContent'
 import { MyContent } from '../view/MyContent'
 import { BreakpointSystem } from '../common/BreakpointSystem'
 import { MediaService } from '../common/MediaService'
+import { globalUser } from '../viewmodel/UserViewModel'
 
 @Entry
 @Component

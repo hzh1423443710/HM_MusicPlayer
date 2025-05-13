@@ -1,16 +1,29 @@
 import { HttpUtils, BACK_END_HOST } from '../common/network/HttpUtils';
 import preferences from '@ohos.data.preferences';
+import { PlaylistData } from '../model/PlaylistData';
+import { MusicInfo } from '../model/MusicData';
 
 @Observed
 export class UserViewModel {
-    isLogged: boolean = false;
-    id: number;
+    id: number = -1;
     username: string;
     qq_id: string;
     netease_id: string;
     email: string;
     create_at: string;
     authorization: string = '';
+    http: HttpUtils = new HttpUtils();
+    qqPlaylists: PlaylistData[];
+    neteasePlaylists: PlaylistData[];
+    playlistSongs: Map<string, MusicInfo[]> = new Map();
+
+    destroy() {
+        this.http.destroy();
+    }
+
+    get isLogged() {
+        return AppStorage.Get<boolean>('isLogged');
+    }
 
     public avatar() {
         return `http://${BACK_END_HOST}/user/avatar/${this.id}`;
@@ -33,47 +46,52 @@ export class UserViewModel {
 
     // 加载用户数据
     public async loadData(context: Context) {
-        try {
-            const pref = await preferences.getPreferences(context, 'HM-Music')
-            this.id = await pref.get('id', 0) as number;
+        const pref = await preferences.getPreferences(context, 'HM-Music')
+        if (await pref.has('id'))
+            this.id = await pref.get('id', -1) as number;
+        if (await pref.has('username'))
             this.username = await pref.get('username', '') as string;
+        if (await pref.has('email'))
             this.email = await pref.get('email', '') as string;
+        if (await pref.has('qq_id'))
             this.qq_id = await pref.get('qq_id', null) as string;
+        if (await pref.has('netease_id'))
             this.netease_id = await pref.get('netease_id', null) as string;
+        if (await pref.has('create_at'))
             this.create_at = await pref.get('create_at', '') as string;
+        if (await pref.has('auth'))
             this.authorization = await pref.get('auth', '') as string;
 
-            if (this.id !== 0)
-                this.isLogged = true;
-        } catch (err) {
-            console.error(this.loadData.name, err.message);
-        }
+        if (this.id !== -1)
+            AppStorage.Set('isLogged', true);
     }
 
     public async login(username: string, password: string) {
-        const http = new HttpUtils();
-        if (await http.login(username, password)) {
+        if (await this.http.login(username, password)) {
             await this.saveData();
-            this.isLogged = true;
-            console.error(this.loadData.name, this.id, this.username, this.email, this.qq_id, this.netease_id);
-            http.destroy();
+            AppStorage.Set('isLogged', true);
             return true;
         }
 
-        http.destroy();
         return false;
     }
 
     public async bindPlatform(platform: string, platformId: string) {
-        const http = new HttpUtils();
-        const ret = await http.bindPlatform(platform, platformId);
-        http.destroy();
+        const ret = await this.http.bindPlatform(platform, platformId);
         return ret;
     }
 
     // 退出登录
     public async logout() {
-        this.isLogged = false;
+        AppStorage.Set('isLogged', false);
+    }
+
+    // 加载用户歌单
+    public async loadPlaylist() {
+        await this.loadData(getContext(this));
+        console.log(`${this.id} ${this.username} ${this.email} ${this.qq_id} ${this.netease_id}`);
+        this.qqPlaylists = await this.http.getQQPlaylists(this.qq_id);
+        this.neteasePlaylists = await this.http.getNetEasePlaylists(this.netease_id);
     }
 }
 

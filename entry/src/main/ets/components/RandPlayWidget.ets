@@ -11,7 +11,7 @@ export struct RandPlayWidget {
     @State music: MusicInfo = new MusicInfo();
     @StorageProp('playState') @Watch('onPlayStateChanged') playState: PlayerState = PlayerState.IDLE;
     @StorageProp('needAppend') @Watch('onNeedAppend') needAppend: number = 0;
-    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: PlaylistType = PlaylistType.NONE;
+    @StorageProp('currentPlaylistType') @Watch('onQueuePlaylistChanged') playerPlaylistType: string = PlaylistType.NONE;
     @State playButtonState: boolean = false;
     media: MediaService = MediaService.getInstance();
 
