@@ -1,4 +1,4 @@
-import { NetEasePlaylistId, playlistIds } from '../common/constants/NetEaseAPI';
+import { NetEasePlaylistId, playlistIds } from '../common/constants/MusicAPI';
 import { PlaylistType } from '../model/MusicData';
 import { BaseNetEasePlayListViewModel } from './BaseNetEaseSwiperListViewModel'
 

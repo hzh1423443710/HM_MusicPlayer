@@ -89,9 +89,36 @@ export class UserViewModel {
     // 加载用户歌单
     public async loadPlaylist() {
         await this.loadData(getContext(this));
-        console.log(`${this.id} ${this.username} ${this.email} ${this.qq_id} ${this.netease_id}`);
+
+        // 加载歌单
         this.qqPlaylists = await this.http.getQQPlaylists(this.qq_id);
         this.neteasePlaylists = await this.http.getNetEasePlaylists(this.netease_id);
+
+        // 加载歌单歌曲
+        this.qqPlaylists.forEach(async item => {
+            const type = 'qq-' + item.id;
+            let songs: MusicInfo[] = [];
+            let page: number = 1;
+
+            while (true) {
+                try {
+                    const data = await this.http.getQQPlaylistSongs(item.id, page);
+                    if (data.length === 0) break;
+                    page++;
+                    songs.push(...data);
+                } catch (err) {
+                    console.error('UserViewModel', JSON.stringify(err));
+                }
+            }
+
+            this.playlistSongs.set(type, songs);
+        });
+
+        this.neteasePlaylists.forEach(async item => {
+            const type = 'netease-' + item.id;
+            const songs = await this.http.getNetEasePlaylistSongs(item.id);
+            this.playlistSongs.set(type, songs);
+        });
     }
 }
 

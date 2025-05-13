@@ -17,16 +17,6 @@ export struct MyContent {
         await this.viewModel.loadPlaylist();
         this.qqPlaylist = globalUser.qqPlaylists;
         this.neteasePlaylist = globalUser.neteasePlaylists;
-
-        this.qqPlaylist.forEach(item => {
-            console.log(JSON.stringify(item));
-        });
-
-        this.neteasePlaylist.forEach(item => {
-            console.log(JSON.stringify(item));
-        });
-
-        console.error(`${this.viewModel.qq_id} ${this.viewModel.netease_id}`)
     }
 
     build() {
@@ -153,6 +143,7 @@ export struct MyContent {
                     id: item.id,
                     platform: platform,
                     name: item.name,
+                    count: item.count
                 }
             });
         })

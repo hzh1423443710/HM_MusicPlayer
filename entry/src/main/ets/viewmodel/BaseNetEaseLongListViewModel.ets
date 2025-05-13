@@ -1,4 +1,3 @@
-import { NetEasePlaylistId } from '../common/constants/NetEaseAPI';
 import { HttpUtils } from '../common/network/HttpUtils';
 import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { DataSource } from './SongDataSource';

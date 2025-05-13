@@ -114,4 +114,40 @@ export enum NetEaseQuality {
     MASTER = 9
 }
 
+/**
+ * QQ音乐 音质 枚举
+ */
+export enum QQMusicQuality {
+    // 音乐试听
+    TRIAL = 0,
+    // 有损音质 - 1
+    LOSSY_1 = 1,
+    // 有损音质 - 2
+    LOSSY_2 = 2,
+    // 有损音质 - 3
+    LOSSY_3 = 3,
+    // 标准音质 - 1
+    STANDARD_1 = 4,
+    // 标准音质 - 2
+    STANDARD_2 = 5,
+    // 标准音质 - 3
+    STANDARD_3 = 6,
+    // 标准音质 - 4
+    STANDARD_4 = 7,
+    // HQ高音质
+    HQ = 8,
+    // HQ高音质（音质增强）
+    HQ_ENHANCED = 9,
+    // SQ无损音质
+    SQ = 10,
+    // Hi-Res音质
+    HI_RES = 11,
+    // 杜比全景声
+    DOLBY_ATMOS = 12,
+    // 臻品全景声
+    PREMIUM_ATMOS = 13,
+    // 臻品母带2.0
+    PREMIUM_MASTER = 14
+}
+
 export const playlistIds: string[] = getRandomPlaylistIds(2);

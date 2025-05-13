@@ -2,8 +2,7 @@ import http from '@ohos.net.http';
 import { MusicFrom, MusicInfo } from '../../model/MusicData';
 import ConnectionUtil from './ConnectionUtils'
 import { SingerInfo } from '../../model/SingerData';
-import { QQMusicQuality } from '../constants/QQMusicAPI';
-import { NetEaseAPI, NetEaseQuality } from '../constants/NetEaseAPI';
+import { NetEaseAPI, NetEaseQuality, QQMusicQuality } from '../constants/MusicAPI';
 import { globalUser } from '../../viewmodel/UserViewModel'
 import File from '@system.file';
 import { PlaylistData } from '../../model/PlaylistData';
@@ -80,7 +79,12 @@ export class HttpUtils {
 
                 if (data.responseCode == 200 && resultObj.code == 200) {
                     resultObj.playlist.forEach(item => {
-                        playlist.push({ name: item.name, id: item.id, cover: item.coverImgUrl, count: item.playCount });
+                        playlist.push({
+                            name: item.name,
+                            id: item.id,
+                            cover: item.coverImgUrl,
+                            count: item.trackCount
+                        });
                     });
 
                     console.log(TAG, `${this.getNetEasePlaylists.name} ${api_url}`);
@@ -509,7 +513,7 @@ export class HttpUtils {
                                 name: item.name,
                                 id: item.tid,
                                 cover: item.cover,
-                                count: item.songCount - 1
+                                count: item.songCount
                             });
                     });
 
@@ -525,14 +529,15 @@ export class HttpUtils {
         return playlists;
     }
 
-    /** TODO
+    /**
      * 获取QQ音乐 歌单所有歌曲
      * @param id
+     * @param page
      * @returns
      */
-    async getQQPlaylistSongs(id: string): Promise<MusicInfo[]> {
+    async getQQPlaylistSongs(id: string, page: number): Promise<MusicInfo[]> {
         if (!await this.netAvailable()) return null;
-        let api_url = `https://api.vkeys.cn/v2/music/tencent/dissinfo?id=${id}`;
+        let api_url = `https://api.vkeys.cn/v2/music/tencent/dissinfo?id=${id}&page=${page}&num=20`;
 
         const songs: MusicInfo[] = [];
 
