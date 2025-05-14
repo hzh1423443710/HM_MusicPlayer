@@ -9,14 +9,13 @@ import { PlaylistData } from '../model/PlaylistData';
 @Component
 export struct MyContent {
     @State viewModel: UserViewModel = globalUser;
-    @State qqPlaylist: PlaylistData[] = [];
-    @State neteasePlaylist: PlaylistData[] = [];
     @StorageProp('isLogged') @Watch('onLogged') isLogged: boolean = false;
+    @StorageProp('avatar') avatar: string = '';
 
     async onLogged() {
-        await this.viewModel.loadPlaylist();
-        this.qqPlaylist = globalUser.qqPlaylists;
-        this.neteasePlaylist = globalUser.neteasePlaylists;
+        if (this.isLogged) {
+            await this.viewModel.loadPlaylist();
+        }
     }
 
     build() {
@@ -27,8 +26,7 @@ export struct MyContent {
             Row() {
                 if (this.isLogged) {
                     Row() {
-                        Image(this.viewModel.avatar())
-                            .alt($r('app.media.default_singer')).width(64).height(64).borderRadius(32)
+                        Image(this.avatar).alt($r('app.media.default_singer')).width(64).height(64).borderRadius(32)
                         Column() {
                             Text(this.viewModel.username).fontSize(28)
                             Text(this.viewModel.email).fontSize(18).margin({ top: 4 })
@@ -66,7 +64,7 @@ export struct MyContent {
                         if (this.viewModel.qq_id) {
                             Text('QQ音乐歌单').fontSize(25)
                             this.splitter()
-                            ForEach(this.qqPlaylist, item => {
+                            ForEach(this.viewModel.qqPlaylists, item => {
                                 this.PlaylistItem(item, 'qq');
                             });
                         }
@@ -74,7 +72,7 @@ export struct MyContent {
                         if (this.viewModel.netease_id) {
                             Text('网易云音乐歌单').fontSize(25)
                             this.splitter()
-                            ForEach(this.neteasePlaylist, item => {
+                            ForEach(this.viewModel.neteasePlaylists, item => {
                                 this.PlaylistItem(item, 'netease');
                             });
                         }

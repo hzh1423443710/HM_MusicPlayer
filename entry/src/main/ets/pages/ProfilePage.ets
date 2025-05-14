@@ -21,7 +21,7 @@ struct PlatformEditDialog {
                 .margin({ top: 20, bottom: 20 })
 
             TextInput({
-                placeholder: `请输入${this.platform === 'qq' ? 'QQ音乐ID' : '网易云音乐ID'}`,
+                placeholder: `请输入${this.platform === 'qq' ? 'QQ号' : '网易云音乐ID'}`,
                 text: this.inputValue
             })
                 .onChange((value) => {
@@ -78,6 +78,9 @@ struct UserProfilePage {
     @State viewModel: UserViewModel = globalUser;
     @State isLoading: boolean = false;
     private editDialogController: CustomDialogController = null;
+    @StorageProp('qq_id') qq_id: string = '';
+    @StorageProp('netease_id') netease_id: string = ''
+    @StorageProp('avatar') avatar: string = '';
 
     // 格式化日期显示
     formatDate(dateString: string): string {
@@ -102,9 +105,7 @@ struct UserProfilePage {
                 { text: '确定', color: '#376668' }
             ],
         }).then(result => {
-            // 确定
             if (result.index === 1) {
-                // 退出登录
                 this.viewModel.logout();
                 promptAction.showToast({ message: '已退出登录' });
                 router.back();
@@ -114,7 +115,7 @@ struct UserProfilePage {
 
     // 打开编辑对话框
     openEditDialog(platform: string, currentValue: string) {
-        let title = platform === 'qq' ? '修改QQ音乐ID' : '修改网易云音乐ID';
+        let title = platform === 'qq' ? '修改QQ号' : '修改网易云音乐ID';
 
         this.editDialogController = new CustomDialogController({
             builder: PlatformEditDialog({
@@ -155,7 +156,7 @@ struct UserProfilePage {
 
     // 构建信息项
     @Builder
-    InfoItem(title: string, value: string, icon: Resource, platform: string = '') {
+    InfoItem(title: string, value: string, icon: Resource) {
         Row() {
             Row() {
                 Image(icon).width(22).height(22).margin({ right: 12 })
@@ -184,8 +185,14 @@ struct UserProfilePage {
                     Column() {
                         // 头像区域
                         Column() {
-                            Image(this.viewModel.avatar() || $r('app.media.default_singer'))
-                                .width(100).height(100).borderRadius(50).margin({ bottom: 16 })
+                            Image(this.avatar || $r('app.media.default_singer'))
+                                .width(100)
+                                .height(100)
+                                .borderRadius(50)
+                                .margin({ bottom: 16 })
+                                .onClick(() => {
+                                    this.viewModel.uploadAvatar();
+                                })
                             Text(this.viewModel.username)
                                 .fontSize(22).fontWeight(FontWeight.Bold).margin({ bottom: 8 })
                         }
@@ -193,7 +200,6 @@ struct UserProfilePage {
 
                         // 信息卡片
                         Column() {
-                            // 基本信息
                             this.InfoItem('用户名', this.viewModel.username, $r('app.media.icon_user'))
                             this.InfoItem('邮箱', this.viewModel.email, $r('app.media.icon_email'))
                             this.InfoItem('创建时间', this.formatDate(this.viewModel.create_at), $r('app.media.icon_create_at'))
@@ -208,11 +214,11 @@ struct UserProfilePage {
                                 }
 
                                 Row() {
-                                    Text(this.viewModel.qq_id || '未设置').fontSize(16).fontColor('#333333')
+                                    Text(this.qq_id).fontSize(16).fontColor('#333333')
                                     Image($r('app.media.icon_edit')).width(20).height(20).margin({ left: 8 })
                                 }
                                 .onClick(() => {
-                                    this.openEditDialog("qq", this.viewModel.qq_id);
+                                    this.openEditDialog("qq", this.qq_id);
                                 })
                             }
                             .width('100%').justifyContent(FlexAlign.SpaceBetween).padding({ top: 16, bottom: 16 })
@@ -225,11 +231,11 @@ struct UserProfilePage {
                                 }
 
                                 Row() {
-                                    Text(this.viewModel.netease_id || '未设置').fontSize(16).fontColor('#333333')
+                                    Text(this.netease_id).fontSize(16).fontColor('#333333')
                                     Image($r('app.media.icon_edit')).width(20).height(20).margin({ left: 8 })
                                 }
                                 .onClick(() => {
-                                    this.openEditDialog("netease", this.viewModel.netease_id);
+                                    this.openEditDialog("netease", this.netease_id);
                                 })
                             }
                             .width('100%').justifyContent(FlexAlign.SpaceBetween).padding({ top: 16, bottom: 16 })

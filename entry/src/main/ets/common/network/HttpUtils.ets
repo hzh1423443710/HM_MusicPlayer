@@ -4,8 +4,10 @@ import ConnectionUtil from './ConnectionUtils'
 import { SingerInfo } from '../../model/SingerData';
 import { NetEaseAPI, NetEaseQuality, QQMusicQuality } from '../constants/MusicAPI';
 import { globalUser } from '../../viewmodel/UserViewModel'
-import File from '@system.file';
 import { PlaylistData } from '../../model/PlaylistData';
+import fs from '@ohos.file.fs';
+import util from '@ohos.util';
+import image from '@ohos.multimedia.image';
 
 const TAG: string = 'HttpUtils';
 
@@ -659,8 +661,8 @@ export class HttpUtils {
             if (data.responseCode === 200 && resultObj.code === 200) {
                 globalUser.id = resultObj.user.id;
                 globalUser.username = resultObj.user.username;
-                globalUser.qq_id = resultObj.user.qq_id;
-                globalUser.netease_id = resultObj.user.netease_id;
+                globalUser.setPlatformId('qq', resultObj.user.qq_id);
+                globalUser.setPlatformId('netease', resultObj.user.netease_id);
                 globalUser.email = resultObj.user.email;
                 globalUser.create_at = resultObj.user.create_at;
                 globalUser.authorization = header.authorization;
@@ -728,11 +730,8 @@ export class HttpUtils {
         }).then((data: http.HttpResponse) => {
             let resultObj = JSON.parse(data.result as string);
             if (data.responseCode === 200 && resultObj.code === 200) {
+                globalUser.setPlatformId(platform, platformId);
                 console.log(TAG, `${this.bindPlatform.name} ${api_url}`);
-                if (platform === 'qq')
-                    globalUser.qq_id = platformId;
-                else
-                    globalUser.netease_id = platformId;
                 success = true;
             } else {
                 console.error(TAG, `${data.responseCode} ${this.bindPlatform.name} ${api_url}`);
@@ -744,20 +743,24 @@ export class HttpUtils {
         return success;
     }
 
-    // 更新头像 TODO
-    public async uploadAvatar(file: File) {
+    // 更新头像
+    public async uploadAvatar(uri: string) {
         if (!await this.netAvailable()) return null;
         let api_url = `${BACK_END_HOST}/user/avatar`;
         let success = false;
 
+        const base64Data = await this.imageToBase64(uri);
+        if (!base64Data) {
+            throw new Error('imageToBase64 Failed');
+        }
+
         await this.httpReq.request(api_url, {
             header: {
-                'Connection': "close",
                 'Authorization': globalUser.authorization
             },
             method: http.RequestMethod.POST,
             extraData: {
-                "avatar": file
+                'avatar': base64Data
             }
         }).then((data: http.HttpResponse) => {
             let resultObj = JSON.parse(data.result as string);
@@ -765,12 +768,37 @@ export class HttpUtils {
                 console.log(TAG, `${this.uploadAvatar.name} ${api_url}`);
                 success = true;
             } else {
-                console.error(TAG, `${data.responseCode} ${this.uploadAvatar.name} ${api_url}`);
+                console.error(TAG, `${data.responseCode} ${this.uploadAvatar.name} ${api_url}`, JSON.stringify(resultObj));
             }
         }).catch(err => {
             console.error(TAG, this.uploadAvatar.name, api_url, err.message);
         });
 
         return success;
+    }
+
+    public async imageToBase64(uri: string) {
+        let base64Data: string;
+        const file = fs.openSync(uri, fs.OpenMode.READ_ONLY);
+        let imageSource = image.createImageSource(file.fd);
+        await imageSource.createPixelMap()
+            .then(async (pixelMap) => {
+                // 转换为ArrayBuffer并编码为Base64
+                const imagePackerApi = image.createImagePacker();
+                const packOpts = { format: 'image/jpeg', quality: 100 };
+                await imagePackerApi.packing(pixelMap, packOpts)
+                    .then((data) => {
+                        let base64Helper = new util.Base64Helper();
+                        base64Data = `data:image/jpeg;base64,${base64Helper.encodeToStringSync(new Uint8Array(data))}`;
+                    })
+            })
+            .catch(err => {
+                throw new Error(`createPixelMap ${JSON.stringify(err)}`);
+            })
+            .finally(() => {
+                fs.close(file.fd);
+            });
+
+        return base64Data;
     }
 }
