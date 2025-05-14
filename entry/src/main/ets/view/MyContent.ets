@@ -26,7 +26,7 @@ export struct MyContent {
             Row() {
                 if (this.isLogged) {
                     Row() {
-                        Image(this.avatar).alt($r('app.media.default_singer')).width(64).height(64).borderRadius(32)
+                        Image(this.avatar).alt($r("app.media.default_user")).width(64).height(64).borderRadius(32)
                         Column() {
                             Text(this.viewModel.username).fontSize(28)
                             Text(this.viewModel.email).fontSize(18).margin({ top: 4 })
@@ -52,7 +52,7 @@ export struct MyContent {
                 text: '个人资料',
                 pushUrl: RouterUrlConstants.PROFILE,
                 needLogin: true,
-                image: $r('app.media.default_singer')
+                image: $r("app.media.default_user")
             })
             this.splitter();
             SettingCell({ pushUrl: RouterUrlConstants.RECENT, text: '最近播放', image: $r('app.media.recent') })

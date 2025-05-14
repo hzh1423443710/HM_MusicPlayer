@@ -1,13 +1,11 @@
 import router from '@ohos.router';
 import { PlayerWidget } from '../components/PlayerWidget';
 import { HeaderWidget } from '../components/HeaderWidget';
-import { SearchState, SearchType, MusicPlatform, SearchViewModel, searchViewModel } from '../viewmodel/SearchViewModel'
+import { SearchState, MusicPlatform, SearchViewModel, searchViewModel } from '../viewmodel/SearchViewModel'
 import { MusicInfo, PlaylistType } from '../model/MusicData';
 import { MusicItem } from '../components/MusicItem';
 import { MediaService, PlayerState } from '../common/MediaService';
 import promptAction from '@ohos.promptAction';
-import { SingerItem } from '../components/SingerItem';
-import { SingerInfo } from '../model/SingerData';
 
 @Entry
 @Component
@@ -86,116 +84,41 @@ struct SearchPage {
 
             // 中间内容区域 - 使用layoutWeight占据剩余空间
             Column() {
-                Tabs() {
-                    // 1.歌曲结果
-                    TabContent() {
-                        Column() {
-                            if (this.viewModel.searchState === SearchState.SEARCHING && this.viewModel.songDataSource.totalCount() === 0) {
-                                Text(this.viewModel.getStateText())
-                                LoadingProgress()
-                                    .width(30)
-                                    .height(30)
-                            } else if (this.viewModel.searchState === SearchState.EMPTY) {
-                                Text(this.viewModel.getStateText())
-                            } else if (this.viewModel.songDataSource.totalCount() > 0) {
-                                List() {
-                                    LazyForEach(this.viewModel.songDataSource, (song: MusicInfo, index: number) => {
-                                        ListItem() {
-                                            Row() {
-                                                MusicItem({ index: index + 1, song: song, showCover: false })
-                                                    .onClick(() => {
-                                                        this.media.playOne(song, this.viewModel.songDataSource.items, PlaylistType.SEARCH);
-                                                    })
-                                            }
-                                            .justifyContent(FlexAlign.Start)
-                                        } // ListItem
-                                        .backgroundColor(this.currentMusic.equals(song) ? $r('app.color.selected') : Color.Transparent)
-                                    })
-                                } // List
-                                .onReachEnd(() => {
-                                    promptAction.showToast({ message: '正在加载' });
-                                    this.viewModel.loadMore().then((ok) => {
-                                        promptAction.showToast({
-                                            message: ok ? '加载成功' : this.viewModel.getStateText()
-                                        });
-                                    });
-                                })
+                if (this.viewModel.searchState === SearchState.SEARCHING && this.viewModel.songDataSource.totalCount() === 0) {
+                    Text(this.viewModel.getStateText())
+                    LoadingProgress()
+                        .width(30)
+                        .height(30)
+                } else if (this.viewModel.searchState === SearchState.EMPTY) {
+                    Text(this.viewModel.getStateText())
+                } else if (this.viewModel.songDataSource.totalCount() > 0) {
+                    List() {
+                        LazyForEach(this.viewModel.songDataSource, (song: MusicInfo, index: number) => {
+                            ListItem() {
+                                Row() {
+                                    MusicItem({ index: index + 1, song: song, showCover: false })
+                                        .onClick(() => {
+                                            this.media.playOne(song, this.viewModel.songDataSource.items, PlaylistType.SEARCH);
+                                        })
+                                }
+                                .justifyContent(FlexAlign.Start)
+                            } // ListItem
+                            .backgroundColor(this.currentMusic.equals(song) ? $r('app.color.selected') : Color.Transparent)
+                        })
+                    } // List
+                    .onReachEnd(() => {
+                        promptAction.showToast({ message: '正在加载' });
+                        this.viewModel.loadMore().then((ok) => {
+                            promptAction.showToast({
+                                message: ok ? '加载成功' : this.viewModel.getStateText()
+                            });
+                        });
+                    })
 
-                            }
-                        }
-                        .width('100%')
-                        .height('100%')
-
-                    }
-                    .tabBar(this.TabBuilder(0, '歌曲', $r('app.media.song')))
-                    .tabIndex(0)
-
-                    // 2.歌手结果
-                    TabContent() {
-                        Column() {
-                            if (this.viewModel.searchState === SearchState.SEARCHING && this.viewModel.singerDataSource.totalCount() === 0) {
-                                Text(this.viewModel.getStateText())
-                                LoadingProgress()
-                                    .width(30)
-                                    .height(30)
-                            } else if (this.viewModel.searchState === SearchState.EMPTY) {
-                                Text(this.viewModel.getStateText())
-                            } else if (this.viewModel.singerDataSource.totalCount() > 0) {
-                                List() {
-                                    LazyForEach(this.viewModel.singerDataSource, (singer: SingerInfo, index: number) => {
-                                        ListItem() {
-                                            Column() {
-                                                Row() {
-                                                    SingerItem({ index: index + 1, singer: singer })
-                                                        .onClick(() => {
-                                                            // 歌手歌曲页面
-                                                        })
-                                                }
-                                                .justifyContent(FlexAlign.Start)
-
-                                                Divider()
-                                                    .strokeWidth(1)
-                                                    .width('90%')
-                                                    .backgroundColor(Color.Gray)
-                                                    .opacity($r('app.float.singer_opacity'))
-                                            }
-                                        } // ListItem
-                                    })
-                                } // List
-                                .onReachEnd(() => {
-                                    promptAction.showToast({ message: '正在加载' });
-                                    this.viewModel.loadMore().then((ok) => {
-                                        promptAction.showToast({
-                                            message: ok ? '加载成功' : this.viewModel.getStateText()
-                                        });
-                                    });
-                                })
-
-                            }
-                        }
-                        .width('100%')
-                        .height('100%')
-                    }
-                    .tabBar(this.TabBuilder(1, '歌手', $r('app.media.singer')))
-                    .tabIndex(1)
-
-                } // Tabs
-                .vertical(false)
-                .onChange((index: number) => {
-                    this.currentTabIndex = index
-                    this.viewModel.setSearchType(index as SearchType);
-
-                    if (this.viewModel.searchType === SearchType.SONG) {
-                        if (this.viewModel.songDataSource.totalCount() === 0)
-                            this.viewModel.search(true);
-                    }
-                    else {
-                        if (this.viewModel.singerDataSource.totalCount() === 0)
-                            this.viewModel.search(true);
-                    }
-                })
-            } // Column
-            .layoutWeight(1)
+                }
+            }
+            .width('100%')
+            .height('100%')
 
             // 底部固定的播放器区域
             PlayerWidget()

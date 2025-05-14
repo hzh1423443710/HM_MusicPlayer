@@ -1,7 +1,6 @@
 import http from '@ohos.net.http';
 import { MusicFrom, MusicInfo } from '../../model/MusicData';
 import ConnectionUtil from './ConnectionUtils'
-import { SingerInfo } from '../../model/SingerData';
 import { NetEaseAPI, NetEaseQuality, QQMusicQuality } from '../constants/MusicAPI';
 import { globalUser } from '../../viewmodel/UserViewModel'
 import { PlaylistData } from '../../model/PlaylistData';
@@ -230,88 +229,6 @@ export class HttpUtils {
     }
 
     /**
-     * 网易云音乐 歌手搜索
-     * @param inputText
-     * @param page
-     * @returns
-     */
-    public async getSingersByNetEase(keyword: string, page: number = 1): Promise<SingerInfo[]> {
-        if (!await this.netAvailable()) return null;
-        const limit = 10;
-        const offset = (page - 1) * limit;
-
-        let api_url = NetEaseAPI.SEARCH;
-        api_url += `?keywords=${encodeURIComponent(keyword)}&type=100&limit=${limit}&offset=${offset}`;
-
-        let singers: SingerInfo[] = [];
-
-        await this.httpReq.request(api_url)
-            .then((data: http.HttpResponse) => {
-                let resultObj = JSON.parse(data.result as string);
-                if (data.responseCode === 200 && resultObj.code === 200) {
-                    resultObj.result.artists.forEach((item) => {
-                        let singer = new SingerInfo();
-                        singer.id = item.id;
-                        singer.name = item.name;
-                        singer.pic = item.picUrl;
-                        singer.songNum = null;
-
-                        singers.push(singer);
-                    });
-
-                    console.log(TAG, `${this.getSingersByNetEase.name} ${api_url}`);
-                } else {
-                    console.error(TAG, `${resultObj.code} ${this.getSingersByNetEase.name} ${api_url}`);
-                }
-            })
-            .catch(err => {
-                console.error(TAG, this.getSingersByNetEase.name, err.message);
-            });
-
-        return singers;
-    }
-
-    /** TODO
-     * 获取歌手所有歌曲
-     * @param id 歌手id
-     */
-    public async getSingerSongsByNetEase(id: string, page: number = 1): Promise<MusicInfo[]> {
-        if (!await this.netAvailable()) return null;
-        const limit = 10;
-        const offset = (page - 1) * limit;
-
-        let api_url = NetEaseAPI.SINGER_SONGS;
-        api_url += `?id=${id}&order=hot&limit=${limit}&offset=${offset}`;
-
-        let songs: MusicInfo[] = [];
-
-        await this.httpReq.request(api_url)
-            .then((data: http.HttpResponse) => {
-                let resultObj = JSON.parse(data.result as string);
-                if (data.responseCode === 200 && resultObj.code === 200) {
-                    resultObj.songs.forEach((item) => {
-                        let music = new MusicInfo();
-                        music.id = item.id;
-                        music.name = item.name;
-                        music.pic = null; // 无该字段
-                        music.url = `http://music.163.com/song/media/outer/url?id=${item.id}`;
-
-                        songs.push(music);
-                    });
-
-                    console.log(TAG, `${this.getSingerSongsByNetEase.name} ${api_url}`);
-                } else {
-                    console.error(TAG, `${resultObj.code} ${this.getSingerSongsByNetEase.name} ${api_url}`);
-                }
-            })
-            .catch(err => {
-                console.error(TAG, this.getSingerSongsByNetEase.name, err.message);
-            });
-
-        return songs;
-    }
-
-    /**
      * 获取 网易云音乐、QQ音乐 歌词
      * @param id 网易云音乐id
      * @returns 字符串形式的lrc歌词
@@ -386,44 +303,6 @@ export class HttpUtils {
     }
 
     /**
-     * QQ音乐 歌手搜索
-     * @param inputText
-     * @param page
-     * @returns
-     */
-    public async getSingersByQQ(keyword: string, page: number = 1): Promise<SingerInfo[]> {
-        if (!await this.netAvailable()) return null;
-
-        let api_url = `https://api.vkeys.cn/v2/music/tencent/search/singer?word=${encodeURIComponent(keyword)}&page=${page}`;
-        let singers: SingerInfo[] = [];
-
-        await this.httpReq.request(api_url)
-            .then((data: http.HttpResponse) => {
-                let resultObj = JSON.parse(data.result as string);
-                if (data.responseCode === 200 && resultObj.code === 200) {
-                    resultObj.data.forEach((item) => {
-                        let singer = new SingerInfo();
-                        singer.id = item.singerMID;
-                        singer.name = item.singerName;
-                        singer.pic = item.singerPic;
-                        singer.songNum = item.songNum;
-
-                        singers.push(singer);
-                    });
-
-                    console.log(TAG, `${this.getSingersByQQ.name} ${api_url}`);
-                } else {
-                    console.error(TAG, `${resultObj.code} ${this.getSingersByQQ.name} ${api_url}`);
-                }
-            })
-            .catch(err => {
-                console.error(TAG, this.getSingersByQQ.name, err.message);
-            });
-
-        return singers;
-    }
-
-    /**
      * QQ音乐 点歌
      * @returns
      */
@@ -455,44 +334,6 @@ export class HttpUtils {
             })
 
         return music_info;
-    }
-
-    /**
-     * QQ音乐 歌手歌曲搜索
-     * @param id 歌手mid
-     * @param page
-     * @returns
-     */
-    public async getSingerSongsByQQ(id: string, page: number = 1): Promise<MusicInfo[]> {
-        if (!await this.netAvailable()) return null;
-        let api_url = `https://api.vkeys.cn/v2/music/tencent/singer/songlist?mid=${id}&page=${page}`;
-        let songs: MusicInfo[] = [];
-
-        await this.httpReq.request(api_url)
-            .then((data: http.HttpResponse) => {
-                let resultObj = JSON.parse(data.result as string);
-                if (data.responseCode === 200 && resultObj.code === 200) {
-                    resultObj.data.forEach(item => {
-                        let music = new MusicInfo();
-                        music.id = item.id;
-                        music.name = item.song;
-                        music.pic = item.cover;
-                        music.url = null;
-                        music.pay = item.quality === '音乐试听';
-
-                        songs.push(music);
-                    });
-
-                    console.log(TAG, `${this.getSingerSongsByQQ.name} ${api_url}`);
-                } else {
-                    console.error(TAG, `${resultObj.code} ${this.getSingerSongsByQQ.name} ${api_url}`);
-                }
-            })
-            .catch(err => {
-                console.error(TAG, this.getSingerSongsByQQ.name, err.message);
-            });
-
-        return songs;
     }
 
     /**

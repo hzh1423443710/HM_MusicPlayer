@@ -1,17 +1,8 @@
 import { HttpUtils } from '../common/network/HttpUtils'
-import { enumToString, MusicFrom, MusicInfo, PlaylistType } from '../model/MusicData';
-import { SingerInfo } from '../model/SingerData';
+import { enumToString, MusicInfo, PlaylistType } from '../model/MusicData';
 import { DataSource } from './SongDataSource';
 
 const TAG = 'SearchViewModel';
-
-/**
- * 搜索类型
- */
-export enum SearchType {
-    SONG,
-    SINGER
-}
 
 /**
  * 搜索平台
@@ -38,11 +29,8 @@ export class SearchViewModel {
     http: HttpUtils = new HttpUtils();
     // 搜索结果 数据源
     songDataSource: DataSource<MusicInfo> = new DataSource<MusicInfo>();
-    singerDataSource: DataSource<SingerInfo> = new DataSource<SingerInfo>();
     // 播放列表类型
     playlistType: string = PlaylistType.SEARCH;
-    // 搜索状态相关
-    searchType: SearchType = SearchType.SONG;
     searchState: SearchState = SearchState.IDLE;
     platform: MusicPlatform = MusicPlatform.NETEASE;
     errorMessage: string = '';
@@ -58,16 +46,6 @@ export class SearchViewModel {
      */
     setKeyword(keyword: string) {
         this.keyword = keyword;
-    }
-
-    /**
-     * 设置搜素类型
-     * @param type 歌曲/歌手
-     */
-    setSearchType(type: SearchType) {
-        if (this.searchType !== type) {
-            this.searchType = type;
-        }
     }
 
     /**
@@ -88,8 +66,7 @@ export class SearchViewModel {
      * @returns
      */
     getCurrentDataSource() {
-        return (this.searchType === SearchType.SONG) ?
-        this.songDataSource : this.singerDataSource;
+        return this.songDataSource;
     }
 
     /**
@@ -103,7 +80,6 @@ export class SearchViewModel {
         this.searchState = SearchState.IDLE;
 
         this.songDataSource.clearData();
-        this.singerDataSource.clearData();
     }
 
     /**
@@ -123,10 +99,7 @@ export class SearchViewModel {
      *  清空当前数据
      */
     private clearCurrentData() {
-        if (this.searchType === SearchType.SONG)
-            this.songDataSource.clearData();
-        else
-            this.singerDataSource.clearData();
+        this.songDataSource.clearData();
     }
 
     /**
@@ -147,13 +120,7 @@ export class SearchViewModel {
         }
 
         try {
-            console.log(`${TAG} search keyword: ${this.keyword}, tyep: ${enumToString(SearchType, this.searchType)},page: ${this.currentPage}, platform: ${enumToString(MusicPlatform, this.platform)}`)
-
-            if (this.searchType === SearchType.SONG)
-                return await this.searchSongs();
-            else
-                return await this.searchSingers();
-
+            return await this.searchSongs();
         } catch (e) {
             console.error(`${TAG} search error: ${e}`);
             this.searchState = SearchState.ERROR;
@@ -232,42 +199,6 @@ export class SearchViewModel {
     }
 
     /**
-     * 搜索歌手
-     * @returns
-     */
-    private async searchSingers(): Promise<boolean> {
-
-        let results: SingerInfo[] = [];
-        if (this.platform === MusicPlatform.NETEASE)
-            results = await this.http.getSingersByNetEase(this.keyword, this.currentPage);
-        else
-            results = await this.http.getSingersByQQ(this.keyword, this.currentPage);
-
-        if (results === null) {
-            this.searchState = SearchState.ERROR;
-            this.errorMessage = '网络错误或服务不可用';
-            return false;
-        }
-
-        if (results.length === 0) {
-            this.searchState = this.singerDataSource.totalCount() > 0 ? SearchState.SUCCESS : SearchState.EMPTY;
-            this.hasMore = false;
-            return true;
-        }
-
-        // 搜索结果不为空
-        results.forEach((item) => {
-            this.singerDataSource.pushData(item);
-        });
-
-        this.searchState = SearchState.SUCCESS;
-        this.currentPage++;
-        this.hasMore = results.length >= this.pageSize;
-
-        console.log(`${TAG} search singers: ${results.length}, 总数: ${this.singerDataSource.totalCount()}位`)
-    }
-
-    /**
      * 获取状态文本
      * @returns
      */
@@ -282,7 +213,7 @@ export class SearchViewModel {
                 return this.errorMessage || '搜索出错';
 
             case SearchState.EMPTY:
-                return `未找到与"${this.keyword}"相关的${this.searchType === SearchType.SONG ? '歌曲' : '歌手'}`;
+                return `未找到与"${this.keyword}"相关的歌曲`;
 
             case SearchState.SUCCESS:
             default:

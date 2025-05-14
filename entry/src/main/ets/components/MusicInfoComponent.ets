@@ -7,9 +7,6 @@ import { downloadAudio, getPickerURI } from '../common/DownloadUtil';
 import { MediaService } from '../common/MediaService';
 import pasteboard from '@ohos.pasteboard';
 
-/**
- * 音乐信息(封面 歌名 歌手 操作按钮)
- */
 @Preview
 @Component
 export struct MusicInfoComponent {
@@ -185,19 +182,6 @@ export struct MusicInfoComponent {
                     getPickerURI(this.music.name).then((savePath: string) => {
                         downloadAudio(getContext(this), url, savePath);
                     });
-                })
-
-            // 喜欢
-            Image($r('app.media.ic_public_like'))
-                .aspectRatio(1)
-                .width(new BreakpointType({
-                    sm: 24,
-                    md: 24,
-                    lg: 30
-                }).getValue(this.currentBreakpoint))
-                .objectFit(ImageFit.Contain)
-                .onClick(() => {
-                    promptAction.showToast({ message: '喜欢' })
                 })
 
             // 倍速

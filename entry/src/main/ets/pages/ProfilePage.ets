@@ -185,7 +185,7 @@ struct UserProfilePage {
                     Column() {
                         // 头像区域
                         Column() {
-                            Image(this.avatar || $r('app.media.default_singer'))
+                            Image(this.avatar || $r("app.media.default_user"))
                                 .width(100)
                                 .height(100)
                                 .borderRadius(50)
